@@ -191,3 +191,24 @@ def resend_registration_email(request, registration_id):
         messages.error(request, 'ईमेल भेजने में त्रुटि हुई। कृपया पुन: प्रयास करें।')
     
     return redirect('admin:events_eventregistration_change', registration_id)
+
+def save(self, *args, **kwargs):
+    is_newly_approved = False
+    if self.pk:
+        old_instance = EventRegistration.objects.get(pk=self.pk)
+        is_newly_approved = (old_instance.approval_status != 'approved' and self.approval_status == 'approved')
+    
+    # Only generate registration number when fully approved
+    if not self.registration_number and self.approval_status == 'approved':
+        # Ensure uniqueness
+        max_attempts = 10
+        for attempt in range(max_attempts):
+            reg_num = self.generate_registration_number()
+            if not EventRegistration.objects.filter(registration_number=reg_num).exists():
+                self.registration_number = reg_num
+                break
+        else:
+            raise ValueError("Could not generate unique registration number after multiple attempts.")
+        self.is_confirmed = True
+    
+    super().save(*args, **kwargs)
