@@ -7,9 +7,9 @@
     <title>{% block title %}युवा चिंतन शिविर भोपाल{% endblock %}</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश - युवाओं के सशक्तिकरण, शिक्षा और समाजसेवा के लिए समर्पित संगठन">
-    <meta name="keywords" content="prantiya yuva prakoshth uttar pradesh, prantiya yuva prakoshth up, yuva prakoshth uttar pradesh, yuva prakoshth up, awgp yuva prakoshth up, awgp yuva prakoshth uttar pradesh, awgp youth wing up, youth cell up, youthcell up, up youthcell, up youth cell, uttar pradesh youth cell, up yuva shakha, yuva vibhag awgp up, yuva karyakram awgp, awgp up youth, yuva prakalp awgp, gayatri yuva up, youth movement awgp, awgp youth up, yuva jagriti abhiyan, yuva sanskar karyakram, yuva sammelan awgp, yuva prerna abhiyan up, awgp yuva activities up, youth workshop awgp, awgp prantiya yuva, yuva sewa karyakram, youth empowerment awgp, prantiya yuva parishad up, awgp uttar pradesh, all world gayatri pariwar up, gayatri pariwar youth up, gayatri yuva up, up awgp events, awgp up branch, awgp youth cell, shantikunj yuva up, shantikunj haridwar yuva wing, akhil vishw gayatri pariwar youth, yuva sammelan uttar pradesh, yuva shivir awgp up, prantiya yuva abhiyaan, yuva sewa abhiyan up, awgp yuva meeting up, youth leadership awgp, awgp volunteer youth up, yuva safalta abhiyan up, yuva rally gayatri pariwar up, yuva sanmelan date up, युवा प्रकोष्ठ, उत्तर प्रदेश, समाजसेवा, शिक्षा, युवा सशक्तिकरण, गायत्री परिवार, अखिल विश्व गायत्री परिवार, शांतिकुंज, हरिद्वार">
-    <meta name="author" content="प्रांतीय युवा प्रकोष्ठ-उत्तर प्रदेश">
+    <meta name="description" content="युवा चिंतन शिविर भोपाल - युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम">
+    <meta name="keywords" content="युवा चिंतन शिविर भोपाल, youth thinking camp bhopal, युवा शिविर भोपाल, युवा कार्यक्रम भोपाल, युवा विकास शिविर, चिंतन शिविर, युवा प्रशिक्षण, व्यक्तित्व विकास, आध्यात्मिक शिविर, चरित्र निर्माण, युवा सशक्तिकरण, भोपाल युवा कार्यक्रम, मध्य प्रदेश युवा शिविर, युवा संस्कार शिविर, युवा नेतृत्व विकास, युवा मार्गदर्शन, युवा प्रेरणा शिविर, युवा जागरूकता कार्यक्रम, युवा समाज सेवा, युवा आदर्श शिविर, भोपाल शिविर पंजीकरण, युवा शिविर आवेदन, युवा कल्याण कार्यक्रम, युवा उत्थान शिविर, युवा चेतना शिविर, युवा संगठन भोपाल, युवा मंच भोपाल, युवा गतिविधियां भोपाल, युवा सम्मेलन भोपाल, युवा कार्यशाला भोपाल">
+    <meta name="author" content="युवा चिंतन शिविर भोपाल">
     
     
     <!-- Bootstrap + Icons -->
@@ -37,12 +37,17 @@
     {% block extra_head %}
     <!-- Default Open Graph Meta Tags (will be overridden by specific pages) -->
     {% if not news %}
-    <meta property="og:title" content="{% block og_title %}प्रांतीय युवा प्रकोष्ठ-उत्तर प्रदेश{% endblock %}">
-    <meta property="og:description" content="युवाओं के सशक्तिकरण और राष्ट्र निर्माण में योगदान देने के लिए समर्पित संगठन">
+    <meta property="og:title" content="{% block og_title %}युवा चिंतन शिविर भोपाल{% endblock %}">
+    <meta property="og:description" content="युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta property="og:site_name" content="प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश">
+    <meta property="og:site_name" content="युवा चिंतन शिविर भोपाल">
     <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="युवा चिंतन शिविर भोपाल">
+    <meta name="twitter:description" content="युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम">
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}">
     {% endif %}
     {% endblock %}
 </head>
@@ -167,8 +172,8 @@
                         <div class="col-lg-4 mb-4">
                             <div class="footer-brand">
                                 <img src="{% static 'images/logo.png' %}" alt="Logo" width="50" height="50" class="mb-3">
-                                <h4 class="footer-title">युवा प्रकोष्ठ शान्तिकुञ्ज</h4>
-                                <p class="footer-description">युवाओं के सशक्तिकरण और राष्ट्र निर्माण में योगदान देने के लिए समर्पित संगठन।</p>
+                                <h4 class="footer-title">युवा चिंतन शिविर भोपाल</h4>
+                                <p class="footer-description">युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम।</p>
                                 
                                 <!-- Social Media Links -->
                                 <div class="social-links">
@@ -216,7 +221,7 @@
                             <div class="contact-info">
                                 <div class="contact-item">
                                     <i class="bi bi-geo-alt-fill"></i>
-                                    <span>युवा प्रकोष्ठ शान्तिकुञ्ज</span>
+                                    <span>युवा चिंतन शिविर भोपाल, मध्य प्रदेश</span>
                                 </div>
                                 <div class="contact-item">
                                     <i class="bi bi-telephone-fill"></i>
@@ -224,7 +229,7 @@
                                 </div>
                                 <div class="contact-item">
                                     <i class="bi bi-envelope-fill"></i>
-                                    <a href="mailto:info@pranteeyyuva.org">info@uppyp.in</a>
+                                    <a href="mailto:info@ycsmp.org">info@ycsmp.org</a>
                                 </div>
                             </div>
                         </div>
@@ -235,7 +240,7 @@
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <p class="copyright">
-                                    &copy; 2025 Provincial Youth Cell Uttar Pradesh.  
+                                    &copy; 2025 युवा चिंतन शिविर भोपाल (Youth Thinking Camp Bhopal).  
                                     <br>
                                     Designed and developed by <a href="https://vmdonline.in/" target="_blank"><strong>Vedmata Web Designing</strong></a>. All rights reserved.
                                 </p>
