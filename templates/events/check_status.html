@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}स्थिति जांचें - युवा चिंतन शिविर भोपाल{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .status-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            min-height: 80vh;
+            padding: 2rem 0;
+        }
+        
+        .status-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            padding: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .status-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .status-form {
+            max-width: 400px;
+            margin: 0 auto 2rem;
+        }
+        
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input-wrapper .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 18px;
+            z-index: 2;
+        }
+        
+        .search-input-wrapper .form-control {
+            padding-left: 45px;
+            margin-bottom: 0;
+        }
+        
+        .form-control {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-check {
+            background: #1976d2 !important;
+            color: white !important;
+            padding: 15px 30px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            width: 100% !important;
+            font-size: 16px !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            z-index: 999 !important;
+        }
+        
+        .btn-check:hover {
+            background: #1565c0 !important;
+            color: white !important;
+        }
+        
+        .registration-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #1976d2;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .status-pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .status-level1 {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status-approved {
+            background: #e8f5e8;
+            color: #1b5e20;
+        }
+        
+        .status-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .reg-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .reg-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .reg-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .reg-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<section class="status-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="status-card" data-aos="fade-up">
+                    <h1 class="status-title">पंजीकरण स्थिति जांचें</h1>
+                    <p class="info-text">अपने मोबाइल नंबर से पंजीकरण की स्थिति जांचें</p>
+                    
+                    <!-- Status Check Form -->
+                    <form method="post" class="status-form">
+                        {% csrf_token %}
+                        <div class="search-input-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="tel" name="phone" class="form-control" 
+                                   placeholder="मोबाइल नंबर दर्ज करें" 
+                                   pattern="[0-9]{10}" 
+                                   value="{{ phone|default:'' }}">
+                        </div>
+                        <button type="submit" class="btn btn-check">
+                            <i class="bi bi-search me-2"></i>स्थिति जांचें
+                        </button>
+                    </form>
+                    
+                    <!-- Registration Results -->
+                    {% if registrations %}
+                        <div class="registrations-list" data-aos="fade-up" data-aos-delay="200">
+                            <h3 style="text-align: center; margin-bottom: 2rem; color: #333;">
+                                {{ phone }} के लिए पंजीकरण ({{ registrations|length }})
+                            </h3>
+                            
+                            {% for registration in registrations %}
+                                <div class="registration-item">
+                                    {% if registration.approval_status == 'approved' and registration.registration_number %}
+                                        <div class="alert alert-success mb-3" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color: white;">
+                                            <div class="text-center">
+                                                <i class="bi bi-check-circle-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                                <h5 style="margin: 0; color: white;">बधाई हो! आपका रजिस्ट्रेशन अप्रूव हो गया</h5>
+                                                <p style="margin: 0.5rem 0 0 0; color: white;">आप हमारे युवा चिंतन शिविर भोपाल कार्यक्रम में आ सकते हैं।</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 style="margin: 0; color: #333;">{{ registration.event.title }}</h5>
+                                        <span class="status-badge 
+                                            {% if registration.approval_status == 'pending' %}status-pending
+                                            {% elif registration.approval_status == 'level1_approved' %}status-level1
+                                            {% elif registration.approval_status == 'approved' %}status-approved
+                                            {% elif registration.approval_status == 'rejected' %}status-rejected
+                                            {% endif %}">
+                                            {% if registration.approval_status == 'pending' %}
+                                                प्रतीक्षारत
+                                            {% elif registration.approval_status == 'level1_approved' %}
+                                                स्तर 1 अप्रूव
+                                            {% elif registration.approval_status == 'approved' %}
+                                                अप्रूव ✓
+                                            {% elif registration.approval_status == 'rejected' %}
+                                                अस्वीकृत
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="reg-details">
+                                        <div class="reg-detail">
+                                            <span class="detail-label">नाम:</span>
+                                            <span class="detail-value">{{ registration.full_name }}</span>
+                                        </div>
+                                        <div class="reg-detail">
+                                            <span class="detail-label">पंजीकरण तिथि:</span>
+                                            <span class="detail-value">{{ registration.registration_date|date:"d M Y" }}</span>
+                                        </div>
+                                        <div class="reg-detail">
+                                            <span class="detail-label">कार्यक्रम तिथि:</span>
+                                            <span class="detail-value">{{ registration.event.event_date|date:"d M Y" }}</span>
+                                        </div>
+                                        <div class="reg-detail">
+                                            <span class="detail-label">स्थान:</span>
+                                            <span class="detail-value">{{ registration.event.venue }}</span>
+                                        </div>
+                                        {% if registration.registration_number %}
+                                        <div class="reg-detail">
+                                            <span class="detail-label">पंजीकरण नंबर:</span>
+                                            <span class="detail-value" style="font-weight: bold; color: #1976d2;">{{ registration.registration_number }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="reg-detail">
+                                            <span class="detail-label">राज्य:</span>
+                                            <span class="detail-value">{{ registration.state }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif phone %}
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                            <i class="bi bi-exclamation-circle" style="font-size: 3rem; color: #ff9800; margin-bottom: 1rem;"></i>
+                            <h4 style="color: #666;">कोई पंजीकरण नहीं मिला</h4>
+                            <p style="color: #999;">इस मोबाइल नंबर से कोई पंजीकरण नहीं मिला। कृपया सही नंबर दर्ज करें।</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.status-form');
+    const button = document.querySelector('.btn-check');
+    
+    if (button) {
+        button.addEventListener('click', function(e) {
+            form.submit();
+        });
+    }
+});
+</script>
+{% endblock %}

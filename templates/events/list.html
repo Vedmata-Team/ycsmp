@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}गतिविधियां - प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="events-hero-section aos-init aos-animate" data-aos="fade-down">
+    <div class="hero-background">
+        <div class="hero-pattern"></div>
+        <div class="hero-gradient"></div>
+    </div>
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="hero-title">कार्यक्रम</h1>
+            <p class="hero-subtitle">प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश के आगामी कार्यक्रम और गतिविधियां</p>
+        </div>
+    </div>
+</section>
+
+<!-- Search and Filters Section -->
+<section class="filters-section py-4" data-aos="fade-up">
+    <div class="container">
+        <div class="filters-wrapper">
+            <form method="GET" class="filters-form">
+                <!-- Search Bar -->
+                <div class="search-wrapper">
+                    <div class="search-input-group">
+                        <input type="text" name="search" class="search-input" 
+                               placeholder="कार्यक्रम खोजें..." value="{{ search }}"
+                               autocomplete="off">
+                        <button type="submit" class="search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Pills -->
+                <div class="filter-pills">
+                    <select name="category" class="filter-select" onchange="this.form.submit()">
+                        <option value="">सभी श्रेणी</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" 
+                                {% if category.id|stringformat:"s" == selected_category %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="district" class="filter-select" onchange="this.form.submit()">
+                        <option value="">सभी जिले</option>
+                        {% for district in districts %}
+                            <option value="{{ district.id }}" 
+                                {% if district.id|stringformat:"s" == selected_district %}selected{% endif %}>
+                                {{ district.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="filter-apply-btn">
+                        <i class="bi bi-funnel-fill me-1"></i>फ़िल्टर लागू करें
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Events Grid Section -->
+<section class="events-grid-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            {% for event in events %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'1' }}00">
+                <div class="event-card modern-card">
+                    <!-- Event Header -->
+                    <div class="event-header">
+                        <div class="event-date-badge">
+                            <div class="date-day">{{ event.event_date|date:"d" }}</div>
+                            <div class="date-month">{{ event.event_date|date:"M" }}</div>
+                            <div class="date-year">{{ event.event_date|date:"Y" }}</div>
+                        </div>
+                        <div class="event-status">
+                            {% if event.available_spots > 0 %}
+                                <span class="status-badge available">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    उपलब्ध
+                                </span>
+                            {% else %}
+                                <span class="status-badge full">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    भरा हुआ
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Event Content -->
+                    <div class="event-content">
+                        <!-- Meta Information -->
+                        <div class="event-meta">
+                            <span class="badge event-category">{{ event.category.name }}</span>
+                            <span class="event-district">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                {{ event.district.name }}
+                            </span>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="event-title">
+                            <a href="{% url 'events:detail' event.pk %}">{{ event.title }}</a>
+                        </h3>
+
+                        <!-- Description -->
+                        <p class="event-description">{{ event.description|truncatewords:15|striptags }}</p>
+
+                        <!-- Event Details -->
+                        <div class="event-details">
+                            <div class="detail-row">
+                                <div class="detail-item">
+                                    <i class="bi bi-clock-fill"></i>
+                                    <span>{{ event.event_date|time:"H:i" }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    <span>{{ event.venue|truncatechars:20 }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-row">
+                                {% if event.registration_fee > 0 %}
+                                    <div class="detail-item">
+                                        <i class="bi bi-currency-rupee"></i>
+                                        <span>₹{{ event.registration_fee }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="detail-item">
+                                        <i class="bi bi-gift-fill"></i>
+                                        <span>निःशुल्क</span>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="detail-item">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span>{{ event.registered_count }}/{{ event.max_participants }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="registration-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" 
+                                     style="width: {{ event.registration_percentage }}%"></div>
+                            </div>
+                            <small class="progress-text">
+                                {% if event.available_spots > 0 %}
+                                    {{ event.available_spots }} स्थान उपलब्ध
+                                {% else %}
+                                    सभी स्थान भर गए
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Event Footer -->
+                    <div class="event-footer">
+                        <div class="footer-actions">
+                            <a href="{% url 'events:detail' event.pk %}" class="btn btn-view-detail">
+                                <i class="bi bi-eye-fill"></i>
+                                विवरण देखें
+                            </a>
+                            
+                            {% if event.available_spots > 0 %}
+                                <a href="{% url 'events:register_event' event.pk %}" class="btn btn-register">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                    पंजीकरण
+                                </a>
+                            {% else %}
+                                <button class="btn btn-register disabled" disabled>
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    भरा हुआ
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Event Decorations -->
+                    <div class="event-decorations">
+                        {% if event.is_featured %}
+                            <div class="featured-ribbon">
+                                <i class="bi bi-star-fill"></i>
+                                मुख्य
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state" data-aos="fade-up">
+                    <div class="empty-icon">
+                        <i class="bi bi-calendar-x"></i>
+                    </div>
+                    <h3 class="empty-title">कोई कार्यक्रम नहीं मिला</h3>
+                    <p class="empty-description">
+                        कृपया अपने खोज मापदंड बदलें या बाद में फिर कोशिश करें।
+                    </p>
+                    <a href="{% url 'events:list' %}" class="btn btn-primary">
+                        सभी कार्यक्रम देखें
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if events.has_other_pages %}
+        <nav class="pagination-wrapper mt-5" aria-label="Events pagination" data-aos="fade-up">
+            <ul class="modern-pagination">
+                {% if events.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ events.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_district %}&district={{ selected_district }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                            <span>पिछला</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in events.paginator.page_range %}
+                    {% if events.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > events.number|add:'-3' and num < events.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_district %}&district={{ selected_district }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if events.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ events.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_district %}&district={{ selected_district }}{% endif %}">
+                            <span>अगला</span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Search input enhancement
+    const searchInput = $('.search-input');
+    const searchBtn = $('.search-btn');
+    
+    searchInput.on('input', function() {
+        if ($(this).val().length > 0) {
+            searchBtn.addClass('active');
+        } else {
+            searchBtn.removeClass('active');
+        }
+    });
+
+    // Auto-submit search after typing stops
+    let searchTimeout;
+    searchInput.on('input', function() {
+        clearTimeout(searchTimeout);
+        const form = $(this).closest('form');
+        const query = $(this).val();
+        
+        if (query.length >= 3) {
+            searchTimeout = setTimeout(() => {
+                form.submit();
+            }, 1000);
+        }
+    });
+
+    // Animate progress bars on scroll
+    const progressBars = $('.progress-fill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const progressBar = entry.target;
+                const width = progressBar.style.width;
+                progressBar.style.width = '0%';
+                setTimeout(() => {
+                    progressBar.style.width = width;
+                }, 100);
+                observer.unobserve(progressBar);
+            }
+        });
+    });
+
+    progressBars.each(function() {
+        observer.observe(this);
+    });
+
+    // Registration button click tracking
+    $('.btn-register').click(function() {
+        const eventTitle = $(this).closest('.event-card').find('.event-title a').text();
+        console.log('Registration clicked for:', eventTitle);
+        
+        // Use new loader system
+        const btn = this;
+        window.loaderManager?.showButtonLoader(btn, 'पंजीकरण हो रहा है...');
+        
+        // Show page loader for navigation
+        setTimeout(() => {
+            window.loaderManager?.showPageLoader('पंजीकरण पृष्ठ लोड हो रहा है...');
+        }, 100);
+    });
+});
+</script>
+{% endblock %}

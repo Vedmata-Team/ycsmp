@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पंजीकरण अप्रूव</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .registration-card { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .reg-number { font-size: 24px; font-weight: bold; color: #667eea; text-align: center; margin: 20px 0; }
+        .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .details-table th, .details-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .details-table th { background-color: #f8f9fa; font-weight: bold; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        .success-badge { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 पंजीकरण अप्रूव हो गया!</h1>
+            <p>आपका पंजीकरण सफलतापूर्वक अप्रूव हो गया है</p>
+        </div>
+        
+        <div class="content">
+            <div class="registration-card">
+                <div class="reg-number">
+                    पंजीकरण संख्या: {{ registration.registration_number }}
+                </div>
+                <div style="text-align: center;">
+                    <span class="success-badge">✓ अप्रूव</span>
+                </div>
+                
+                <table class="details-table">
+                    <tr>
+                        <th>नाम</th>
+                        <td>{{ registration.full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>कार्यक्रम</th>
+                        <td>{{ event.title }}</td>
+                    </tr>
+                    <tr>
+                        <th>दिनांक</th>
+                        <td>{{ event.event_date|date:"d F Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>समय</th>
+                        <td>{{ event.event_date|time:"H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>स्थान</th>
+                        <td>{{ event.venue }}</td>
+                    </tr>
+                    <tr>
+                        <th>मोबाइल</th>
+                        <td>{{ registration.phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>आगमन तिथि</th>
+                        <td>{{ registration.arrival_date|date:"d F Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>प्रस्थान तिथि</th>
+                        <td>{{ registration.departure_date|date:"d F Y" }}</td>
+                    </tr>
+                    {% if registration.bringing_vehicle %}
+                    <tr>
+                        <th>वाहन नंबर</th>
+                        <td>{{ registration.vehicle_number }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="margin: 0 0 10px 0; color: #1976d2;">महत्वपूर्ण निर्देश:</h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li>कृपया अपना पंजीकरण संख्या सुरक्षित रखें</li>
+                        <li>कार्यक्रम में भाग लेते समय यह संख्या साथ लाएं</li>
+                        <li>किसी भी समस्या के लिए संपर्क करें: 9258360962</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>युवा चिंतन शिविर भोपाल</strong></p>
+            <p>संपर्क: 9258360962 | ईमेल: info@uppyp.in</p>
+            <p>यह एक स्वचालित ईमेल है, कृपया इसका उत्तर न दें।</p>
+        </div>
+    </div>
+</body>
+</html>

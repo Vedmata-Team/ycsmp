@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}पंजीकरण प्रतीक्षारत - युवा चिंतन शिविर भोपाल{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .pending-section {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .pending-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pending-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #ff9800 0%, #ffb300 100%);
+        }
+        
+        .pending-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ff9800 0%, #ffb300 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pendingPulse 2s infinite;
+        }
+        
+        .pending-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        @keyframes pendingPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pending-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 1rem;
+        }
+        
+        .pending-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .registration-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .status-badge {
+            background: linear-gradient(135deg, #ff9800 0%, #ffb300 100%);
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .btn-home {
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            margin-top: 2rem;
+        }
+        
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            color: white;
+        }
+        
+        .next-steps {
+            background: #e8f5e8;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+        .next-steps h6 {
+            color: #28a745;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .next-steps ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .next-steps li {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<section class="pending-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="pending-card" data-aos="zoom-in">
+                    <!-- Pending Icon -->
+                    <div class="pending-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    
+                    <!-- Pending Message -->
+                    <h1 class="pending-title">पंजीकरण प्रतीक्षारत!</h1>
+                    <div class="pending-message">
+                        <p>धन्यवाद <strong>{{ registration.full_name }}</strong>!</p>
+                        <p>आपका पंजीकरण सफलतापूर्वक जमा हो गया है। यह अब अप्रूवल की प्रक्रिया में है।</p>
+                        <p>अप्रूवल के बाद आपको <b>पंजीकरण नंबर</b> और पूरी जानकारी ईमेल पर भेजी जाएगी।</p>
+                    </div>
+                    
+                    <!-- Registration Details -->
+                    <div class="registration-details" data-aos="fade-up" data-aos-delay="200">
+                        <h5>पंजीकरण विवरण</h5>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">स्थिति:</span>
+                            <span class="detail-value status-badge">
+                                {% if registration.approval_status == 'pending' %}
+                                    प्रतीक्षारत
+                                {% elif registration.approval_status == 'level1_approved' %}
+                                    स्तर 1 अप्रूव
+                                {% elif registration.approval_status == 'approved' %}
+                                    अप्रूव
+                                {% elif registration.approval_status == 'rejected' %}
+                                    अस्वीकृत
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">कार्यक्रम:</span>
+                            <span class="detail-value">{{ registration.event.title }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">तिथि:</span>
+                            <span class="detail-value">{{ registration.event.event_date|date:"d M Y, l" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">स्थान:</span>
+                            <span class="detail-value">{{ registration.event.venue }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">पंजीकरण तिथि:</span>
+                            <span class="detail-value">{{ registration.registration_date|date:"d M Y H:i" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">राज्य:</span>
+                            <span class="detail-value">{{ registration.state }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">जिला:</span>
+                            <span class="detail-value">{{ registration.city }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons" data-aos="fade-up" data-aos-delay="400">
+                        <a href="{% url 'events:check_status' %}" class="btn-email">
+                            <i class="bi bi-search"></i>
+                            स्थिति जांचें
+                        </a>
+                        
+                        <a href="{% url 'events:list' %}" class="btn-home">
+                            <i class="bi bi-house-door-fill"></i>
+                            मुख्य पृष्ठ
+                        </a>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="next-steps" data-aos="fade-up" data-aos-delay="600">
+                        <h6>अगले कदम:</h6>
+                        <ul>
+                            <li>आपका पंजीकरण अप्रूवल की प्रक्रिया में है</li>
+                            <li>अप्रूवल के बाद आपको ईमेल पर पूरी जानकारी मिलेगी</li>
+                            <li>अपने मोबाइल नंबर से पंजीकरण की स्थिति जांच सकते हैं</li>
+                            <li>यदि कोई प्रश्न है तो हमसे संपर्क करें: +91 9415156122</li>
+                            <li>कृपया धैर्य रखें, जल्द ही आपको अपडेट मिलेगा</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

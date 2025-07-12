@@ -1,0 +1,285 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}युवा चिंतन शिविर भोपाल{% endblock %}</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश - युवाओं के सशक्तिकरण, शिक्षा और समाजसेवा के लिए समर्पित संगठन">
+    <meta name="keywords" content="prantiya yuva prakoshth uttar pradesh, prantiya yuva prakoshth up, yuva prakoshth uttar pradesh, yuva prakoshth up, awgp yuva prakoshth up, awgp yuva prakoshth uttar pradesh, awgp youth wing up, youth cell up, youthcell up, up youthcell, up youth cell, uttar pradesh youth cell, up yuva shakha, yuva vibhag awgp up, yuva karyakram awgp, awgp up youth, yuva prakalp awgp, gayatri yuva up, youth movement awgp, awgp youth up, yuva jagriti abhiyan, yuva sanskar karyakram, yuva sammelan awgp, yuva prerna abhiyan up, awgp yuva activities up, youth workshop awgp, awgp prantiya yuva, yuva sewa karyakram, youth empowerment awgp, prantiya yuva parishad up, awgp uttar pradesh, all world gayatri pariwar up, gayatri pariwar youth up, gayatri yuva up, up awgp events, awgp up branch, awgp youth cell, shantikunj yuva up, shantikunj haridwar yuva wing, akhil vishw gayatri pariwar youth, yuva sammelan uttar pradesh, yuva shivir awgp up, prantiya yuva abhiyaan, yuva sewa abhiyan up, awgp yuva meeting up, youth leadership awgp, awgp volunteer youth up, yuva safalta abhiyan up, yuva rally gayatri pariwar up, yuva sanmelan date up, युवा प्रकोष्ठ, उत्तर प्रदेश, समाजसेवा, शिक्षा, युवा सशक्तिकरण, गायत्री परिवार, अखिल विश्व गायत्री परिवार, शांतिकुंज, हरिद्वार">
+    <meta name="author" content="प्रांतीय युवा प्रकोष्ठ-उत्तर प्रदेश">
+    
+    
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Bootstrap 5 JS (place before </body>) -->
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> {% endcomment %}
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/logo.png' %}">
+    
+    {% block extra_head %}
+    <!-- Default Open Graph Meta Tags (will be overridden by specific pages) -->
+    {% if not news %}
+    <meta property="og:title" content="{% block og_title %}प्रांतीय युवा प्रकोष्ठ-उत्तर प्रदेश{% endblock %}">
+    <meta property="og:description" content="युवाओं के सशक्तिकरण और राष्ट्र निर्माण में योगदान देने के लिए समर्पित संगठन">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}">
+    {% endif %}
+    {% endblock %}
+</head>
+<body>
+    <div class="wrapper d-flex flex-column min-vh-100">
+        
+        <!-- Enhanced Navigation Header -->
+        <header class="main-header shadow-sm" data-aos="fade-down">
+            <nav class="navbar navbar-expand-lg ">
+                <div class="container">
+                    <!-- Brand Logo -->
+                    <a class="navbar-brand d-flex align-items-center" href="{% url 'events:homepage' %}">
+                        <img src="{% static 'images/logo.png' %}" alt="Logo" width="60" height="60" class="me-2">
+                        <div>
+                            <div class="brand-title">युवा चिंतन शिविर भोपाल</div>
+                            <small class="brand-subtitle">Youth Thinking Camp Bhopal</small>
+                        </div>
+                    </a>
+                    
+                    <!-- Mobile Toggle Button -->
+                    <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="toggler-icon"></span>
+                        <span class="toggler-icon"></span>
+                        <span class="toggler-icon"></span>
+                    </button>
+
+                    <!-- Navigation Menu -->
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="{% url 'events:homepage' %}">
+                                    <i class="bi bi-house-door-fill me-1"></i>मुख्य पृष्ठ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="{% url 'events:list' %}">
+                                    <i class="bi bi-calendar-event me-1"></i>कार्यक्रम
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="{% url 'events:check_status' %}">
+                                    <i class="bi bi-search me-1"></i>स्थिति जांचें
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link modern-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-info-circle me-1"></i>जानकारी
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-people me-2"></i>हमारे बारे में</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-telephone me-2"></i>संपर्क</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle me-2"></i>सहायता</a></li>
+                                </ul>
+                            </li>
+                            {% if user.is_staff %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link modern-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-gear me-1"></i>एडमिन
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/admin/"><i class="bi bi-speedometer2 me-2"></i>डैशबोर्ड</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'events:bulk_export' %}"><i class="bi bi-download me-2"></i>एक्सपोर्ट</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/admin/logout/"><i class="bi bi-box-arrow-right me-2"></i>लॉगआउट</a></li>
+                                </ul>
+                            </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-register-nav ms-2" href="{% url 'events:register' %}">
+                                    <i class="bi bi-person-plus-fill me-1"></i>पंजीकरण
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="reading-progress-bar" id="reading-progress"></div>
+
+        <!-- Flash Messages -->
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show modern-alert" role="alert" data-aos="fade-down">
+                        <div class="d-flex align-items-center">
+                            {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="main-content flex-grow-1">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Enhanced Footer -->
+        <footer class="modern-footer mt-auto" data-aos="fade-up">
+            <div class="footer-wave">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M0,0V6c0,21.6,291,111.46,741,110.26C1295.83,115.52,1200,6,1200,6V0Z" class="footer-wave-path"></path>
+                </svg>
+            </div>
+            
+            <div class="footer-content">
+                <div class="container py-5">
+                    <!-- Main Footer Content -->
+                    <div class="row mb-4">
+                        <div class="col-lg-4 mb-4">
+                            <div class="footer-brand">
+                                <img src="{% static 'images/logo.png' %}" alt="Logo" width="50" height="50" class="mb-3">
+                                <h4 class="footer-title">युवा प्रकोष्ठ शान्तिकुञ्ज</h4>
+                                <p class="footer-description">युवाओं के सशक्तिकरण और राष्ट्र निर्माण में योगदान देने के लिए समर्पित संगठन।</p>
+                                
+                                <!-- Social Media Links -->
+                                <div class="social-links">
+                                    <a href="#" class="social-link" title="Facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" class="social-link" title="Twitter">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" class="social-link" title="Instagram">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="#" class="social-link" title="YouTube">
+                                        <i class="fab fa-youtube"></i>
+                                    </a>
+                                    <a href="https://wa.me/919415156122" class="social-link" title="WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-2 col-md-6 mb-4">
+                            <h5 class="footer-heading">Quick Links</h5>
+                            <ul class="footer-links">
+                                <li><a href="{% url 'events:homepage' %}">मुख्य पृष्ठ</a></li>
+                                <li><a href="{% url 'events:list' %}">कार्यक्रम</a></li>
+                                <li><a href="{% url 'events:register' %}">पंजीकरण</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-lg-2 col-md-6 mb-4">
+                            <h5 class="footer-heading">Categories</h5>
+                            <ul class="footer-links">
+                                <li><a href="#">समाजसेवा</a></li>
+                                <li><a href="#">शिक्षा</a></li>
+                                <li><a href="#">युवा गतिविधि</a></li>
+                                <li><a href="#">सांस्कृतिक</a></li>
+                                <li><a href="#">खेल</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-lg-4 mb-4">
+                            <h5 class="footer-heading">Contact Info</h5>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    <span>युवा प्रकोष्ठ शान्तिकुञ्ज</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    <a href="tel:+919258360962">9258360962</a>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope-fill"></i>
+                                    <a href="mailto:info@pranteeyyuva.org">info@uppyp.in</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer Bottom -->
+                    <div class="footer-bottom">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <p class="copyright">
+                                    &copy; 2025 Provincial Youth Cell Uttar Pradesh.  
+                                    <br>
+                                    Designed and developed by <a href="https://vmdonline.in/" target="_blank"><strong>Vedmata Web Designing</strong></a>. All rights reserved.
+                                </p>
+
+
+                            </div>
+                            {% comment %} <div class="col-md-6 text-md-end">
+                                <a href="/mahakal" class="admin-link">
+                                    <i class="bi bi-gear-fill me-1"></i>एडमिन पैनल
+                                </a>
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        
+        <!-- SEO Keywords for Search Engine Indexing -->
+        {% comment %} {% include 'seo_content.html' %} {% endcomment %}
+
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" title="वापस ऊपर जाएं">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/animations.js' %}"></script>
+    
+    <!-- AOS Initialization -->
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 60,
+            easing: 'ease-out-cubic'
+        });
+    </script>
+
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

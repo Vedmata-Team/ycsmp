@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}इवेंट पंजीकरण{% if event %} - {{ event.title }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/registration_form.css' %}">
+       
+{% endblock %}
+
+{% block content %}
+
+<section class="registration-form-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-container" data-aos="fade-up">
+                    <!-- Form Header -->
+                    <div class="form-header">
+                        <h2>
+                            <i class="bi bi-person-plus-fill me-2"></i>
+                            {% if event %}{{ event.title }}{% else %}सामान्य पंजीकरण{% endif %}
+                        </h2>
+                        <p class="mb-0">कृपया सभी जानकारी सही तरीके से भरें</p>
+                    </div>
+
+                    <!-- Form Body -->
+                    <div class="form-body">
+                        <!-- Event Information -->
+                        {% if event %}
+                        <div class="event-info" data-aos="fade-up" data-aos-delay="200">
+                            <h5>कार्यक्रम विवरण</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <i class="bi bi-calendar3"></i>
+                                        <span>{{ event.event_date|date:"d M Y, l" }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="bi bi-clock"></i>
+                                        <span>{{ event.event_date|time:"H:i" }} बजे</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        <span>{{ event.venue }}</span>
+                                    </div>
+                                    {% if event.registration_fee > 0 %}
+                                    <div class="info-item">
+                                        <i class="bi bi-currency-rupee"></i>
+                                        <span>₹{{ event.registration_fee }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Error Messages -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger" data-aos="fade-up" data-aos-delay="300">
+                                <h6><i class="bi bi-exclamation-triangle-fill me-2"></i>कृपया निम्नलिखित त्रुटियों को ठीक करें:</h6>
+                                <ul class="mb-0">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Multi-step Form -->
+                        <form method="post" id="registrationForm" data-aos="fade-up" data-aos-delay="400">
+                            {% csrf_token %}
+
+                            <!-- Step Indicator -->
+                            <div class="step-indicator">
+                                <div class="step active" id="step-1">1</div>
+                                <div class="step" id="step-2">2</div>
+                                <div class="step" id="step-3">3</div>
+                            </div>
+
+                            <!-- Step 1: Personal Information -->
+                            <div class="form-step active" id="step-1-content">
+                                <h4 class="mb-4">व्यक्तिगत जानकारी</h4>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ form.full_name.label_tag }}
+                                            {{ form.full_name }}
+                                            {% if form.full_name.errors %}
+                                                <div class="invalid-feedback">{{ form.full_name.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ form.phone.label_tag }}
+                                            {{ form.phone }}
+                                            {% if form.phone.errors %}
+                                                <div class="invalid-feedback">{{ form.phone.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.email.label_tag }}
+                                            {{ form.email }}
+                                            {% if form.email.errors %}
+                                                <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.date_of_birth.label_tag }}
+                                            {{ form.date_of_birth }}
+                                            {% if form.date_of_birth.errors %}
+                                                <div class="invalid-feedback">{{ form.date_of_birth.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.gender.label_tag }}
+                                            {{ form.gender }}
+                                            {% if form.gender.errors %}
+                                                <div class="invalid-feedback">{{ form.gender.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ form.transport_mode.label_tag }}
+                                            {{ form.transport_mode }}
+                                            {% if form.transport_mode.errors %}
+                                                <div class="invalid-feedback">{{ form.transport_mode.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                <!-- Vehicle number field (conditionally shown) -->
+                                <div class="row" id="vehicle-number-row" style="display: none;">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ form.vehicle_number.label_tag }}
+                                            {{ form.vehicle_number }}
+                                            {% if form.vehicle_number.errors %}
+                                            <div class="invalid-feedback">{{ form.vehicle_number.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.education.label_tag }}
+                                            {{ form.education }}
+                                            {% if form.education.errors %}
+                                            <div class="invalid-feedback">{{ form.education.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.occupation.label_tag }}
+                                            {{ form.occupation }}
+                                            {% if form.occupation.errors %}
+                                            <div class="invalid-feedback">{{ form.occupation.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label>क्या आप शांतिकुंज/शाखाओं में शिविर कर चुके हैं?</label>
+                                            <div>
+                                                {% for radio in form.previous_shivir %}
+                                                    <div class="form-check form-check-inline">
+                                                        {{ radio.tag }}
+                                                        {{ radio.choice_label }}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% if form.previous_shivir.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.previous_shivir.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            {{ form.village_taluka.label_tag }}
+                                            {{ form.village_taluka }}
+                                            {% if form.village_taluka.errors %}
+                                                <div class="invalid-feedback">{{ form.village_taluka.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            {{ form.state.label_tag }}
+                                            {{ form.state }}
+                                            {% if form.state.errors %}
+                                                <div class="invalid-feedback">{{ form.state.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            {{ form.city.label_tag }}
+                                            {{ form.city }}
+                                            {% if form.city.errors %}
+                                                <div class="invalid-feedback">{{ form.city.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    {{ form.country }}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">देश</label>
+                                            <input type="text" class="form-control" value="India" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">विशेष कौशल (वैकल्पिक)</label>
+                                            <div class="skills-checkboxes">
+                                                <div class="row g-2">
+                                                    {% for choice in form.special_skills %}
+                                                        <div class="col-md-4 col-sm-6">
+                                                            <div class="form-check">
+                                                                {{ choice.tag }}
+                                                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                                    {{ choice.choice_label }}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% if form.special_skills.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.special_skills.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Other Skills Field -->
+                                        <div class="form-group" id="other-skills-row" style="display: none;">
+                                            {{ form.special_skills_other.label_tag }}
+                                            {{ form.special_skills_other }}
+                                            {% if form.special_skills_other.errors %}
+                                                <div class="invalid-feedback">{{ form.special_skills_other.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-next" onclick="nextStep(1)">
+                                        अगला <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Other Information -->
+                            <div class="form-step" id="step-2-content">
+                                <h4 class="mb-4">अन्य जानकारी</h4>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.arrival_date.label_tag }}
+                                            {{ form.arrival_date }}
+                                            {% if form.arrival_date.errors %}
+                                                <div class="invalid-feedback">{{ form.arrival_date.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.departure_date.label_tag }}
+                                            {{ form.departure_date }}
+                                            {% if form.departure_date.errors %}
+                                                <div class="invalid-feedback">{{ form.departure_date.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label>क्या आप किसी विशेष टीम/सेवा में योगदान देना चाहते हैं?</label>
+                                            <div>
+                                                {% for radio in form.interested_in_volunteering %}
+                                                    <div class="form-check form-check-inline">
+                                                        {{ radio.tag }}
+                                                        {{ radio.choice_label }}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% if form.interested_in_volunteering.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.interested_in_volunteering.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12" id="volunteering-details-row" style="display: none;">
+                                        <div class="form-group mb-3">
+                                            {{ form.volunteering_details.label_tag }}
+                                            {{ form.volunteering_details }}
+                                            {% if form.volunteering_details.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.volunteering_details.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">अभियान चयन करें <span class="text-danger">*</span></label>
+                                            <div class="alert alert-info mb-3">
+                                                <small><i class="bi bi-info-circle"></i> युवा जोड़ो अभियान अनिवार्य है। कृपया कम से कम एक और अभियान चुनें।</small>
+                                            </div>
+                                            <div class="campaign-checkboxes">
+                                                {% for choice in form.campaigns %}
+                                                    <div class="form-check">
+                                                        {{ choice.tag }}
+                                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                            {{ choice.choice_label }}
+                                                            {% if choice.data.value == 'youth_connect' %}
+                                                                <span class="badge bg-warning ms-2">अनिवार्य</span>
+                                                            {% endif %}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% if form.campaigns.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.campaigns.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-prev" onclick="prevStep(2)">
+                                        <i class="bi bi-arrow-left"></i> पिछला
+                                    </button>
+                                    <button type="button" class="btn btn-next" onclick="nextStep(2)">
+                                        अगला <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Confirmation -->
+                            <div class="form-step" id="step-3-content">
+                                <h4 class="mb-4">पुष्टि करें</h4>
+
+                                <div class="confirmation-details">
+                                    <div class="alert alert-info">
+                                        <h6><i class="bi bi-info-circle-fill me-2"></i>कृपया अपनी जानकारी की जांच करें:</h6>
+                                        <div id="confirmation-summary">
+                                            <!-- Details will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                    <label class="form-check-label" for="termsCheck">
+                                        मैं सभी नियम और शर्तों से सहमत हूं और दी गई जानकारी सत्य है।
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-prev" onclick="prevStep(3)">
+                                        <i class="bi bi-arrow-left"></i> पिछला
+                                    </button>
+                                    <button type="submit" class="btn btn-submit" id="submitBtn">
+                                        <i class="bi bi-check-circle-fill me-2"></i>पंजीकरण पूरा करें
+                                    </button>
+                                </div>
+                                
+                                <!-- Fallback submit for JavaScript disabled -->
+                                <noscript>
+                                    <div class="mt-3 text-center">
+                                        <button type="submit" class="btn btn-primary">
+                                            पंजीकरण पूरा करें (JavaScript अक्षम)
+                                        </button>
+                                    </div>
+                                </noscript>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/event_location_select.js' %}"></script>
+<script src="{% static 'js/registration_form.js' %}"></script>
+{% endblock %}

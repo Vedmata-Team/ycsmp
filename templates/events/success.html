@@ -1,0 +1,466 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}पंजीकरण सफल - प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .success-section {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%);
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .success-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .success-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #fd8535 0%, #ffb300 100%);
+        }
+        
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: successPulse 2s infinite;
+        }
+        
+        .success-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        
+        .success-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .registration-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .registration-details h5 {
+            color: #fd8535;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .registration-number {
+            background: linear-gradient(135deg, #fd8535 0%, #ffb300 100%);
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .btn-download, .btn-email, .btn-home {
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+        
+        .btn-email {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        
+        .btn-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+            color: white;
+        }
+        
+        .btn-home {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+        
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            color: white;
+        }
+        
+        .next-steps {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+        .next-steps h6 {
+            color: #1976d2;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .next-steps ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .next-steps li {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fd8535;
+            animation: confetti-fall 3s linear forwards;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .social-share {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .social-share h6 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .social-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .social-btn.facebook { background: #3b5998; }
+        .social-btn.twitter { background: #1da1f2; }
+        .social-btn.whatsapp { background: #25d366; }
+        .social-btn.telegram { background: #0088cc; }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<section class="success-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="success-card" data-aos="zoom-in">
+                    <!-- Success Icon -->
+                    <div class="success-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    
+                    <!-- Success Message -->
+                    <h1 class="success-title">पंजीकरण सफल!</h1>
+                    <div class="success-message">
+                        <p>बधाई हो <strong>{{ registration.full_name }}</strong>!</p>
+                        <p>आपका पंजीकरण सफलतापूर्वक पूरा हो गया है। आपको जल्द ही और जानकारी मिलेगी।</p>
+                    </div>
+                    
+                    <!-- Registration Details -->
+                    <div class="registration-details" data-aos="fade-up" data-aos-delay="200">
+                        <h5>पंजीकरण विवरण</h5>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">रजिस्ट्रेशन नंबर:</span>
+                            <span class="detail-value registration-number">{{ registration.registration_number }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">कार्यक्रम:</span>
+                            <span class="detail-value">{{ registration.event.title }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">तिथि:</span>
+                            <span class="detail-value">{{ registration.event.event_date|date:"d M Y, l" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">समय:</span>
+                            <span class="detail-value">{{ registration.event.event_date|time:"H:i" }} बजे</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">स्थान:</span>
+                            <span class="detail-value">{{ registration.event.venue }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">पंजीकरण तिथि:</span>
+                            <span class="detail-value">{{ registration.registration_date|date:"d M Y H:i" }}</span>
+                        </div>
+                        
+                        {% if registration.event.registration_fee > 0 %}
+                        <div class="detail-item">
+                            <span class="detail-label">शुल्क:</span>
+                            <span class="detail-value">₹{{ registration.event.registration_fee }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons" data-aos="fade-up" data-aos-delay="400">
+                        <a href="{% url 'events:check_status' %}" class="btn-email">
+                            <i class="bi bi-search"></i>
+                            स्थिति जांचें
+                        </a>
+                        
+                        <a href="{% url 'events:list' %}" class="btn-home">
+                            <i class="bi bi-house-door-fill"></i>
+                            मुख्य पृष्ठ
+                        </a>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="next-steps" data-aos="fade-up" data-aos-delay="600">
+                        <h6>अगले कदम:</h6>
+                        <ul>
+                            <li>कार्यक्रम की तिथि और समय को याद रखें</li>
+                            <li>यदि कोई प्रश्न है तो हमसे संपर्क करें: +91 9415156122</li>
+                            <li>अपने मोबाइल नंबर से पंजीकरण की स्थिति जांच सकते हैं</li>
+                            <li>अपने दोस्तों को भी इस कार्यक्रम के बारे में बताएं</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Social Share -->
+                    <div class="social-share" data-aos="fade-up" data-aos-delay="800">
+                        <h6>अपने दोस्तों के साथ साझा करें:</h6>
+                        <div class="social-buttons">
+                            <a href="#" class="social-btn facebook" onclick="shareOnFacebook()">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-btn twitter" onclick="shareOnTwitter()">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-btn whatsapp" onclick="shareOnWhatsApp()">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <a href="#" class="social-btn telegram" onclick="shareOnTelegram()">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Confetti Animation -->
+<div class="confetti" id="confetti"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Confetti animation
+function createConfetti() {
+    const confetti = document.getElementById('confetti');
+    const colors = ['#fd8535', '#ffb300', '#28a745', '#dc3545', '#007bff'];
+    
+    for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 3 + 's';
+        piece.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        confetti.appendChild(piece);
+    }
+    
+    // Clean up after animation
+    setTimeout(() => {
+        confetti.innerHTML = '';
+    }, 6000);
+}
+
+// Social share functions
+function shareOnFacebook() {
+    const text = encodeURIComponent(`मैंने प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश के कार्यक्रम "${registration.event.title}" में पंजीकरण कराया है!`);
+    const url = encodeURIComponent(window.location.origin);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
+}
+
+function shareOnTwitter() {
+    const text = encodeURIComponent(`मैंने प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश के कार्यक्रम में पंजीकरण कराया है! #युवाशक्ति #समाजसेवा`);
+    const url = encodeURIComponent(window.location.origin);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+}
+
+function shareOnWhatsApp() {
+    const text = encodeURIComponent(`मैंने प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश के कार्यक्रम "{{ registration.event.title }}" में पंजीकरण कराया है! आप भी जुड़िए: ${window.location.origin}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function shareOnTelegram() {
+    const text = encodeURIComponent(`मैंने प्रांतीय युवा प्रकोष्ठ उत्तर प्रदेश के कार्यक्रम में पंजीकरण कराया है!`);
+    const url = encodeURIComponent(window.location.origin);
+    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+}
+
+// Initialize confetti on page load
+document.addEventListener('DOMContentLoaded', function() {
+    createConfetti();
+    
+    // Add click tracking for buttons
+    document.querySelectorAll('.btn-download, .btn-email').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const action = this.classList.contains('btn-download') ? 'download' : 'email';
+            console.log(`ID Card ${action} clicked for registration: {{ registration.registration_number }}`);
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> प्रक्रिया हो रही है...';
+            this.style.pointerEvents = 'none';
+            
+            // Reset after delay (remove in production, this is just for demo)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.style.pointerEvents = 'auto';
+            }, 3000);
+        });
+    });
+});
+
+// Copy registration number on click
+document.querySelector('.registration-number').addEventListener('click', function() {
+    const text = this.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = this.textContent;
+        this.textContent = 'कॉपी हो गया!';
+        setTimeout(() => {
+            this.textContent = originalText;
+        }, 2000);
+    });
+});
+</script>
+{% endblock %}

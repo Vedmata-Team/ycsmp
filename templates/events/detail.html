@@ -1,0 +1,499 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} - गतिविधियां{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/event_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb-nav py-3" data-aos="fade-down">
+    <div class="container">
+        <ol class="breadcrumb modern-breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'events:homepage' %}">
+                    <i class="bi bi-house-door-fill"></i>
+                    मुख्य पृष्ठ
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'events:list' %}">गतिविधियां</a>
+            </li>
+            <li class="breadcrumb-item active">{{ event.title|truncatewords:5 }}</li>
+        </ol>
+    </div>
+</nav>
+
+<!-- Registration Button: Always on Top for Mobile, Professional Responsive Arrangement -->
+<div class="registration-actions registration-actions-top beautiful-register-btn mb-4 d-block d-lg-none">
+    {% if registration_open and spots_available %}
+        <a href="{% url 'events:register_event' event.pk %}" 
+           class="btn btn-register-now btn-sm py-2">
+            <i class="bi bi-stars"></i>
+            <span>✨ तुरंत पंजीकरण करें</span>
+        </a>
+        <p class="registration-note mt-2 mb-0 small text-center">
+            <i class="bi bi-info-circle"></i>
+            जल्दी करें, सीमित स्थान!
+        </p>
+    {% endif %}
+</div>
+
+<!-- Event Detail Section -->
+<section class="event-detail-section py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Event Card -->
+                <div class="event-detail-card modern-card" data-aos="fade-up">
+                    <!-- Event Header -->
+                    <div class="event-header">
+                        <div class="event-date-display">
+                            <div class="date-card">
+                                <div class="date-day">{{ event.event_date|date:"d" }}</div>
+                                <div class="date-month">{{ event.event_date|date:"M" }}</div>
+                                <div class="date-year">{{ event.event_date|date:"Y" }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="event-meta">
+                            <div class="meta-badges">
+                                <span class="badge event-category">युवा कार्यक्रम</span>
+                                <span class="badge event-district">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    मध्य प्रदेश
+                                </span>
+                                {% if event.is_featured %}
+                                    <span class="badge event-featured">
+                                        <i class="bi bi-star-fill"></i>
+                                        मुख्य कार्यक्रम
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="event-status-large">
+                                {% if registration_open and spots_available %}
+                                    <a href="{% url 'events:register_event' event.pk %}" class="status-open" style="text-decoration: none; color: white;">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        पंजीकरण खुला
+                                    </a>
+
+                                {% elif not registration_open %}
+                                    <span class="status-closed">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        पंजीकरण बंद
+                                    </span>
+                                {% else %}
+                                    <span class="status-full">
+                                        <i class="bi bi-people-fill"></i>
+                                        भरा हुआ
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Title -->
+                    <h1 class="event-title">{{ event.title }}</h1>
+                    
+                    <!-- Event Key Info -->
+                    <div class="event-key-info mt-3 mb-4">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <i class="bi bi-calendar3 text-primary me-2"></i>
+                                    <span><strong>दिनांक:</strong> 27 से 29 अक्टूबर 2025</span>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="info-item">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                    <span><strong>कार्यक्रम स्थल:</strong> सरस्वती विद्या मंदिर शारदा विहार भोपाल मध्य प्रदेश</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="https://maps.app.goo.gl/jdnvJ5SPGFwP7tum6" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-geo-alt me-1"></i>स्थान देखें
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div class="info-item">
+                                    <i class="bi bi-shield-check-fill text-success me-2"></i>
+                                    <span><strong>तत्वावधान:</strong> अखिल विश्व गायत्री परिवार शान्तिकुञ्ज-हरिद्वार</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Images -->
+                    {% if event.images.all %}
+                        <div class="event-media" data-aos="zoom-in" data-aos-delay="200">
+                            {% if event.images.count == 1 %}
+                                <div class="single-image">
+                                    <img src="{{ event.images.first.image.url }}" 
+                                         class="img-fluid event-image" 
+                                         alt="{{ event.title }}">
+                                </div>
+                            {% else %}
+                                <div id="eventImagesCarousel" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">
+                                        {% for image in event.images.all %}
+                                            <button type="button" data-bs-target="#eventImagesCarousel" 
+                                                    data-bs-slide-to="{{ forloop.counter0 }}" 
+                                                    {% if forloop.first %}class="active"{% endif %}></button>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="carousel-inner">
+                                        {% for image in event.images.all %}
+                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                                <img src="{{ image.image.url }}" 
+                                                     class="d-block w-100" 
+                                                     alt="{{ event.title }}">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#eventImagesCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#eventImagesCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Event Description -->
+                    <div class="event-description" data-aos="fade-up" data-aos-delay="300">
+                        {{ event.description|safe }}
+                    </div>
+
+                    <!-- Event Details Compact -->
+                    <div class="row g-3 mb-4" data-aos="fade-up" data-aos-delay="400">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="detail-item p-3 border rounded">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar3 text-primary me-2"></i>
+                                    <div>
+                                        <small class="text-muted">कार्यक्रम दिनांक</small>
+                                        <div class="fw-bold">27 से 29 अक्टूबर 2025</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-4">
+                            <div class="detail-item p-3 border rounded">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2 mt-1"></i>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">कार्यक्रम स्थल</small>
+                                        <div class="fw-bold small">सरस्वती विद्या मंदिर शारदा विहार<br>भोपाल मध्य प्रदेश</div>
+                                        <a href="https://maps.app.goo.gl/jdnvJ5SPGFwP7tum6" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
+                                            <i class="bi bi-geo-alt me-1"></i>स्थान देखें
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-4">
+                            <div class="detail-item p-3 border rounded">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-shield-check-fill text-success me-2 mt-1"></i>
+                                    <div>
+                                        <small class="text-muted">तत्वावधान</small>
+                                        <div class="fw-bold small">अखिल विश्व गायत्री परिवार<br>शान्तिकुञ्ज-हरिद्वार</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-4">
+                            <div class="detail-item p-3 border rounded">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-currency-rupee text-warning me-2"></i>
+                                    <div>
+                                        <small class="text-muted">शुल्क</small>
+                                        <div class="fw-bold">निःशुल्क</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-4">
+                            <div class="detail-item p-3 border rounded">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-people-fill text-info me-2"></i>
+                                    <div>
+                                        <small class="text-muted">पंजीकरण</small>
+                                        <div class="fw-bold">0/3500 भरा<br><small>3500 उपलब्ध</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Registration Card -->
+                <div class="registration-sidebar modern-card" data-aos="fade-left" data-aos-delay="200">
+                    <div class="sidebar-header">
+                        <h4>
+                            <i class="bi bi-person-plus-fill"></i>
+                            पंजीकरण करें
+                        </h4>
+                    </div>
+
+                    <div class="sidebar-content">
+                        <!-- Registration Progress -->
+                        <div class="registration-progress">
+                            <div class="progress-info">
+                                <span>{{ event.registered_count }}/{{ event.max_participants }} पंजीकृत</span>
+                                <span>{{ event.available_spots }} उपलब्ध</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" 
+                                     style="width: {% widthratio event.registered_count event.max_participants 100 %}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Registration Deadline -->
+                        <div class="deadline-info">
+                            <i class="bi bi-clock-fill"></i>
+                            <div>
+                                <strong>पंजीकरण अंतिम तिथि:</strong><br>
+                                <span class="deadline-date">{{ event.registration_deadline|date:"d M Y, H:i" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Registration Fee -->
+                        {% if event.registration_fee > 0 %}
+                        <div class="fee-info">
+                            <i class="bi bi-currency-rupee"></i>
+                            <div>
+                                <strong>पंजीकरण शुल्क:</strong><br>
+                                <span class="fee-amount">₹{{ event.registration_fee }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Registration Button -->
+                        <div class="registration-actions">
+                            {% if registration_open and spots_available %}
+                                <a href="{% url 'events:register_event' event.pk %}" 
+                                   class="btn btn-register-now">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                    अभी पंजीकरण करें
+                                </a>
+                                <p class="registration-note">
+                                    <i class="bi bi-info-circle"></i>
+                                    तुरंत पंजीकरण करें, सीमित स्थान!
+                                </p>
+                            {% elif not registration_open %}
+                                <button class="btn btn-register-closed" disabled>
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    पंजीकरण बंद
+                                </button>
+                                <p class="registration-note">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    पंजीकरण की अंतिम तिथि समाप्त हो गई है।
+                                </p>
+                            {% else %}
+                                <button class="btn btn-register-full" disabled>
+                                    <i class="bi bi-people-fill"></i>
+                                    सभी स्थान भर गए
+                                </button>
+                                <p class="registration-note">
+                                    <i class="bi bi-info-circle"></i>
+                                    इस कार्यक्रम के लिए सभी स्थान भर गए हैं।
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share Card -->
+                <div class="share-sidebar modern-card" data-aos="fade-left" data-aos-delay="400">
+                    <div class="sidebar-header">
+                        <h5>
+                            <i class="bi bi-share-fill"></i>
+                            साझा करें
+                        </h5>
+                    </div>
+                    
+                    <div class="sidebar-content">
+                        <p>इस कार्यक्रम को अपने दोस्तों के साथ साझा करें:</p>
+                        
+                        <div class="social-share-buttons">
+                            <button class="share-btn facebook" onclick="shareOnFacebook()">
+                                <i class="fab fa-facebook-f"></i>
+                                Facebook
+                            </button>
+                            <button class="share-btn twitter" onclick="shareOnTwitter()">
+                                <i class="fab fa-twitter"></i>
+                                Twitter
+                            </button>
+                            <button class="share-btn whatsapp" onclick="shareOnWhatsApp()">
+                                <i class="fab fa-whatsapp"></i>
+                                WhatsApp
+                            </button>
+                            <button class="share-btn telegram" onclick="shareOnTelegram()">
+                                <i class="fab fa-telegram"></i>
+                                Telegram
+                            </button>
+                        </div>
+                        
+                        <div class="copy-link">
+                            <input type="text" class="form-control" id="event-url" 
+                                   value="{{ request.build_absolute_uri }}" readonly>
+                            <button class="btn btn-copy" onclick="copyEventLink()">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Card -->
+                <div class="contact-sidebar modern-card" data-aos="fade-left" data-aos-delay="600">
+                    <div class="sidebar-header">
+                        <h5>
+                            <i class="bi bi-telephone-fill"></i>
+                            संपर्क करें
+                        </h5>
+                    </div>
+                    
+                    <div class="sidebar-content">
+                        <p>कार्यक्रम से संबंधित किसी भी प्रश्न के लिए संपर्क करें:</p>
+                        
+                        <div class="contact-items">
+                            <div class="contact-item">
+                                <i class="bi bi-telephone-fill"></i>
+                                <a href="tel:+919415156122">+91 9415156122</a>
+                            </div>
+                            <div class="contact-item">
+                                <i class="bi bi-envelope-fill"></i>
+                                <a href="mailto:info@pranteeyyuva.org">info@pranteeyyuva.org</a>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fab fa-whatsapp"></i>
+                                <a href="https://wa.me/919415156122">WhatsApp</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Share functions
+function shareOnFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+}
+
+function shareOnTwitter() {
+    const title = encodeURIComponent("{{ event.title|escapejs }}");
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank');
+}
+
+function shareOnWhatsApp() {
+    const text = encodeURIComponent("{{ event.title|escapejs }} - " + window.location.href);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function shareOnTelegram() {
+    const title = encodeURIComponent("{{ event.title|escapejs }}");
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
+}
+
+function copyEventLink() {
+    const urlInput = document.getElementById('event-url');
+    urlInput.select();
+    urlInput.setSelectionRange(0, 99999);
+    
+    navigator.clipboard.writeText(urlInput.value).then(() => {
+        showToast('लिंक कॉपी हो गया!', 'success');
+        
+        // Visual feedback
+        const copyBtn = document.querySelector('.btn-copy');
+        const originalHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="bi bi-check"></i>';
+        copyBtn.classList.add('copied');
+        
+        setTimeout(() => {
+            copyBtn.innerHTML = originalHtml;
+            copyBtn.classList.remove('copied');
+        }, 2000);
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toast = $(`
+        <div class="toast-notification toast-${type}">
+            <div class="toast-content">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>${message}</span>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(toast);
+    toast.addClass('show');
+    
+    setTimeout(() => {
+        toast.removeClass('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+$(document).ready(function() {
+    // Animate progress bar on scroll
+    const progressBar = $('.progress-fill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = entry.target;
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+                observer.unobserve(bar);
+            }
+        });
+    });
+
+    if (progressBar.length) {
+        observer.observe(progressBar[0]);
+    }
+
+    // Registration button enhancement
+    $('.btn-register-now').hover(
+        function() {
+            $(this).addClass('hover-effect');
+        },
+        function() {
+            $(this).removeClass('hover-effect');
+        }
+    );
+});
+</script>
+{% endblock %}

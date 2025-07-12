@@ -1,0 +1,54 @@
+.field-districts {
+    margin-top: 10px;
+}
+
+.searchable-districts {
+    position: relative;
+}
+
+.districts-search {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.districts-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.districts-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    cursor: pointer;
+    padding: 2px 0;
+    color: #333 !important;
+}
+
+.districts-container label.hidden {
+    display: none;
+}
+
+.districts-container input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.select-all-districts {
+    margin-bottom: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    color: #333 !important;
+}
+
+.field-state_code select {
+    min-width: 200px;
+}

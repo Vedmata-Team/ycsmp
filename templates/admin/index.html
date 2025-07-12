@@ -1,0 +1,38 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content %}
+{{ block.super }}
+
+<div class="module" style="margin-top: 20px;">
+    <h2>Export Tools</h2>
+    <div class="form-row">
+        <p>Export all data in various formats:</p>
+        <ul>
+            <li><a href="{% url 'events:bulk_export' %}" class="button">Bulk Export Tool</a></li>
+            <li><a href="{% url 'events:export_events' %}?format=csv" class="button">Export All Events (CSV)</a></li>
+            <li><a href="{% url 'events:export_events' %}?format=excel" class="button">Export All Events (Excel)</a></li>
+            <li><a href="{% url 'events:export_registrations' %}?format=csv" class="button">Export All Registrations (CSV)</a></li>
+            <li><a href="{% url 'events:export_registrations' %}?format=excel" class="button">Export All Registrations (Excel)</a></li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 4px 8px 4px 0;
+    background: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.button:hover {
+    background: #205067;
+    color: white;
+}
+</style>
+{% endblock %}

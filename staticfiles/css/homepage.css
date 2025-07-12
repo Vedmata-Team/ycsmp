@@ -1,0 +1,231 @@
+/* Homepage Specific Styles */
+
+.hero-section {
+    background: linear-gradient(135deg, #fccd32 0%, #fc7a2e 100%);
+    padding: 100px 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    min-height: 70vh;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('../images/youth.svg') no-repeat center;
+    background-size: cover;
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: none;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.stats-number {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.stats-card h5 {
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+}
+
+.quick-actions {
+    background: #f8f9fa;
+    padding: 60px 0;
+}
+
+.action-btn {
+    display: block;
+    padding: 25px 20px;
+    background: white;
+    border-radius: 15px;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+    height: 100%;
+    border: none;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    color: #667eea;
+    text-decoration: none;
+}
+
+.action-btn i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #667eea;
+    display: block;
+}
+
+.action-btn h5 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.action-btn p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+}
+
+.featured-events {
+    padding: 80px 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 50px;
+    font-size: 2.5rem;
+    color: #333;
+    font-weight: 700;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+}
+
+/* Event Card Enhancements for Homepage */
+.event-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-content {
+    flex-grow: 1;
+}
+
+.event-footer {
+    margin-top: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 60px 0;
+        text-align: center;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+    }
+    
+    .action-btn i {
+        font-size: 2rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 40px 0;
+    }
+    
+    .stats-card {
+        padding: 20px 15px;
+    }
+    
+    .action-btn {
+        padding: 20px 15px;
+    }
+    
+    .quick-actions {
+        padding: 40px 0;
+    }
+    
+    .featured-events {
+        padding: 60px 0;
+    }
+}
+
+/* Animation Classes */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Loading States */
+.stats-number.loading {
+    color: #ccc;
+}
+
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

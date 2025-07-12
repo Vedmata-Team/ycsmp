@@ -1,0 +1,21 @@
+{% load i18n %}
+<div class="searchable-select-container">
+    <input type="text" class="searchable-input" placeholder="जिले खोजें..." />
+    <div class="select-all-container">
+        <label>
+            <input type="checkbox" class="select-all-checkbox" />
+            सभी चुनें
+        </label>
+    </div>
+    <div class="options-container">
+        {% for option in widget.optgroups %}
+            {% for group_option in option.1 %}
+                <label class="option-label">
+                    <input type="checkbox" name="{{ widget.name }}" value="{{ group_option.value }}" 
+                           {% if group_option.selected %}checked{% endif %} />
+                    {{ group_option.label }}
+                </label>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
