@@ -136,7 +136,7 @@ class EventRegistration(models.Model):
     ]
 
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
-    registration_number = models.CharField(max_length=20, unique=True, blank=True)
+    registration_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
     
     # Personal Information
     full_name = models.CharField(max_length=100, verbose_name="नाम")
@@ -241,20 +241,17 @@ class EventRegistration(models.Model):
         return f"{self.full_name} - {self.event.title}"
 
     def save(self, *args, **kwargs):
-        # Check if this is a status change to approved
         is_newly_approved = False
         if self.pk:
             old_instance = EventRegistration.objects.get(pk=self.pk)
             is_newly_approved = (old_instance.approval_status != 'approved' and self.approval_status == 'approved')
-        
-        # Only generate registration number when fully approved
-        if not self.registration_number and self.approval_status == 'approved':
-            self.registration_number = self.generate_registration_number()
-            self.is_confirmed = True
+            
+            if is_newly_approved and not self.registration_number:
+                self.registration_number = self.generate_registration_number()
+                self.is_confirmed = True
         
         super().save(*args, **kwargs)
         
-        # Send email when newly approved
         if is_newly_approved and not self.email_sent:
             from .email_utils import send_registration_approval_email
             if send_registration_approval_email(self):
@@ -280,17 +277,32 @@ class EventRegistration(models.Model):
     
     def generate_registration_number(self):
         """Generate registration number: YCS-StateCode-CityPrefix-SerialNumber"""
+        from django.db import transaction
+        
         state_code = self.state_code or 'XX'
         city_prefix = self.city[:3].upper() if self.city else 'XXX'
         
-        # Get count of approved registrations from same city
-        count = EventRegistration.objects.filter(
-            city=self.city,
-            approval_status='approved'
-        ).exclude(pk=self.pk).count() + 1
-        
-        serial = f"{count:04d}"
-        return f"YCS-{state_code}-{city_prefix}-{serial}"
+        with transaction.atomic():
+            # Get the highest existing serial number for this city
+            existing_regs = EventRegistration.objects.filter(
+                city=self.city,
+                registration_number__isnull=False
+            ).exclude(pk=self.pk or 0)
+            
+            max_serial = 0
+            prefix = f"YCS-{state_code}-{city_prefix}-"
+            
+            for reg in existing_regs:
+                if reg.registration_number and reg.registration_number.startswith(prefix):
+                    try:
+                        serial_part = reg.registration_number.split('-')[-1]
+                        serial_num = int(serial_part)
+                        max_serial = max(max_serial, serial_num)
+                    except (ValueError, IndexError):
+                        continue
+            
+            new_serial = max_serial + 1
+            return f"YCS-{state_code}-{city_prefix}-{new_serial:04d}"
 
 class EventImage(models.Model):
     event = models.ForeignKey(Event, related_name='images', on_delete=models.CASCADE)
