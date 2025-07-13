@@ -144,7 +144,7 @@ class EventRegistration(models.Model):
     email = models.EmailField(verbose_name="ईमेल")
     date_of_birth = models.DateField(verbose_name="जन्म तिथि")
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name="लिंग")
-    
+    models.
     # Transport Information
     TRANSPORT_CHOICES = [
         ('car', 'कार'),
