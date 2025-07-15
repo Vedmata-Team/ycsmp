@@ -77,7 +77,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('transport_mode', 'vehicle_number')
         }),
         ('अन्य जानकारी', {
-            'fields': ('previous_shivir', 'arrival_date', 'departure_date', 'interested_in_volunteering', 'volunteering_details', 'selected_campaigns')
+            'fields': ('previous_shivir', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'selected_campaigns')
         }),
         ('अप्रूवल स्थिति', {
             'fields': ('approval_status', 'level1_approver', 'level1_approved_at', 'final_approver', 'final_approved_at', 'rejection_reason', 'email_sent')
