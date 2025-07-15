@@ -35,11 +35,7 @@
                                 <div class="col-md-6">
                                     <div class="info-item">
                                         <i class="bi bi-calendar3"></i>
-                                        <span>{{ event.event_date|date:"d M Y, l" }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="bi bi-clock"></i>
-                                        <span>{{ event.event_date|time:"H:i" }} बजे</span>
+                                        <span>26 से 28 अक्टूबर 2025</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -298,15 +294,6 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            {{ form.departure_date.label_tag }}
-                                            {{ form.departure_date }}
-                                            {% if form.departure_date.errors %}
-                                                <div class="invalid-feedback">{{ form.departure_date.errors.0 }}</div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <div class="row">
@@ -343,7 +330,7 @@
                                         <div class="form-group mb-3">
                                             <label class="form-label">अभियान चयन करें <span class="text-danger">*</span></label>
                                             <div class="alert alert-info mb-3">
-                                                <small><i class="bi bi-info-circle"></i> युवा जोड़ो अभियान अनिवार्य है। कृपया कम से कम एक और अभियान चुनें।</small>
+                                                <small><i class="bi bi-info-circle"></i> युवा जोड़ो अभियान अनिवार्य है। इसके अतिरिक्त किसी एक और अभियान को चुनें जिसमें आपकी अभिरुचि है।</small>
                                             </div>
                                             <div class="campaign-checkboxes">
                                                 {% for choice in form.campaigns %}

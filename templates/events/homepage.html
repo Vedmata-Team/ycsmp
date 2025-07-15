@@ -6,6 +6,8 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/list.css' %}">
     <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+    <!-- Add this in the <head> section of base.html -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         .hero-section::before {
             content: '';
@@ -207,6 +209,31 @@
     </div>
 </section>
 
+<!-- Discipline Section -->
+<section class="discipline-section mt-4 mb-4">
+    <div class="container">
+        <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="bi bi-shield-check me-2"></i>शिविर संचालन की सुव्यवस्था हेतु अनुशासन</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-person-badge-fill text-primary me-2"></i> शिविर में आरम्भ से अंत तक फोटोयुक्त परिचय पत्र अवश्य लगाकर रखें। यह स्वागत काउंटर से प्राप्त करें।</li>
+                    <li class="mb-2"><i class="bi bi-shirt text-success me-2"></i> शिविर परिसर में मिशन के निर्धारित गणवेश या शालीन वस्त्र पहनें। बरमूड़ा, शॉर्ट्स, नाइट ड्रेस आदि में आवास से बाहर न निकलें।</li>
+                    <li class="mb-2"><i class="bi bi-clock-history text-warning me-2"></i> प्रतिदिन की दिनचर्या का पालन करें – समय पर शयन करें, जागें व भोजन करें।</li>
+                    <li class="mb-2"><i class="bi bi-list-ol text-info me-2"></i> प्रसाधन, भोजनालय, स्टॉल आदि में अनुशासन व पंक्तिबद्धता बनाए रखें।</li>
+                    <li class="mb-2"><i class="bi bi-people-fill text-danger me-2"></i> धक्का-मुक्की न करें। बहिनों को प्राथमिकता दें।</li>
+                    <li class="mb-2"><i class="bi bi-phone-vibrate text-secondary me-2"></i> सत्रों के दौरान मोबाइल साइलेंट या बंद रखें। मध्य में उठकर फोन पर बात करना अशिष्टता मानी जाएगी।</li>
+                    <li class="mb-2"><i class="bi bi-journal-check text-primary me-2"></i> सभी सत्रों में अनिवार्य रूप से उपस्थित रहें व उद्बोधनों/निर्देशों को ध्यान से सुनें।</li>
+                    <li class="mb-2"><i class="bi bi-house-door-fill text-success me-2"></i> केवल आवंटित आवास में ही रहें। अन्यत्र न शिफ्ट हों।</li>
+                    <li class="mb-2"><i class="bi bi-person-lines-fill text-info me-2"></i> किसी असुविधा पर मुख्य कार्यालय से संपर्क करें।</li>
+                    <li class="mb-2"><i class="bi bi-geo-alt-fill text-warning me-2"></i> शिविर परिसर से बाहर बिना अनुमति शहर में न जाएं। आवश्यकता होने पर जोन प्रभारी या मुख्य कार्यालय को सूचित करें।</li>
+                    <li class="mb-2"><i class="bi bi-trash-fill text-danger me-2"></i> अपने आस-पास सफाई रखें। कचरा केवल निर्धारित स्थान पर ही डालें।</li>
+                    <li class="mb-2"><i class="bi bi-shield-lock-fill text-secondary me-2"></i> अपने सामान की सुरक्षा स्वयं करें। मोबाइल, पर्स, नगदी आदि सदा साथ रखें। विशेषकर चार्जिंग के समय सूचना देकर ही छोड़ें।</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> किसी भी अपरिचित या संदिग्ध व्यक्ति/गतिविधि की सूचना तुरंत सुरक्षा नियंत्रण कक्ष को दें।</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
 <!-- Quick Actions Section -->
 <section class="quick-actions">
     <div class="container">
@@ -276,9 +303,11 @@
                             <a href="{% url 'events:detail' event.pk %}" class="btn btn-sm btn-outline-primary">
                                 विवरण देखें
                             </a>
-                            <a href="{% url 'events:register_event' event.pk %}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-person-plus me-1"></i>पंजीकरण
-                            </a>
+                            {% if event.pk %}
+                                <a href="{% url 'events:register_event' event.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-person-plus me-1"></i>पंजीकरण
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -288,5 +317,6 @@
     </div>
 </section>
 {% endif %}
+
 
 {% endblock %}

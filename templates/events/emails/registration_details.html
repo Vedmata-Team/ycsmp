@@ -85,11 +85,7 @@
                     </tr>
                     <tr>
                         <th>आगमन तिथि</th>
-                        <td>{{ registration.arrival_date|date:"d F Y" }}</td>
-                    </tr>
-                    <tr>
-                        <th>प्रस्थान तिथि</th>
-                        <td>{{ registration.departure_date|date:"d F Y" }}</td>
+                        <td>{{ registration.get_arrival_date_display }}</td>
                     </tr>
                     {% if registration.bringing_vehicle %}
                     <tr>

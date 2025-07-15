@@ -176,7 +176,7 @@
                                 विवरण देखें
                             </a>
                             
-                            {% if event.available_spots > 0 %}
+                            {% if event.available_spots > 0 and event.pk %}
                                 <a href="{% url 'events:register_event' event.pk %}" class="btn btn-register">
                                     <i class="bi bi-person-plus-fill"></i>
                                     पंजीकरण

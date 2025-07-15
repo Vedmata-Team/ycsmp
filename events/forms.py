@@ -48,7 +48,7 @@ class EventRegistrationForm(forms.ModelForm):
             'full_name', 'phone', 'email', 'date_of_birth', 'gender',
             'transport_mode', 'vehicle_number', 'previous_shivir',
             'education', 'occupation', 'village_taluka', 'country', 'state', 'city',
-            'arrival_date', 'departure_date',
+            'arrival_date',
             'interested_in_volunteering', 'volunteering_details'
         ]
         
@@ -68,8 +68,7 @@ class EventRegistrationForm(forms.ModelForm):
             'state': forms.Select(attrs={'class': 'form-select'}),
             'city': forms.Select(attrs={'class': 'form-select'}),
 
-            'arrival_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'departure_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'arrival_date': forms.Select(attrs={'class': 'form-select'}),
             'interested_in_volunteering': forms.RadioSelect(choices=[(True, 'हाँ'), (False, 'नहीं')], attrs={'class': 'form-check-input'}),
             'volunteering_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'आप कैसे योगदान देना चाहते हैं?'}),
         }

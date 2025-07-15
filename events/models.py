@@ -175,8 +175,12 @@ class EventRegistration(models.Model):
     city = models.CharField(max_length=64, verbose_name="जनपद/जिला")
     
     # Other Details
-    arrival_date = models.DateField(verbose_name="आगमन तिथि")
-    departure_date = models.DateField(verbose_name="प्रस्थान तिथि")
+    ARRIVAL_DATE_CHOICES = [
+        ('2025-10-25', '25 अक्टूबर 2025'),
+        ('2025-10-26', '26 अक्टूबर 2025'),
+        ('2025-10-27', '27 अक्टूबर 2025'),
+    ]
+    arrival_date = models.CharField(max_length=10, choices=ARRIVAL_DATE_CHOICES, verbose_name="आगमन तिथि")
     
     # Volunteering
     interested_in_volunteering = models.BooleanField(default=False, verbose_name="क्या आप किसी विशेष टीम/सेवा में योगदान देना चाहते हैं?")
