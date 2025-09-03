@@ -1,0 +1,20 @@
+[Unit]
+Description=ycsmp.in gunicorn daemon
+After=network.target
+
+[Service]
+Type=notify
+User=divy
+Group=www-data
+RuntimeDirectory=gunicorn
+WorkingDirectory=/home/divy/myproject/ycsmp
+Environment="PATH=/home/divy/myproject/ycsmp/venv/bin"
+ExecStart=/home/divy/myproject/ycsmp/venv/bin/gunicorn \
+          --config /home/divy/myproject/ycsmp/gunicorn.conf.py \
+          ycs_mp.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
