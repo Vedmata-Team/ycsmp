@@ -1,5 +1,6 @@
 [Unit]
 Description=ycsmp.in gunicorn daemon
+Requires=network.target
 After=network.target
 
 [Service]
@@ -13,8 +14,12 @@ ExecStart=/home/divy/myproject/ycsmp/venv/bin/gunicorn \
           --config /home/divy/myproject/ycsmp/gunicorn.conf.py \
           ycs_mp.wsgi:application
 ExecReload=/bin/kill -s HUP $MAINPID
-Restart=on-failure
+Restart=always
 RestartSec=3
+StartLimitInterval=60
+StartLimitBurst=3
+KillMode=mixed
+TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
