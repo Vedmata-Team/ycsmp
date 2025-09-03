@@ -26,18 +26,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-$rz(-!wtki8r@*rvysa_p+iai3ng3)5*$ksi_8z^^@iy5__d1m')
+SECRET_KEY = 'django-insecure-$rz(-!wtki8r@*rvysa_p+iai3ng3)5*$ksi_8z^^@iy5__d1m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', default=True)
+DEBUG = False
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
+ALLOWED_HOSTS = [
     "ycsmp.in",
     "www.ycsmp.in",
     "127.0.0.1",
     "localhost",
     "testserver"
-])
+]
 
 
 
@@ -163,36 +163,25 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 
 # EMAIL Configuration
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
-    EMAIL_PORT = env.int('EMAIL_PORT', default=587)
-    EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-    EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
-    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
-    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-    EMAIL_TIMEOUT = 10
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'youthcell@awgp.org'
+EMAIL_HOST_PASSWORD = 'PpgPvm@24'
+DEFAULT_FROM_EMAIL = 'youthcell@awgp.org'
+EMAIL_TIMEOUT = 10
 
-# Cache Configuration - Redis for production, local memory for development
-if env('REDIS_URL', default=None):
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': env('REDIS_URL'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            }
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://localhost:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake',
-        }
-    }
+}
 
 # Session Configuration
 SESSION_COOKIE_AGE = 3600
