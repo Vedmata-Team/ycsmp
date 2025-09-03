@@ -93,13 +93,14 @@ WSGI_APPLICATION = 'ycs_mp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='5432'),
+        'NAME': 'yscmp',
+        'USER': 'ycsmp',
+        'PASSWORD': 'Ycsmp123#',
+        'HOST': '69.62.78.57',
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
