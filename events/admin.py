@@ -56,8 +56,8 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('registration_number_with_email_button', 'full_name', 'event', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
-    list_filter = ('event', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
+    list_display = ('registration_number_with_email_button', 'full_name', 'event', 'registration_type', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
+    list_filter = ('event', 'registration_type', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
     actions = ['approve_level1', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date')
@@ -65,7 +65,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('पंजीकरण जानकारी', {
-            'fields': ('registration_number', 'event', 'registration_date')
+            'fields': ('registration_number', 'event', 'registration_type', 'registration_date')
         }),
         ('व्यक्तिगत जानकारी', {
             'fields': ('full_name', 'phone', 'email', 'date_of_birth', 'gender', 'education', 'occupation', 'special_skills')

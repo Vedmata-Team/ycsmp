@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}429 - बहुत अधिक अनुरोध{% endblock %}
+
+{% block extra_css %}
+<style>
+.error-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    text-align: center;
+    padding: 40px 0;
+}
+
+.error-content {
+    max-width: 600px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    animation: flash 2s infinite;
+}
+
+.error-title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.error-message {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.action-btn {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+@keyframes flash {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.5; }
+}
+
+@media (max-width: 768px) {
+    .error-code { font-size: 5rem; }
+    .error-title { font-size: 1.5rem; }
+    .error-content { padding: 30px 20px; }
+    .quick-actions { flex-direction: column; align-items: center; }
+    .action-btn { width: 200px; justify-content: center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="container">
+        <div class="error-content mx-auto">
+            <div class="error-code">429</div>
+            <h1 class="error-title">बहुत अधिक अनुरोध</h1>
+            <p class="error-message">
+                आपने बहुत तेज़ी से अनुरोध भेजे हैं। कृपया कुछ समय प्रतीक्षा करें और फिर पुनः प्रयास करें।
+            </p>
+            
+            <div class="quick-actions">
+                <a href="javascript:setTimeout(() => location.reload(), 5000)" class="action-btn">
+                    <i class="bi bi-hourglass-split"></i>
+                    5 सेकंड प्रतीक्षा करें
+                </a>
+                <a href="{% url 'events:homepage' %}" class="action-btn">
+                    <i class="bi bi-house-door"></i>
+                    मुख्य पृष्ठ
+                </a>
+                <a href="tel:+919258360962" class="action-btn">
+                    <i class="bi bi-telephone"></i>
+                    संपर्क करें
+                </a>
+                <a href="javascript:history.back()" class="action-btn">
+                    <i class="bi bi-arrow-left"></i>
+                    वापस जाएं
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

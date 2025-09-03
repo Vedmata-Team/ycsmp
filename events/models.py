@@ -88,6 +88,11 @@ class Event(models.Model):
         return 0
 
 class EventRegistration(models.Model):
+    REGISTRATION_TYPE_CHOICES = [
+        ('participant', 'प्रतिभागी'),
+        ('volunteer', 'समयदानी कार्यकर्ता'),
+    ]
+    
     GENDER_CHOICES = [
         ('M', 'पुरुष'),
         ('F', 'महिला'),
@@ -136,6 +141,7 @@ class EventRegistration(models.Model):
     ]
 
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
+    registration_type = models.CharField(max_length=20, choices=REGISTRATION_TYPE_CHOICES, default='participant', verbose_name="पंजीकरण प्रकार")
     registration_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
     
     # Personal Information
@@ -178,7 +184,6 @@ class EventRegistration(models.Model):
     ARRIVAL_DATE_CHOICES = [
         ('2025-10-25', '25 अक्टूबर 2025'),
         ('2025-10-26', '26 अक्टूबर 2025'),
-        ('2025-10-27', '27 अक्टूबर 2025'),
     ]
     arrival_date = models.CharField(max_length=10, choices=ARRIVAL_DATE_CHOICES, verbose_name="आगमन तिथि")
     
@@ -256,11 +261,7 @@ class EventRegistration(models.Model):
         
         super().save(*args, **kwargs)
         
-        if is_newly_approved and not self.email_sent:
-            from .email_utils import send_registration_approval_email
-            if send_registration_approval_email(self):
-                self.email_sent = True
-                super().save(update_fields=['email_sent'])
+        # Email sending removed for testing - can be re-enabled in production
     
     def get_approver_for_registration(self):
         """Get appropriate approver based on state"""
@@ -280,21 +281,25 @@ class EventRegistration(models.Model):
             ).first()
     
     def generate_registration_number(self):
-        """Generate registration number: YCS-StateCode-CityPrefix-SerialNumber"""
+        """Generate registration number: YCS/YCSV-StateCode-CityPrefix-SerialNumber"""
         from django.db import transaction
         
         state_code = self.state_code or 'XX'
         city_prefix = self.city[:3].upper() if self.city else 'XXX'
         
+        # Different prefix for volunteers
+        base_prefix = 'YCSV' if self.registration_type == 'volunteer' else 'YCS'
+        
         with transaction.atomic():
-            # Get the highest existing serial number for this city
+            # Get the highest existing serial number for this city and registration type
             existing_regs = EventRegistration.objects.filter(
                 city=self.city,
+                registration_type=self.registration_type,
                 registration_number__isnull=False
             ).exclude(pk=self.pk or 0)
             
             max_serial = 0
-            prefix = f"YCS-{state_code}-{city_prefix}-"
+            prefix = f"{base_prefix}-{state_code}-{city_prefix}-"
             
             for reg in existing_regs:
                 if reg.registration_number and reg.registration_number.startswith(prefix):
@@ -306,7 +311,7 @@ class EventRegistration(models.Model):
                         continue
             
             new_serial = max_serial + 1
-            return f"YCS-{state_code}-{city_prefix}-{new_serial:04d}"
+            return f"{base_prefix}-{state_code}-{city_prefix}-{new_serial:04d}"
 
 class EventImage(models.Model):
     event = models.ForeignKey(Event, related_name='images', on_delete=models.CASCADE)
@@ -326,23 +331,3 @@ class EventImage(models.Model):
     def __str__(self):
         return f"{self.event.title} - Image"
 
-class ApprovalUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="यूजर")
-    state_code = models.CharField(max_length=10, verbose_name="राज्य कोड")
-    is_state_approver = models.BooleanField(default=False, verbose_name="राज्य अप्रूवर")
-    is_district_approver = models.BooleanField(default=False, verbose_name="जिला अप्रूवर")
-    districts = models.JSONField(default=list, blank=True, verbose_name="जिले")
-    
-    class Meta:
-        verbose_name = "अप्रूवल यूजर"
-        verbose_name_plural = "अप्रूवल यूजर"
-    
-    def __str__(self):
-        return f"{self.user.username} - {self.state_code}"
-    
-    def get_assignment_display(self):
-        if self.state_code == 'MP' and self.is_district_approver:
-            return f"MP जिले: {', '.join(self.districts) if self.districts else 'कोई नहीं'}"
-        elif self.is_state_approver:
-            return f"राज्य: {self.state_code}"
-        return "कोई असाइनमेंट नहीं"

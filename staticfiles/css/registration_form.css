@@ -1,7 +1,6 @@
 .registration-form-section {
     background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%);
-    min-height: 80vh;
-    padding: 5rem 0;
+    padding: 2rem 0;
 }
 
 .form-container {

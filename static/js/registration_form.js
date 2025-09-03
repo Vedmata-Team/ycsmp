@@ -108,6 +108,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const step = steps[index];
         let valid = true;
         
+        // Special validation for step 1 - state and district required
+        if (index === 0) {
+            const stateField = step.querySelector('select[name="state"]');
+            const districtField = step.querySelector('input[name="village_taluka"]');
+            
+            if (!stateField || !stateField.value.trim()) {
+                if (stateField) stateField.classList.add('is-invalid');
+                alert('कृपया राज्य का चयन करें।');
+                valid = false;
+            }
+            
+            if (!districtField || !districtField.value.trim()) {
+                if (districtField) districtField.classList.add('is-invalid');
+                alert('कृपया जिला/तालुका भरें।');
+                valid = false;
+            }
+        }
+        
         // Special validation for campaigns in step 2
         if (index === 1) {
             const checkedCampaigns = step.querySelectorAll('input[name="campaigns"]:checked');
@@ -210,13 +228,120 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     });
 
-    // Remove invalid class on input
-    form.querySelectorAll('input, select, textarea').forEach(input => {
-        input.addEventListener('input', () => input.classList.remove('is-invalid'));
-    });
+    // Real-time validation
+    function setupRealTimeValidation() {
+        // Phone validation
+        const phoneInput = form.querySelector('input[name="phone"]');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                const value = this.value;
+                const phonePattern = /^[0-9]{10}$/;
+                
+                if (value && !phonePattern.test(value)) {
+                    this.classList.add('is-invalid');
+                    showFieldError(this, 'कृपया 10 अंकों का मोबाइल नंबर दर्ज करें');
+                } else {
+                    this.classList.remove('is-invalid');
+                    hideFieldError(this);
+                }
+            });
+        }
+        
+        // Email validation
+        const emailInput = form.querySelector('input[name="email"]');
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                const value = this.value;
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (value && !emailPattern.test(value)) {
+                    this.classList.add('is-invalid');
+                    showFieldError(this, 'कृपया सही ईमेल पता दर्ज करें');
+                } else {
+                    this.classList.remove('is-invalid');
+                    hideFieldError(this);
+                }
+            });
+        }
+        
+        // Name validation
+        const nameInput = form.querySelector('input[name="full_name"]');
+        if (nameInput) {
+            nameInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                
+                if (value && value.length < 2) {
+                    this.classList.add('is-invalid');
+                    showFieldError(this, 'नाम कम से कम 2 अक्षर का होना चाहिए');
+                } else {
+                    this.classList.remove('is-invalid');
+                    hideFieldError(this);
+                }
+            });
+        }
+        
+        // Date of birth validation
+        const dobInput = form.querySelector('input[name="date_of_birth"]');
+        if (dobInput) {
+            dobInput.addEventListener('change', function() {
+                const value = this.value;
+                if (value) {
+                    const birthDate = new Date(value);
+                    const today = new Date();
+                    const age = today.getFullYear() - birthDate.getFullYear();
+                    
+                    if (age < 16 || age > 100) {
+                        this.classList.add('is-invalid');
+                        showFieldError(this, 'आयु 16 से 100 वर्ष के बीच होनी चाहिए');
+                    } else {
+                        this.classList.remove('is-invalid');
+                        hideFieldError(this);
+                    }
+                }
+            });
+        }
+        
+        // Required field validation
+        form.querySelectorAll('input[required], select[required], textarea[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.classList.add('is-invalid');
+                    showFieldError(this, 'यह फील्ड आवश्यक है');
+                } else {
+                    this.classList.remove('is-invalid');
+                    hideFieldError(this);
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                    hideFieldError(this);
+                }
+            });
+        });
+    }
+    
+    function showFieldError(field, message) {
+        let errorDiv = field.parentNode.querySelector('.field-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error text-danger small mt-1';
+            field.parentNode.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+    }
+    
+    function hideFieldError(field) {
+        const errorDiv = field.parentNode.querySelector('.field-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
 
     // Initialize
     setupConditionalFields();
+    setupRealTimeValidation();
     showStep(0);
     
     // Backup submit handler
@@ -235,7 +360,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Registration type modal functions
+function continueVolunteerRegistration() {
+    const modal = document.getElementById('registrationTypeModal');
+    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+    bootstrapModal.hide();
+}
+
+function goToRegularRegistration() {
+    // Get current URL and replace volunteer-register with register
+    const currentUrl = window.location.href;
+    let regularUrl;
+    
+    if (currentUrl.includes('/volunteer-register/')) {
+        regularUrl = currentUrl.replace('/volunteer-register/', '/register/');
+    } else if (currentUrl.includes('/volunteer-register')) {
+        regularUrl = currentUrl.replace('/volunteer-register', '/register');
+    } else {
+        // Fallback to events list
+        regularUrl = '/events/';
+    }
+    
+    window.location.href = regularUrl;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Show registration type modal on page load for volunteer registration
+    const isVolunteerPage = window.location.href.includes('volunteer-register');
+    if (isVolunteerPage) {
+        const modal = new bootstrap.Modal(document.getElementById('registrationTypeModal'));
+        modal.show();
+    }
+    
     function toggleVolunteeringDetails() {
         const yesRadio = document.querySelector('input[name="interested_in_volunteering"][value="True"]');
         const detailsGroup = document.getElementById('volunteering-details-group');

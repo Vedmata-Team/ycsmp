@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पंजीकरण पुष्टि</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 15px; text-align: center; font-size: 12px; color: #666; }
+        .highlight { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>युवा चिंतन शिविर भोपाल</h2>
+            <p>पंजीकरण पुष्टि</p>
+        </div>
+        
+        <div class="content">
+            <p>प्रिय {{ registration.full_name }},</p>
+            
+            <p>आपका पंजीकरण सफलतापूर्वक प्राप्त हो गया है। आपका आवेदन अब समीक्षा के लिए भेजा गया है।</p>
+            
+            <div class="highlight">
+                <strong>पंजीकरण विवरण:</strong><br>
+                नाम: {{ registration.full_name }}<br>
+                मोबाइल: {{ registration.phone }}<br>
+                ईमेल: {{ registration.email }}<br>
+                {% if registration.event %}कार्यक्रम: {{ registration.event.title }}<br>{% endif %}
+                पंजीकरण प्रकार: {% if registration.registration_type == 'volunteer' %}समयदानी कार्यकर्ता{% else %}प्रतिभागी{% endif %}<br>
+                पंजीकरण दिनांक: {{ registration.registration_date|date:"d M Y" }}
+            </div>
+            
+            <p><strong>अगले चरण:</strong></p>
+            <ul>
+                <li>आपका आवेदन जिला/राज्य स्तर पर समीक्षा की जाएगी</li>
+                <li>अप्रूवल के बाद आपको पंजीकरण नंबर मिलेगा</li>
+                <li>आप अपनी स्थिति जांच सकते हैं: <a href="http://ycsmp.in/check-status/">यहाँ क्लिक करें</a></li>
+            </ul>
+            
+            <p>किसी भी सहायता के लिए संपर्क करें: <strong>9258360962</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 युवा चिंतन शिविर भोपाल | अखिल विश्व गायत्री परिवार</p>
+        </div>
+    </div>
+</body>
+</html>

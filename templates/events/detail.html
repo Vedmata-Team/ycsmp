@@ -290,11 +290,26 @@
                         <!-- Registration Button -->
                         <div class="registration-actions">
                             {% if registration_open and spots_available and event and event.pk %}
-                                <a href="{% url 'events:register_event' event.pk %}" 
-                                   class="btn btn-register-now">
-                                    <i class="bi bi-person-plus-fill"></i>
-                                    अभी पंजीकरण करें
-                                </a>
+                                <div class="dropdown w-100">
+                                    <button class="btn btn-register-now dropdown-toggle w-100 mb-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                        पंजीकरण करें
+                                    </button>
+                                    <ul class="dropdown-menu w-100">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:register_event' event.pk %}">
+                                                <i class="bi bi-person-plus me-2"></i>
+                                                प्रतिभागी पंजीकरण
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:volunteer_register_event' event.pk %}">
+                                                <i class="bi bi-hand-thumbs-up me-2"></i>
+                                                समयदानी कार्यकर्ता पंजीकरण
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                                 <p class="registration-note">
                                     <i class="bi bi-info-circle"></i>
                                     तुरंत पंजीकरण करें, सीमित स्थान!

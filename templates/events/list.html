@@ -177,10 +177,26 @@
                             </a>
                             
                             {% if event.available_spots > 0 and event.pk %}
-                                <a href="{% url 'events:register_event' event.pk %}" class="btn btn-register">
-                                    <i class="bi bi-person-plus-fill"></i>
-                                    पंजीकरण
-                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-register dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                        पंजीकरण करें
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:register_event' event.pk %}">
+                                                <i class="bi bi-person-plus me-2"></i>
+                                                प्रतिभागी पंजीकरण
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:volunteer_register_event' event.pk %}">
+                                                <i class="bi bi-hand-thumbs-up me-2"></i>
+                                                समयदानी कार्यकर्ता पंजीकरण
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             {% else %}
                                 <button class="btn btn-register disabled" disabled>
                                     <i class="bi bi-x-circle-fill"></i>

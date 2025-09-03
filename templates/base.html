@@ -115,10 +115,24 @@
                                 </ul>
                             </li>
                             {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-register-nav ms-2" href="{% url 'events:register' %}">
-                                    <i class="bi bi-person-plus-fill me-1"></i>पंजीकरण
+                            <li class="nav-item dropdown">
+                                <a class="nav-link btn btn-register-nav dropdown-toggle ms-2" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-plus-fill me-1"></i>पंजीकरण करें
                                 </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'events:register' %}">
+                                            <i class="bi bi-person-plus me-2"></i>
+                                            प्रतिभागी पंजीकरण
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'events:volunteer_register' %}">
+                                            <i class="bi bi-hand-thumbs-up me-2"></i>
+                                            समयदानी कार्यकर्ता पंजीकरण
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </div>
@@ -177,19 +191,7 @@
                                 
                                 <!-- Social Media Links -->
                                 <div class="social-links">
-                                    <a href="#" class="social-link" title="Facebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </a>
-                                    <a href="#" class="social-link" title="Twitter">
-                                        <i class="fab fa-twitter"></i>
-                                    </a>
-                                    <a href="#" class="social-link" title="Instagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </a>
-                                    <a href="#" class="social-link" title="YouTube">
-                                        <i class="fab fa-youtube"></i>
-                                    </a>
-                                    <a href="https://wa.me/919415156122" class="social-link" title="WhatsApp">
+                                    <a href="https://wa.me/919258360962" class="social-link" title="WhatsApp">
                                         <i class="fab fa-whatsapp"></i>
                                     </a>
                                 </div>
@@ -240,9 +242,7 @@
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <p class="copyright">
-                                    &copy; 2025 युवा चिंतन शिविर भोपाल (Youth Thinking Camp Bhopal).  
-                                    <br>
-                                    Designed and developed by <a href="https://vmdonline.in/" target="_blank"><strong>Vedmata Web Designing</strong></a>. All rights reserved.
+                                    &copy; 2025 युवा चिंतन शिविर भोपाल (Youth Thinking Camp Bhopal). All rights reserved.
                                 </p>
 
 
@@ -273,6 +273,37 @@
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/animations.js' %}"></script>
+    
+    <!-- Security Script -->
+    <script>
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.key === 's')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Disable drag and drop
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable text selection
+        document.onselectstart = function() {
+            return false;
+        };
+    </script>
     
     <!-- AOS Initialization -->
     <script>

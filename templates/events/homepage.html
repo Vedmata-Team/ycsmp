@@ -122,7 +122,338 @@
             font-size: 0.9rem;
             margin-bottom: 10px;
         }
+        
+        /* Dropdown z-index fixes - Very high values */
+        .dropdown {
+            position: relative;
+            z-index: 9999;
+        }
+        
+        .dropdown-menu {
+            z-index: 10000 !important;
+            position: absolute !important;
+        }
+        
+        .dropdown-toggle {
+            z-index: 9998;
+        }
+        
+        /* Section z-index management - Lower values */
+        .quick-actions {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .discipline-section {
+            position: relative;
+            z-index: 1 !important;
+        }
+        
+        .discipline-section .card {
+            position: relative;
+            z-index: 1 !important;
+        }
+        
+        .featured-events {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .event-card {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .event-card .dropdown {
+            z-index: 10001;
+        }
+        
+        .event-card .dropdown-menu {
+            z-index: 10002 !important;
+        }
+        
+        .action-btn {
+            position: relative;
+            z-index: 9997;
+        }
+        
+        /* Quick actions dropdown specific */
+        .quick-actions .dropdown {
+            z-index: 10003 !important;
+        }
+        
+        .quick-actions .dropdown-menu {
+            z-index: 10004 !important;
+        }
+        
+        .quick-actions .dropdown-toggle {
+            z-index: 10002 !important;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            /* Hero section mobile */
+            .hero-section {
+                padding: 30px 0;
+            }
+            
+            .hero-section h1 {
+                font-size: 1.8rem !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .hero-section .lead {
+                font-size: 1rem;
+                margin-bottom: 20px !important;
+            }
+            
+            .hero-section .event-info {
+                padding: 15px !important;
+                margin-bottom: 20px !important;
+                font-size: 0.85rem;
+            }
+            
+            .hero-section .event-info div {
+                margin-bottom: 8px !important;
+            }
+            
+            .hero-section .d-flex {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            .hero-section .btn {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+            
+            .hero-section .map-container {
+                margin-top: 20px;
+            }
+            
+            .hero-section .map-container iframe {
+                height: 250px !important;
+            }
+            
+            /* Stats section mobile layout - 2x2 grid */
+            .stats-section .row {
+                --bs-gutter-x: 0.5rem;
+            }
+            
+            .stats-section .col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+                padding: 0.25rem;
+            }
+            
+            .stats-card {
+                padding: 15px;
+                margin-bottom: 0.5rem;
+            }
+            
+            .stats-number {
+                font-size: 1.8rem;
+            }
+            
+            .stats-card h6 {
+                font-size: 0.85rem;
+            }
+            
+            /* Quick Actions section mobile layout - 2x2 grid */
+            .quick-actions .row {
+                --bs-gutter-x: 0.5rem;
+            }
+            
+            .quick-actions .col-lg-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+                padding: 0.25rem;
+            }
+            
+            .action-btn {
+                padding: 15px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .action-btn i {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+            
+            .action-btn h6 {
+                font-size: 0.85rem;
+                margin-bottom: 5px;
+            }
+            
+            .action-btn p {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            /* Hero section extra small screens */
+            .hero-section {
+                padding: 20px 0;
+            }
+            
+            .hero-section h1 {
+                font-size: 1.5rem !important;
+                line-height: 1.3;
+            }
+            
+            .hero-section .lead {
+                font-size: 0.9rem;
+            }
+            
+            .hero-section .event-info {
+                padding: 12px !important;
+                font-size: 0.8rem;
+            }
+            
+            .hero-section .btn {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+            
+            .hero-section .map-container iframe {
+                height: 200px !important;
+            }
+            
+            /* Ensure 2x2 layout on very small screens */
+            .stats-section .col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+            
+            .quick-actions .col-lg-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+        
+        /* Registration Split Section Styles */
+        .registration-split-container {
+            display: flex;
+            height: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .registration-half {
+            flex: 1;
+            padding: 20px 15px;
+            text-decoration: none;
+            color: #333;
+            text-align: center;
+        }
+        
+        /* Security Styles */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            pointer-events: none;
+        }
+        
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .registration-half {
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .registration-half:hover {
+            background: #f8f9fa;
+            color: #667eea;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        .registration-half.right-half:hover {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .registration-half i {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        
+        .registration-half.right-half i {
+            color: #2e7d32;
+        }
+        
+        .registration-half h6 {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .registration-half p {
+            font-size: 0.8rem;
+        }
+        
+        .vertical-divider {
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, #ddd 20%, #ddd 80%, transparent);
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
     </style>
+    <script>
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.key === 's')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Disable drag and drop
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable text selection
+        document.onselectstart = function() {
+            return false;
+        };
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -154,9 +485,25 @@
                     </a>
                 </div>
                 <div class="d-flex gap-3 flex-wrap">
-                    <a href="{% url 'events:register' %}" class="btn btn-light btn-lg">
-                        <i class="bi bi-person-plus-fill me-2"></i>अभी पंजीकरण करें
-                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-light btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-plus-fill me-2"></i>अभी पंजीकरण करें
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'events:register' %}">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    प्रतिभागी पंजीकरण
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'events:volunteer_register' %}">
+                                    <i class="bi bi-hand-thumbs-up me-2"></i>
+                                    समयदानी कार्यकर्ता पंजीकरण
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                     <a href="{% url 'events:list' %}" class="btn btn-outline-light btn-lg">
                         <i class="bi bi-calendar-event me-2"></i>सभी कार्यक्रम देखें
                     </a>
@@ -172,6 +519,80 @@
                             allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<!-- Quick Actions Section -->
+<section class="quick-actions">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">त्वरित कार्य</h2>
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="registration-split-container">
+                    <a href="{% url 'events:register' %}" class="registration-half left-half">
+                        <i class="bi bi-person-plus"></i>
+                        <h6>प्रतिभागी</h6>
+                        <p class="mb-0 small">पंजीकरण</p>
+                    </a>
+                    <div class="vertical-divider"></div>
+                    <a href="{% url 'events:volunteer_register' %}" class="registration-half right-half">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                        <h6>समयदानी</h6>
+                        <p class="mb-0 small">पंजीकरण</p>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <a href="{% url 'events:check_status' %}" class="action-btn">
+                    <i class="bi bi-search"></i>
+                    <h6>स्थिति जांचें</h6>
+                    <p class="mb-0 small">अपने पंजीकरण की स्थिति देखें</p>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <a href="{% url 'events:list' %}" class="action-btn">
+                    <i class="bi bi-calendar-event"></i>
+                    <h6>सभी कार्यक्रम</h6>
+                    <p class="mb-0 small">आगामी कार्यक्रम देखें</p>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <a href="tel:+919258360962" class="action-btn">
+                    <i class="bi bi-telephone-fill"></i>
+                    <h6>संपर्क करें</h6>
+                    <p class="mb-0 small">सहायता के लिए कॉल करें</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Discipline Section -->
+<section class="discipline-section mt-4 mb-4">
+    <div class="container">
+        <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="bi bi-shield-check me-2"></i>शिविर संचालन की सुव्यवस्था हेतु अनुशासन</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-person-badge-fill text-primary me-2"></i> शिविर में आरम्भ से अंत तक फोटोयुक्त परिचय पत्र अवश्य लगाकर रखें। यह स्वागत काउंटर से प्राप्त करें।</li>
+                    <li class="mb-2"><i class="bi bi-shirt text-success me-2"></i> शिविर परिसर में मिशन के निर्धारित गणवेश या शालीन वस्त्र पहनें। बरमूड़ा, शॉर्ट्स, नाइट ड्रेस आदि में आवास से बाहर न निकलें।</li>
+                    <li class="mb-2"><i class="bi bi-clock-history text-warning me-2"></i> प्रतिदिन की दिनचर्या का पालन करें – समय पर शयन करें, जागें व भोजन करें।</li>
+                    <li class="mb-2"><i class="bi bi-list-ol text-info me-2"></i> प्रसाधन, भोजनालय, स्टॉल आदि में अनुशासन व पंक्तिबद्धता बनाए रखें।</li>
+                    <li class="mb-2"><i class="bi bi-people-fill text-danger me-2"></i> धक्का-मुक्की न करें। बहिनों को प्राथमिकता दें।</li>
+                    <li class="mb-2"><i class="bi bi-phone-vibrate text-secondary me-2"></i> सत्रों के दौरान मोबाइल साइलेंट या बंद रखें। मध्य में उठकर फोन पर बात करना अशिष्टता मानी जाएगी।</li>
+                    <li class="mb-2"><i class="bi bi-journal-check text-primary me-2"></i> सभी सत्रों में अनिवार्य रूप से उपस्थित रहें व उद्बोधनों/निर्देशों को ध्यान से सुनें।</li>
+                    <li class="mb-2"><i class="bi bi-house-door-fill text-success me-2"></i> केवल आवंटित आवास में ही रहें। अन्यत्र न शिफ्ट हों।</li>
+                    <li class="mb-2"><i class="bi bi-person-lines-fill text-info me-2"></i> किसी असुविधा पर मुख्य कार्यालय से संपर्क करें।</li>
+                    <li class="mb-2"><i class="bi bi-geo-alt-fill text-warning me-2"></i> शिविर परिसर से बाहर बिना अनुमति शहर में न जाएं। आवश्यकता होने पर जोन प्रभारी या मुख्य कार्यालय को सूचित करें।</li>
+                    <li class="mb-2"><i class="bi bi-trash-fill text-danger me-2"></i> अपने आस-पास सफाई रखें। कचरा केवल निर्धारित स्थान पर ही डालें।</li>
+                    <li class="mb-2"><i class="bi bi-shield-lock-fill text-secondary me-2"></i> अपने सामान की सुरक्षा स्वयं करें। मोबाइल, पर्स, नगदी आदि सदा साथ रखें। विशेषकर चार्जिंग के समय सूचना देकर ही छोड़ें।</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> किसी भी अपरिचित या संदिग्ध व्यक्ति/गतिविधि की सूचना तुरंत सुरक्षा नियंत्रण कक्ष को दें।</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -209,67 +630,6 @@
     </div>
 </section>
 
-<!-- Discipline Section -->
-<section class="discipline-section mt-4 mb-4">
-    <div class="container">
-        <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="200">
-            <div class="card-body">
-                <h5 class="mb-3"><i class="bi bi-shield-check me-2"></i>शिविर संचालन की सुव्यवस्था हेतु अनुशासन</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><i class="bi bi-person-badge-fill text-primary me-2"></i> शिविर में आरम्भ से अंत तक फोटोयुक्त परिचय पत्र अवश्य लगाकर रखें। यह स्वागत काउंटर से प्राप्त करें।</li>
-                    <li class="mb-2"><i class="bi bi-shirt text-success me-2"></i> शिविर परिसर में मिशन के निर्धारित गणवेश या शालीन वस्त्र पहनें। बरमूड़ा, शॉर्ट्स, नाइट ड्रेस आदि में आवास से बाहर न निकलें।</li>
-                    <li class="mb-2"><i class="bi bi-clock-history text-warning me-2"></i> प्रतिदिन की दिनचर्या का पालन करें – समय पर शयन करें, जागें व भोजन करें।</li>
-                    <li class="mb-2"><i class="bi bi-list-ol text-info me-2"></i> प्रसाधन, भोजनालय, स्टॉल आदि में अनुशासन व पंक्तिबद्धता बनाए रखें।</li>
-                    <li class="mb-2"><i class="bi bi-people-fill text-danger me-2"></i> धक्का-मुक्की न करें। बहिनों को प्राथमिकता दें।</li>
-                    <li class="mb-2"><i class="bi bi-phone-vibrate text-secondary me-2"></i> सत्रों के दौरान मोबाइल साइलेंट या बंद रखें। मध्य में उठकर फोन पर बात करना अशिष्टता मानी जाएगी।</li>
-                    <li class="mb-2"><i class="bi bi-journal-check text-primary me-2"></i> सभी सत्रों में अनिवार्य रूप से उपस्थित रहें व उद्बोधनों/निर्देशों को ध्यान से सुनें।</li>
-                    <li class="mb-2"><i class="bi bi-house-door-fill text-success me-2"></i> केवल आवंटित आवास में ही रहें। अन्यत्र न शिफ्ट हों।</li>
-                    <li class="mb-2"><i class="bi bi-person-lines-fill text-info me-2"></i> किसी असुविधा पर मुख्य कार्यालय से संपर्क करें।</li>
-                    <li class="mb-2"><i class="bi bi-geo-alt-fill text-warning me-2"></i> शिविर परिसर से बाहर बिना अनुमति शहर में न जाएं। आवश्यकता होने पर जोन प्रभारी या मुख्य कार्यालय को सूचित करें।</li>
-                    <li class="mb-2"><i class="bi bi-trash-fill text-danger me-2"></i> अपने आस-पास सफाई रखें। कचरा केवल निर्धारित स्थान पर ही डालें।</li>
-                    <li class="mb-2"><i class="bi bi-shield-lock-fill text-secondary me-2"></i> अपने सामान की सुरक्षा स्वयं करें। मोबाइल, पर्स, नगदी आदि सदा साथ रखें। विशेषकर चार्जिंग के समय सूचना देकर ही छोड़ें।</li>
-                    <li class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> किसी भी अपरिचित या संदिग्ध व्यक्ति/गतिविधि की सूचना तुरंत सुरक्षा नियंत्रण कक्ष को दें।</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Quick Actions Section -->
-<section class="quick-actions">
-    <div class="container">
-        <h2 class="section-title" data-aos="fade-up">त्वरित कार्य</h2>
-        <div class="row g-3">
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <a href="{% url 'events:register' %}" class="action-btn">
-                    <i class="bi bi-person-plus-fill"></i>
-                    <h6>नया पंजीकरण</h6>
-                    <p class="mb-0 small">कार्यक्रम के लिए पंजीकरण करें</p>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <a href="{% url 'events:check_status' %}" class="action-btn">
-                    <i class="bi bi-search"></i>
-                    <h6>स्थिति जांचें</h6>
-                    <p class="mb-0 small">अपने पंजीकरण की स्थिति देखें</p>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <a href="{% url 'events:list' %}" class="action-btn">
-                    <i class="bi bi-calendar-event"></i>
-                    <h6>सभी कार्यक्रम</h6>
-                    <p class="mb-0 small">आगामी कार्यक्रम देखें</p>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                <a href="tel:+919258360962" class="action-btn">
-                    <i class="bi bi-telephone-fill"></i>
-                    <h6>संपर्क करें</h6>
-                    <p class="mb-0 small">सहायता के लिए कॉल करें</p>
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
 
 <!-- Featured Events Section -->
 {% if featured_events %}
@@ -304,9 +664,25 @@
                                 विवरण देखें
                             </a>
                             {% if event.pk %}
-                                <a href="{% url 'events:register_event' event.pk %}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-person-plus me-1"></i>पंजीकरण
-                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-plus me-1"></i>पंजीकरण
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:register_event' event.pk %}">
+                                                <i class="bi bi-person-plus me-2"></i>
+                                                प्रतिभागी पंजीकरण
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:volunteer_register_event' event.pk %}">
+                                                <i class="bi bi-hand-thumbs-up me-2"></i>
+                                                समयदानी कार्यकर्ता पंजीकरण
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             {% endif %}
                         </div>
                     </div>

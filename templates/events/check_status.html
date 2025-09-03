@@ -63,22 +63,41 @@
         .btn-check {
             background: #1976d2 !important;
             color: white !important;
-            padding: 15px 30px !important;
+            padding: 15px 30px;
             border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            width: 100% !important;
-            font-size: 16px !important;
+            border-radius: 8px;
+            font-weight: 600;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer !important;
+            transition: all 0.3s ease;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+            pointer-events: auto !important;
             position: relative !important;
-            z-index: 999 !important;
+            z-index: 10 !important;
         }
         
         .btn-check:hover {
             background: #1565c0 !important;
             color: white !important;
+            transform: translateY(-1px);
+        }
+        
+        .btn-check:active {
+            transform: translateY(0);
+            background: #0d47a1 !important;
+        }
+        
+        .btn-check:focus {
+            outline: 2px solid #64b5f6;
+            outline-offset: 2px;
+        }
+        
+        .btn-check:disabled {
+            background: #ccc !important;
+            cursor: not-allowed !important;
         }
         
         .registration-item {
@@ -273,10 +292,78 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.status-form');
     const button = document.querySelector('.btn-check');
+    const phoneInput = document.querySelector('input[name="phone"]');
     
+    // Force button to be visible and active
     if (button) {
+        // Remove any disabled attributes
+        button.removeAttribute('disabled');
+        button.disabled = false;
+        
+        // Force visibility and interactivity
+        button.style.display = 'block';
+        button.style.visibility = 'visible';
+        button.style.opacity = '1';
+        button.style.pointerEvents = 'auto';
+        button.style.cursor = 'pointer';
+        
+        // Add click handler
         button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Validate phone number
+            const phone = phoneInput.value.trim();
+            if (!phone) {
+                alert('कृपया मोबाइल नंबर दर्ज करें');
+                phoneInput.focus();
+                return false;
+            }
+            
+            if (!/^[0-9]{10}$/.test(phone)) {
+                alert('कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें');
+                phoneInput.focus();
+                return false;
+            }
+            
+            // Submit form
             form.submit();
+            return true;
+        });
+        
+        // Also add mousedown and mouseup for better interaction
+        button.addEventListener('mousedown', function() {
+            this.style.transform = 'translateY(1px)';
+        });
+        
+        button.addEventListener('mouseup', function() {
+            this.style.transform = 'translateY(-1px)';
+        });
+    }
+    
+    // Handle Enter key press
+    if (phoneInput) {
+        phoneInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (button) {
+                    button.click();
+                }
+            }
+        });
+        
+        // Focus on input when page loads
+        phoneInput.focus();
+    }
+    
+    // Ensure form is always submittable
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const phone = phoneInput.value.trim();
+            if (!phone || !/^[0-9]{10}$/.test(phone)) {
+                e.preventDefault();
+                return false;
+            }
         });
     }
 });
