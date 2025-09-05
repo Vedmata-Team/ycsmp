@@ -145,13 +145,20 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def approve_final(self, request, queryset):
         from django.utils import timezone
         updated = 0
+        email_sent = 0
         for registration in queryset.filter(approval_status='level1_approved'):
             registration.approval_status = 'approved'
             registration.final_approver = request.user
             registration.final_approved_at = timezone.now()
-            registration.save()  # This will generate registration number
+            registration.save()  # This will generate registration number and send email automatically
             updated += 1
-        self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए।')
+            if registration.email_sent:
+                email_sent += 1
+        
+        if email_sent > 0:
+            self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए और {email_sent} ईमेल भेजे गए।')
+        else:
+            self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए।')
     approve_final.short_description = "अंतिम अप्रूव करें"
     
     def reject_registration(self, request, queryset):
@@ -160,14 +167,25 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     reject_registration.short_description = "पंजीकरण अस्वीकृत करें"
     
     def send_email_to_approved(self, request, queryset):
-        from .email_utils import send_registration_details_email
+        from .email_utils import send_registration_approval_email
         sent_count = 0
+        failed_count = 0
         for registration in queryset.filter(approval_status='approved'):
-            if send_registration_details_email(registration):
-                registration.email_sent = True
-                registration.save(update_fields=['email_sent'])
-                sent_count += 1
-        self.message_user(request, f'{sent_count} पंजीकरण विवरण ईमेल भेजे गए।')
+            try:
+                if send_registration_approval_email(registration):
+                    registration.email_sent = True
+                    registration.save(update_fields=['email_sent'])
+                    sent_count += 1
+                else:
+                    failed_count += 1
+            except Exception as e:
+                print(f"Failed to send email to {registration.email}: {e}")
+                failed_count += 1
+        
+        if failed_count > 0:
+            self.message_user(request, f'{sent_count} ईमेल भेजे गए, {failed_count} असफल।')
+        else:
+            self.message_user(request, f'{sent_count} पंजीकरण विवरण ईमेल भेजे गए।')
     send_email_to_approved.short_description = "अप्रूव पंजीकरण को ईमेल भेजें"
     
     def registration_number_with_email_button(self, obj):

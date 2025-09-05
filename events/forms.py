@@ -10,7 +10,7 @@ class EventRegistrationForm(forms.ModelForm):
     campaigns = forms.MultipleChoiceField(
         choices=EventRegistration.CAMPAIGN_CHOICES,
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
-        required=True,
+        required=False,
         label="अभियान चयन करें"
     )
     
@@ -54,7 +54,7 @@ class EventRegistrationForm(forms.ModelForm):
         
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'नाम'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'मोबाइल नं.', 'pattern': '[0-9]{10}'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'मोबाइल नं.', 'maxlength': '10'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ईमेल'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'gender': forms.Select(attrs={'class': 'form-select'}),
@@ -121,25 +121,4 @@ class EventRegistrationForm(forms.ModelForm):
         
         return special_skills_other
     
-    def clean_campaigns(self):
-        campaigns = self.cleaned_data.get('campaigns', [])
-        
-        # Ensure 'युवा जोड़ो अभियान' is always selected
-        if 'youth_connect' not in campaigns:
-            campaigns.append('youth_connect')
-        
-        # Ensure at least one additional campaign is selected
-        if len(campaigns) < 2:
-            raise forms.ValidationError('कृपया युवा जोड़ो अभियान के अतिरिक्त कम से कम एक और अभियान चुनें।')
-        
-        return campaigns
-    
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.selected_campaigns = self.cleaned_data.get('campaigns', [])
-        instance.special_skills = self.cleaned_data.get('special_skills', [])
-        instance.special_skills_other = self.cleaned_data.get('special_skills_other', '')
-        instance.country = 'India'  # Ensure country is always India
-        if commit:
-            instance.save()
-        return instance
+

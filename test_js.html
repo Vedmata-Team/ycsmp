@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test JavaScript Functions</title>
+    <style>
+        .form-step { display: none; }
+        .form-step.active { display: block; }
+        .step { padding: 10px; margin: 5px; background: #ccc; }
+        .step.active { background: #fd8535; color: white; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Function Test</h1>
+    
+    <div class="step-indicator">
+        <div class="step active" id="step-1">1</div>
+        <div class="step" id="step-2">2</div>
+        <div class="step" id="step-3">3</div>
+    </div>
+    
+    <div class="form-step active" id="step-1-content">
+        <h3>Step 1</h3>
+        <input type="text" required placeholder="Required field">
+        <button onclick="nextStep(0)">Next</button>
+    </div>
+    
+    <div class="form-step" id="step-2-content">
+        <h3>Step 2</h3>
+        <input type="text" required placeholder="Required field">
+        <button onclick="prevStep(1)">Previous</button>
+        <button onclick="nextStep(1)">Next</button>
+    </div>
+    
+    <div class="form-step" id="step-3-content">
+        <h3>Step 3</h3>
+        <button onclick="prevStep(2)">Previous</button>
+        <button onclick="alert('Form submitted!')">Submit</button>
+    </div>
+
+    <script>
+        console.log('JavaScript file loaded!');
+
+        // Global variables
+        let steps, indicators, form, currentStep = 0;
+
+        // Global functions accessible to HTML onclick handlers
+        function nextStep(currentStepIndex) {
+            console.log('nextStep called with index:', currentStepIndex);
+            
+            if (!steps || steps.length === 0) {
+                console.error('Steps not initialized');
+                return;
+            }
+            
+            const step = steps[currentStepIndex];
+            if (!step) {
+                console.error('Step not found:', currentStepIndex);
+                return;
+            }
+            
+            // Simple validation - check required fields
+            const requiredInputs = step.querySelectorAll('input[required], select[required]');
+            let valid = true;
+            
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.style.border = '2px solid red';
+                    valid = false;
+                } else {
+                    input.style.border = '';
+                }
+            });
+            
+            if (valid) {
+                showStep(currentStepIndex + 1);
+            } else {
+                alert('Please fill all required fields');
+            }
+        }
+
+        function prevStep(currentStepIndex) {
+            showStep(currentStepIndex - 1);
+        }
+
+        function showStep(index) {
+            if (!steps || !indicators) return;
+            
+            steps.forEach((step, i) => {
+                step.classList.toggle('active', i === index);
+                if (indicators[i]) {
+                    indicators[i].classList.toggle('active', i === index);
+                }
+            });
+            
+            currentStep = index;
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing...');
+            
+            steps = Array.from(document.querySelectorAll('.form-step'));
+            indicators = Array.from(document.querySelectorAll('.step-indicator .step'));
+            
+            console.log('Found steps:', steps.length);
+            console.log('Found indicators:', indicators.length);
+            
+            if (steps.length === 0) {
+                console.error('No form steps found!');
+                return;
+            }
+            
+            // Initialize first step
+            showStep(0);
+            
+            console.log('Test form initialized');
+        });
+
+        // Make functions globally accessible
+        window.nextStep = nextStep;
+        window.prevStep = prevStep;
+        window.showStep = showStep;
+    </script>
+</body>
+</html>

@@ -1,9 +1,7 @@
-console.log('JavaScript file loaded!');
+console.log('New JavaScript file loaded!');
 
-// Global variables
 let steps, indicators, form, currentStep = 0;
 
-// Global functions accessible to HTML onclick handlers
 function nextStep(currentStepIndex) {
     console.log('nextStep called with index:', currentStepIndex);
     
@@ -61,7 +59,6 @@ function showStep(index) {
     });
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing...');
     
@@ -82,8 +79,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('Registration form initialized');
 });
-
-// Make functions globally accessible
-window.nextStep = nextStep;
-window.prevStep = prevStep;
-window.showStep = showStep;

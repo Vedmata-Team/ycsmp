@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.db import transaction
 from .models import Event, EventRegistration
 from .forms import EventRegistrationForm
+from .email_utils import send_registration_approval_email
 import logging
 
 logger = logging.getLogger(__name__)
@@ -108,7 +109,7 @@ def event_detail(request, pk):
     return render(request, 'events/detail.html', context)
 
 def event_volunteer_register(request, pk=None):
-    """Volunteer registration view - Optimized for high load"""
+    """Volunteer registration view"""
     event = None
     if pk:
         event = get_object_or_404(Event, pk=pk, is_published=True)
@@ -123,20 +124,19 @@ def event_volunteer_register(request, pk=None):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # Check for duplicate registration
-                    phone = form.cleaned_data['phone']
-                    email = form.cleaned_data['email']
-                    
-                    existing = EventRegistration.objects.filter(
-                        Q(phone=phone) | Q(email=email)
-                    ).exists()
-                    
-                    if existing:
-                        messages.error(request, 'इस मोबाइल नंबर या ईमेल से पहले से पंजीकरण है।')
-                        return render(request, 'events/volunteer_register_form.html', {'form': form, 'event': event})
-                    
+                    print("Volunteer registration - allowing multiple registrations")
                     registration = form.save(commit=False)
                     registration.registration_type = 'volunteer'
+                    
+                    # Handle campaigns and special skills from POST data
+                    campaigns = request.POST.getlist('campaigns')
+                    special_skills = request.POST.getlist('special_skills')
+                    special_skills_other = request.POST.get('special_skills_other', '')
+                    
+                    registration.selected_campaigns = campaigns
+                    registration.special_skills = special_skills
+                    registration.special_skills_other = special_skills_other
+                    
                     if event:
                         registration.event = event
                     else:
@@ -149,16 +149,17 @@ def event_volunteer_register(request, pk=None):
                     
                     registration.save()
                     
-                    messages.success(request, 'आपका समयदानी कार्यकर्ता पंजीकरण सफलतापूर्वक जमा हो गया है! अप्रूवल के बाद आपको पंजीकरण नंबर मिलेगा।')
+                    messages.info(request, 'आपका पंजीकरण जमा हो गया है और अप्रूवल की प्रक्रिया में है। कृपया नीचे दिए गए निर्देशों को ध्यान से पढ़ें।')
                     return redirect('events:pending_approval', registration_id=registration.id)
                     
             except Exception as e:
                 logger.error(f"Volunteer registration failed: {str(e)}")
                 messages.error(request, 'पंजीकरण में त्रुटि हुई। कृपया पुन: प्रयास करें।')
         else:
+            logger.error(f"Volunteer form validation failed: {form.errors}")
             messages.error(request, 'कृपया सभी फील्ड सही तरीके से भरें।')
     else:
-        form = EventRegistrationForm(initial={'registration_type': 'volunteer'})
+        form = EventRegistrationForm()
     
     context = {
         'form': form,
@@ -167,14 +168,10 @@ def event_volunteer_register(request, pk=None):
     return render(request, 'events/volunteer_register_form.html', context)
 
 def event_register(request, pk=None):
-    """Event registration view - Optimized for high load"""
+    """Event registration view"""
     event = None
     if pk:
-        # Use select_for_update to prevent race conditions
-        event = get_object_or_404(
-            Event.objects.select_for_update(), 
-            pk=pk, is_published=True
-        )
+        event = get_object_or_404(Event, pk=pk, is_published=True)
         
         # Check if registration is closed
         if timezone.now() >= event.registration_deadline:
@@ -187,29 +184,60 @@ def event_register(request, pk=None):
             return redirect('events:detail', pk=pk)
     
     if request.method == 'POST':
+        print("\n=== FORM SUBMISSION DEBUG ===")
+        print(f"POST request received at {timezone.now()}")
+        print(f"Request method: {request.method}")
+        print(f"Content type: {request.content_type}")
+        print(f"POST data keys: {list(request.POST.keys())}")
+        
+        # Log all form data
+        print("\n--- FORM DATA ---")
+        for key, value in request.POST.items():
+            if isinstance(value, list):
+                print(f"{key}: {value}")
+            else:
+                print(f"{key}: {value}")
+        
         form = EventRegistrationForm(request.POST)
+        print(f"\nForm created: {form.__class__.__name__}")
+        print(f"Form is bound: {form.is_bound}")
+        print(f"Form is valid: {form.is_valid()}")
+        
+        if not form.is_valid():
+            print("\n--- FORM VALIDATION ERRORS ---")
+            for field, errors in form.errors.items():
+                print(f"{field}: {errors}")
+            if form.non_field_errors():
+                print(f"Non-field errors: {form.non_field_errors()}")
+        
         if form.is_valid():
             try:
+                print("\n--- STARTING TRANSACTION ---")
                 with transaction.atomic():
-                    # Check for duplicate registration
-                    phone = form.cleaned_data['phone']
-                    email = form.cleaned_data['email']
+                    print("Inside transaction block")
+                    print("Allowing multiple registrations from same user")
                     
-                    existing = EventRegistration.objects.filter(
-                        Q(phone=phone) | Q(email=email)
-                    ).exists()
-                    
-                    if existing:
-                        messages.error(request, 'इस मोबाइल नंबर या ईमेल से पहले से पंजीकरण है।')
-                        return render(request, 'events/register_form.html', {'form': form, 'event': event})
-                    
+                    print("Creating registration")
                     registration = form.save(commit=False)
+                    print("Registration object created (without event yet)")
+                    registration.registration_type = 'participant'
+                    print(f"Registration type set: {registration.registration_type}")
+                    
+                    # Handle campaigns and special skills from POST data
+                    campaigns = request.POST.getlist('campaigns')
+                    special_skills = request.POST.getlist('special_skills')
+                    special_skills_other = request.POST.get('special_skills_other', '')
+                    print(f"Campaigns: {campaigns}")
+                    print(f"Special skills: {special_skills}")
+                    print(f"Special skills other: {special_skills_other}")
+                    
+                    registration.selected_campaigns = campaigns
+                    registration.special_skills = special_skills
+                    registration.special_skills_other = special_skills_other
+                    print("Campaign and skills data set")
+                    
                     if event:
                         registration.event = event
-                        # Atomic decrement of available spots
-                        Event.objects.filter(pk=event.pk).update(
-                            registered_count=F('registered_count') + 1
-                        )
                     else:
                         latest_event = Event.objects.filter(is_published=True).first()
                         if latest_event:
@@ -220,16 +248,27 @@ def event_register(request, pk=None):
                     
                     registration.save()
                     
-                    messages.success(request, 'आपका पंजीकरण सफलतापूर्वक जमा हो गया है! अप्रूवल के बाद आपको पंजीकरण नंबर मिलेगा।')
+                    messages.info(request, 'आपका पंजीकरण जमा हो गया है और अप्रूवल की प्रक्रिया में है। कृपया नीचे दिए गए निर्देशों को ध्यान से पढ़ें।')
                     return redirect('events:pending_approval', registration_id=registration.id)
                     
             except Exception as e:
+                print(f"\n--- REGISTRATION ERROR ---")
+                print(f"Error type: {type(e).__name__}")
+                print(f"Error message: {str(e)}")
+                import traceback
+                print(f"Traceback: {traceback.format_exc()}")
                 logger.error(f"Registration failed: {str(e)}")
                 messages.error(request, 'पंजीकरण में त्रुटि हुई। कृपया पुन: प्रयास करें।')
         else:
+            print(f"\n--- FORM VALIDATION FAILED ---")
+            print(f"Returning form with errors to template")
+            logger.error(f"Form validation failed: {form.errors}")
             messages.error(request, 'कृपया सभी फील्ड सही तरीके से भरें।')
     else:
-        form = EventRegistrationForm(initial={'registration_type': 'participant'})
+        print(f"\n=== GET REQUEST ===")
+        print(f"Request method: {request.method}")
+        print(f"Creating new form instance")
+        form = EventRegistrationForm()
     
     context = {
         'form': form,
@@ -287,4 +326,34 @@ def resend_registration_email(request, registration_id):
     else:
         messages.error(request, 'ईमेल भेजने में त्रुटि हुई। कृपया पुन: प्रयास करें।')
     
-    return redirect('admin:events_eventregistration_change', registration_id)
+
+
+def test_email(request):
+    """Test email configuration"""
+    if not request.user.is_staff:
+        return HttpResponse('Unauthorized', status=401)
+    
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    try:
+        print("\n=== EMAIL TEST DEBUG ===")
+        print(f"SMTP Host: {settings.EMAIL_HOST}")
+        print(f"SMTP Port: {settings.EMAIL_PORT}")
+        print(f"Use TLS: {settings.EMAIL_USE_TLS}")
+        print(f"From email: {settings.DEFAULT_FROM_EMAIL}")
+        print(f"Host user: {settings.EMAIL_HOST_USER}")
+        
+        send_mail(
+            subject='Test Email - YCS MP',
+            message='This is a test email to verify SMTP configuration.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['test@example.com'],  # Change this to your email for testing
+            fail_silently=False,
+        )
+        return HttpResponse('Test email sent successfully! Check console for debug info.')
+    except Exception as e:
+        print(f"Test email failed: {e}")
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}")
+        return HttpResponse(f'Test email failed: {str(e)}')

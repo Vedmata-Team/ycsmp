@@ -16,6 +16,7 @@ urlpatterns = [
     path('pending/<int:registration_id>/', views.pending_approval, name='pending_approval'),
     path('check-status/', views.check_status, name='check_status'),
     path('resend-email/<int:registration_id>/', views.resend_registration_email, name='resend_email'),
+    path('test-email/', views.test_email, name='test_email'),
     
     # Export URLs
     path('export/events/', export_views.export_events, name='export_events'),

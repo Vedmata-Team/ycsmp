@@ -5,7 +5,16 @@ from django.utils.html import strip_tags
 
 def send_registration_approval_email(registration):
     """Send email when registration is fully approved"""
-    subject = f'पंजीकरण अप्रूव - {registration.event.title}'
+    reg_type = 'समयदानी कार्यकर्ता' if registration.registration_type == 'volunteer' else 'प्रतिभागी'
+    subject = f'{reg_type} पंजीकरण अप्रूव - {registration.event.title}'
+    
+    print(f"\n=== EMAIL SENDING DEBUG ===")
+    print(f"Attempting to send email to: {registration.email}")
+    print(f"Subject: {subject}")
+    print(f"From email: {settings.DEFAULT_FROM_EMAIL}")
+    print(f"SMTP Host: {settings.EMAIL_HOST}")
+    print(f"SMTP Port: {settings.EMAIL_PORT}")
+    print(f"Use TLS: {settings.EMAIL_USE_TLS}")
     
     context = {
         'registration': registration,
@@ -24,14 +33,22 @@ def send_registration_approval_email(registration):
             html_message=html_message,
             fail_silently=False,
         )
+        print(f"Email sent successfully to {registration.email}")
         return True
     except Exception as e:
         print(f"Email sending failed: {e}")
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}")
         return False
 
 def send_registration_details_email(registration):
     """Send registration details email (for resend functionality)"""
-    subject = f'पंजीकरण विवरण - {registration.event.title}'
+    reg_type = 'सहयोगी कार्यकर्ता' if registration.registration_type == 'volunteer' else 'प्रतिभागी'
+    subject = f'{reg_type} पंजीकरण विवरण - {registration.event.title}'
+    
+    print(f"\n=== EMAIL RESEND DEBUG ===")
+    print(f"Attempting to resend email to: {registration.email}")
+    print(f"Subject: {subject}")
     
     context = {
         'registration': registration,
@@ -50,7 +67,10 @@ def send_registration_details_email(registration):
             html_message=html_message,
             fail_silently=False,
         )
+        print(f"Email resent successfully to {registration.email}")
         return True
     except Exception as e:
-        print(f"Email sending failed: {e}")
+        print(f"Email resending failed: {e}")
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}")
         return False

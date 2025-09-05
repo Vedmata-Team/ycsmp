@@ -261,7 +261,20 @@ class EventRegistration(models.Model):
         
         super().save(*args, **kwargs)
         
-        # Email sending removed for testing - can be re-enabled in production
+        # Send email when registration is approved
+        if is_newly_approved and not self.email_sent:
+            from .email_utils import send_registration_approval_email
+            try:
+                if send_registration_approval_email(self):
+                    self.email_sent = True
+                    # Use update to avoid recursion
+                    EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
+                    print(f"Approval email sent to {self.email}")
+                else:
+                    print(f"Failed to send approval email to {self.email}")
+            except Exception as e:
+                print(f"Error sending approval email to {self.email}: {str(e)}")
+
     
     def get_approver_for_registration(self):
         """Get appropriate approver based on state"""
