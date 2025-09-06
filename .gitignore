@@ -10,3 +10,6 @@ venv/
 
 __pycache__/
 *.pyc
+restart.sh
+static/github.md
+update.sh
