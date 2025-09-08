@@ -7,7 +7,7 @@
 let isScrolling = false;
 let lastScrollTop = 0;
 
-// Initialize when DOM is loaded
+// Initializes when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeNavigation();
     initializeScrollEffects();

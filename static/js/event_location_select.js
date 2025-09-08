@@ -50,6 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loadCities(this.value);
     });
 
-    // On page load, set default country and load states
+    // On pages load, set default country and load states
     loadStates('India');
 });
