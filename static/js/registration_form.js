@@ -388,7 +388,7 @@ function fillTestData() {
     console.log('Test data filled!');
 }
 
-// Make functions globally accessible
+// Make functions globally accessibles
 window.nextStep = nextStep;
 window.prevStep = prevStep;
 window.showStep = showStep;
