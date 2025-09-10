@@ -406,6 +406,10 @@
             color: #2e7d32;
         }
         
+        .text-purple {
+            color: #6a1b9a !important;
+        }
+        
         .registration-half h6 {
             margin-bottom: 5px;
             font-size: 0.9rem;
@@ -502,6 +506,12 @@
                                     समयदानी कार्यकर्ता पंजीकरण
                                 </a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'events:organization_register' %}">
+                                    <i class="bi bi-building me-2"></i>
+                                    संगठन प्रतिनिधि पंजीकरण
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <a href="{% url 'events:list' %}" class="btn btn-outline-light btn-lg">
@@ -533,18 +543,32 @@
         <h2 class="section-title" data-aos="fade-up">त्वरित कार्य</h2>
         <div class="row g-3">
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <div class="registration-split-container">
-                    <a href="{% url 'events:register' %}" class="registration-half left-half">
+                <div class="dropdown">
+                    <button class="action-btn dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-plus"></i>
-                        <h6>प्रतिभागी</h6>
-                        <p class="mb-0 small">पंजीकरण</p>
-                    </a>
-                    <div class="vertical-divider"></div>
-                    <a href="{% url 'events:volunteer_register' %}" class="registration-half right-half">
-                        <i class="bi bi-hand-thumbs-up"></i>
-                        <h6>समयदानी</h6>
-                        <p class="mb-0 small">पंजीकरण</p>
-                    </a>
+                        <h6>पंजीकरण करें</h6>
+                        <p class="mb-0 small">अपना प्रकार चुनें</p>
+                    </button>
+                    <ul class="dropdown-menu w-100">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'events:register' %}">
+                                <i class="bi bi-person-plus me-2 text-primary"></i>
+                                प्रतिभागी पंजीकरण
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'events:volunteer_register' %}">
+                                <i class="bi bi-hand-thumbs-up me-2 text-success"></i>
+                                समयदानी कार्यकर्ता
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'events:organization_register' %}">
+                                <i class="bi bi-building me-2 text-purple"></i>
+                                संगठन प्रतिनिधि
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
@@ -679,6 +703,12 @@
                                             <a class="dropdown-item" href="{% url 'events:volunteer_register_event' event.pk %}">
                                                 <i class="bi bi-hand-thumbs-up me-2"></i>
                                                 समयदानी कार्यकर्ता पंजीकरण
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'events:organization_register_event' event.pk %}">
+                                                <i class="bi bi-building me-2"></i>
+                                                संगठन प्रतिनिधि पंजीकरण
                                             </a>
                                         </li>
                                     </ul>

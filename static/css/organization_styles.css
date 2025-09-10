@@ -1,0 +1,192 @@
+/* Organization Representative Registration Styles - Purple Theme */
+
+.organization-header {
+    background: linear-gradient(135deg, #4a148c, #6a1b9a);
+    color: white;
+}
+
+.organization-btn {
+    background: linear-gradient(135deg, #4a148c, #6a1b9a);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.organization-btn:hover {
+    background: linear-gradient(135deg, #3d1178, #4a148c);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 20, 140, 0.4);
+}
+
+.organization-btn-secondary {
+    background: #e1bee7;
+    border: 2px solid #4a148c;
+    color: #4a148c;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.organization-btn-secondary:hover {
+    background: #4a148c;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.organization-btn-submit {
+    background: linear-gradient(135deg, #4a148c, #6a1b9a);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.organization-btn-submit:hover {
+    background: linear-gradient(135deg, #3d1178, #4a148c);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 27, 154, 0.4);
+}
+
+/* Step indicator for organization theme */
+.organization-header + .form-body .step-indicator .step {
+    background: #e1bee7;
+    color: #4a148c;
+    border: 2px solid #4a148c;
+}
+
+.organization-header + .form-body .step-indicator .step.active {
+    background: linear-gradient(135deg, #4a148c, #6a1b9a);
+    color: white;
+}
+
+.organization-header + .form-body .step-indicator .step.completed {
+    background: #4a148c;
+    color: white;
+}
+
+/* Form text colors for organization theme */
+.organization-header + .form-body h4 {
+    color: #4a148c;
+    font-weight: 600;
+}
+
+.organization-header + .form-body .form-label {
+    color: #4a148c;
+    font-weight: 500;
+}
+
+.organization-header + .form-body .form-check-label {
+    color: #4a148c;
+}
+
+.organization-header + .form-body .alert-info {
+    background-color: #f3e5f5;
+    border-color: #e1bee7;
+    color: #4a148c;
+}
+
+.organization-header + .form-body .alert-info h6 {
+    color: #4a148c;
+}
+
+/* Form field focus states */
+.organization-header + .form-body .form-control:focus,
+.organization-header + .form-body .form-select:focus {
+    border-color: #4a148c;
+    box-shadow: 0 0 0 0.2rem rgba(74, 20, 140, 0.25);
+}
+
+/* Error styling */
+.field-error {
+    color: #d32f2f;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.field-error.show {
+    display: block;
+}
+
+.form-control.error,
+.form-select.error {
+    border-color: #d32f2f;
+    box-shadow: 0 0 0 0.2rem rgba(211, 47, 47, 0.25);
+}
+
+/* Real-time validation styling */
+.form-control.valid,
+.form-select.valid {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+/* Campaign checkboxes styling for organization theme */
+.organization-header + .form-body .campaign-checkboxes .form-check-input:checked {
+    background-color: #4a148c;
+    border-color: #4a148c;
+}
+
+.organization-header + .form-body .campaign-checkboxes .form-check-input:focus {
+    border-color: #4a148c;
+    box-shadow: 0 0 0 0.2rem rgba(74, 20, 140, 0.25);
+}
+
+/* Radio button styling for organization theme */
+.organization-header + .form-body .form-check-input[type="radio"]:checked {
+    background-color: #4a148c;
+    border-color: #4a148c;
+}
+
+.organization-header + .form-body .form-check-input[type="radio"]:focus {
+    border-color: #4a148c;
+    box-shadow: 0 0 0 0.2rem rgba(74, 20, 140, 0.25);
+}
+
+/* Alert styling for organization theme */
+.organization-header + .form-body .alert-info {
+    background-color: #f3e5f5;
+    border-color: #e1bee7;
+    color: #4a148c;
+}
+
+/* Confirmation summary styling */
+.organization-header + .form-body .confirmation-details .alert-info {
+    background-color: #f3e5f5;
+    border-left: 4px solid #4a148c;
+}
+
+.organization-header + .form-body .confirmation-details .alert-info h6 {
+    color: #4a148c;
+}
+
+.organization-header + .form-body .confirmation-details .alert-info ul {
+    color: #4a148c;
+}
+
+.organization-header + .form-body .confirmation-details .alert-info li {
+    color: #4a148c;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .organization-btn,
+    .organization-btn-secondary,
+    .organization-btn-submit {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+    }
+}

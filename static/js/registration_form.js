@@ -3,6 +3,52 @@ console.log('JavaScript file loaded!');
 // Global variables
 let steps, indicators, form, currentStep = 0;
 
+// Real-time validation functions
+function validateField(field) {
+    const fieldName = field.name;
+    const value = field.value.trim();
+    let isValid = true;
+    let errorMessage = '';
+
+    // Required field validation
+    if (field.hasAttribute('required') && !value) {
+        isValid = false;
+        errorMessage = 'यह फील्ड आवश्यक है';
+    }
+    // Phone validation
+    else if (fieldName === 'phone') {
+        if (!/^\d{10}$/.test(value)) {
+            isValid = false;
+            errorMessage = 'मोबाइल नंबर 10 अंकों का होना चाहिए';
+        }
+    }
+    // Email validation
+    else if (fieldName === 'email') {
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            isValid = false;
+            errorMessage = 'सही ईमेल पता दर्ज करें';
+        }
+    }
+    // State and city validation
+    else if ((fieldName === 'state' || fieldName === 'city') && field.tagName === 'SELECT') {
+        if (!value || value === '') {
+            isValid = false;
+            errorMessage = fieldName === 'state' ? 'कृपया राज्य चुनें' : 'कृपया जिला/जनपद चुनें';
+        }
+    }
+
+    // Update field styling
+    if (isValid) {
+        field.classList.remove('is-invalid');
+        field.classList.add('is-valid');
+    } else {
+        field.classList.remove('is-valid');
+        field.classList.add('is-invalid');
+    }
+
+    return { isValid, errorMessage };
+}
+
 // Global functions accessible to HTML onclick handlers
 function nextStep(currentStepIndex) {
     console.log('nextStep called with index:', currentStepIndex);
@@ -18,59 +64,51 @@ function nextStep(currentStepIndex) {
         return;
     }
     
-    // Simple validation - check required fields and patterns
+    // Validate all required fields in current step
     const requiredInputs = step.querySelectorAll('input[required], select[required]');
     let valid = true;
+    let firstErrorField = null;
+    let errorMessages = [];
     
     requiredInputs.forEach(input => {
-        let isValid = true;
-        
-        // Check if field is empty
-        if (!input.value.trim()) {
-            isValid = false;
-        }
-        // Special validation for phone
-        else if (input.name === 'phone' && input.value.length !== 10) {
-            isValid = false;
-        }
-        // Special validation for state and city dropdowns
-        else if ((input.name === 'state' || input.name === 'city') && (!input.value || input.value === '')) {
-            isValid = false;
-        }
-        
-        if (isValid) {
-            input.classList.remove('is-invalid');
-        } else {
-            input.classList.add('is-invalid');
+        const validation = validateField(input);
+        if (!validation.isValid) {
             valid = false;
+            if (!firstErrorField) {
+                firstErrorField = input;
+            }
+            if (validation.errorMessage) {
+                errorMessages.push(`${input.name}: ${validation.errorMessage}`);
+            }
         }
     });
     
-    // Additional check for state and city selection
-    const stateSelect = step.querySelector('[name="state"]');
-    const citySelect = step.querySelector('[name="city"]');
-    
-    if (stateSelect && (!stateSelect.value || stateSelect.value === '')) {
-        stateSelect.classList.add('is-invalid');
-        valid = false;
-    }
-    
-    if (citySelect && (!citySelect.value || citySelect.value === '')) {
-        citySelect.classList.add('is-invalid');
-        valid = false;
+    // Special validation for campaigns (only in step 2)
+    if (currentStepIndex === 1) {
+        const campaignCheckboxes = step.querySelectorAll('[name="campaigns"]:checked');
+        if (campaignCheckboxes.length < 2) {
+            valid = false;
+            errorMessages.push('कृपया कम से कम 2 अभियान चुनें');
+        }
+        
+        const youthConnectSelected = Array.from(campaignCheckboxes).some(cb => cb.value === 'youth_connect');
+        if (!youthConnectSelected) {
+            valid = false;
+            errorMessages.push('युवा जोड़ो अभियान अनिवार्य है');
+        }
     }
     
     if (valid) {
         showStep(currentStepIndex + 1);
     } else {
-        // Check specifically for state/city issues
-        const stateSelect = step.querySelector('[name="state"]');
-        const citySelect = step.querySelector('[name="city"]');
+        // Focus on first error field
+        if (firstErrorField) {
+            firstErrorField.focus();
+        }
         
-        if (stateSelect && (!stateSelect.value || stateSelect.value === '')) {
-            alert('कृपया राज्य चुनें।');
-        } else if (citySelect && (!citySelect.value || citySelect.value === '')) {
-            alert('कृपया जिला/जनपद चुनें।');
+        // Show specific error messages
+        if (errorMessages.length > 0) {
+            alert('त्रुटियाँ:\n' + errorMessages.join('\n'));
         } else {
             alert('कृपया सभी आवश्यक फील्ड भरें।');
         }
@@ -243,6 +281,37 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    
+    // Add real-time validation to all form fields
+    const allFields = form.querySelectorAll('input, select');
+    allFields.forEach(field => {
+        // Validate on blur (when user leaves field)
+        field.addEventListener('blur', () => {
+            if (field.value.trim() || field.hasAttribute('required')) {
+                validateField(field);
+            }
+        });
+        
+        // Validate on input for immediate feedback
+        field.addEventListener('input', () => {
+            if (field.classList.contains('is-invalid') || field.classList.contains('is-valid')) {
+                validateField(field);
+            }
+        });
+        
+        // Special handling for phone number
+        if (field.name === 'phone') {
+            field.addEventListener('input', function(e) {
+                const value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    e.target.value = value.slice(0, 10);
+                } else {
+                    e.target.value = value;
+                }
+                validateField(field);
+            });
+        }
+    });
     
     // Handle form submission with debugging
     if (form) {

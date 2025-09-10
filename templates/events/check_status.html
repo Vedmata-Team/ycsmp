@@ -247,6 +247,20 @@
                                             <span class="detail-value">{{ registration.full_name }}</span>
                                         </div>
                                         <div class="reg-detail">
+                                            <span class="detail-label">पंजीकरण प्रकार:</span>
+                                            <span class="detail-value">
+                                                {% if registration.registration_type == 'participant' %}
+                                                    प्रतिभागी
+                                                {% elif registration.registration_type == 'volunteer' %}
+                                                    समयदानी कार्यकर्ता
+                                                {% elif registration.registration_type == 'organization_representative' %}
+                                                    संगठन प्रतिनिधि
+                                                {% else %}
+                                                    {{ registration.get_registration_type_display }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="reg-detail">
                                             <span class="detail-label">पंजीकरण तिथि:</span>
                                             <span class="detail-value">{{ registration.registration_date|date:"d M Y" }}</span>
                                         </div>

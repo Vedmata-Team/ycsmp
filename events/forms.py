@@ -1,5 +1,5 @@
 from django import forms
-from .models import EventRegistration
+from .models import EventRegistration, ResponsibilityOption
 import csv
 import os
 from django.conf import settings
@@ -48,7 +48,7 @@ class EventRegistrationForm(forms.ModelForm):
             'full_name', 'phone', 'email', 'date_of_birth', 'gender',
             'transport_mode', 'vehicle_number', 'previous_shivir',
             'education', 'occupation', 'village_taluka', 'country', 'state', 'city',
-            'arrival_date',
+            'arrival_date', 'responsibility',
             'interested_in_volunteering', 'volunteering_details'
         ]
         
@@ -69,6 +69,7 @@ class EventRegistrationForm(forms.ModelForm):
             'city': forms.Select(attrs={'class': 'form-select'}),
 
             'arrival_date': forms.Select(attrs={'class': 'form-select'}),
+            'responsibility': forms.Select(attrs={'class': 'form-select'}),
             'interested_in_volunteering': forms.RadioSelect(choices=[(True, 'हाँ'), (False, 'नहीं')], attrs={'class': 'form-check-input'}),
             'volunteering_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'आप कैसे योगदान देना चाहते हैं?'}),
         }
@@ -89,6 +90,11 @@ class EventRegistrationForm(forms.ModelForm):
         # Set state choices from CSV
         self.fields['state'].choices = self.get_state_choices()
         self.fields['city'].choices = [('', 'जनपद/जिला चुनें')]
+        
+        # Set responsibility choices
+        responsibility_choices = [('', 'जिम्मेदारी चुनें')]
+        responsibility_choices.extend([(r.id, r.name) for r in ResponsibilityOption.objects.filter(is_active=True).order_by('order', 'name')])
+        self.fields['responsibility'].choices = responsibility_choices
         
         # Set initial value for campaigns to include mandatory 'युवा जोड़ो अभियान'
         if not self.instance.pk:
@@ -120,5 +126,43 @@ class EventRegistrationForm(forms.ModelForm):
             raise forms.ValidationError('कृपया अन्य विशेष कौशल का विवरण दें।')
         
         return special_skills_other
+    
+    def clean_responsibility(self):
+        responsibility = self.cleaned_data.get('responsibility')
+        
+        # Check if this is organization registration from POST data or initial data
+        registration_type = None
+        if hasattr(self, 'data') and self.data:
+            registration_type = self.data.get('registration_type')
+        if not registration_type:
+            registration_type = self.initial.get('registration_type')
+        
+        if registration_type == 'organization_representative' and not responsibility:
+            raise forms.ValidationError('संगठन प्रतिनिधि के लिए जिम्मेदारी चुनना आवश्यक है।')
+        
+        return responsibility
+    
+    def clean_campaigns(self):
+        campaigns = self.cleaned_data.get('campaigns', [])
+        
+        # Ensure 'युवा जोड़ो अभियान' is always selected
+        if 'youth_connect' not in campaigns:
+            campaigns.append('youth_connect')
+        
+        # Ensure at least one additional campaign is selected
+        if len(campaigns) < 2:
+            raise forms.ValidationError('कृपया युवा जोड़ो अभियान के अतिरिक्त कम से कम एक और अभियान चुनें।')
+        
+        return campaigns
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.selected_campaigns = self.cleaned_data.get('campaigns', [])
+        instance.special_skills = self.cleaned_data.get('special_skills', [])
+        instance.special_skills_other = self.cleaned_data.get('special_skills_other', '')
+        instance.country = 'India'  # Ensure country is always India
+        if commit:
+            instance.save()
+        return instance
     
 

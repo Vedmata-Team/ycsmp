@@ -87,10 +87,25 @@ class Event(models.Model):
             return round((self.registered_count / self.max_participants) * 100, 1)
         return 0
 
+class ResponsibilityOption(models.Model):
+    name = models.CharField(max_length=100, verbose_name="जिम्मेदारी नाम")
+    order = models.PositiveIntegerField(default=0, verbose_name="क्रम")
+    is_active = models.BooleanField(default=True, verbose_name="सक्रिय")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "जिम्मेदारी विकल्प"
+        verbose_name_plural = "जिम्मेदारी विकल्प"
+        ordering = ['order', 'name']
+    
+    def __str__(self):
+        return self.name
+
 class EventRegistration(models.Model):
     REGISTRATION_TYPE_CHOICES = [
         ('participant', 'प्रतिभागी'),
         ('volunteer', 'समयदानी कार्यकर्ता'),
+        ('organization_representative', 'संगठन प्रतिनिधि'),
     ]
     
     GENDER_CHOICES = [
@@ -141,7 +156,7 @@ class EventRegistration(models.Model):
     ]
 
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
-    registration_type = models.CharField(max_length=20, choices=REGISTRATION_TYPE_CHOICES, default='participant', verbose_name="पंजीकरण प्रकार")
+    registration_type = models.CharField(max_length=30, choices=REGISTRATION_TYPE_CHOICES, default='participant', verbose_name="पंजीकरण प्रकार")
     registration_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
     
     # Personal Information
@@ -193,6 +208,9 @@ class EventRegistration(models.Model):
     
     # Campaigns (stored as JSON)
     selected_campaigns = models.JSONField(default=list, verbose_name="चयनित अभियान")
+    
+    # Organization Representative specific fields
+    responsibility = models.ForeignKey(ResponsibilityOption, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="जिम्मेदारी")
     
     # Approval System
     approval_status = models.CharField(
@@ -300,8 +318,13 @@ class EventRegistration(models.Model):
         state_code = self.state_code or 'XX'
         city_prefix = self.city[:3].upper() if self.city else 'XXX'
         
-        # Different prefix for volunteers
-        base_prefix = 'YCSV' if self.registration_type == 'volunteer' else 'YCS'
+        # Different prefix for each registration type
+        if self.registration_type == 'volunteer':
+            base_prefix = 'YCSV'
+        elif self.registration_type == 'organization_representative':
+            base_prefix = 'YCSO'
+        else:
+            base_prefix = 'YCS'
         
         with transaction.atomic():
             # Get the highest existing serial number for this city and registration type

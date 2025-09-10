@@ -5,7 +5,13 @@ from django.utils.html import strip_tags
 
 def send_registration_approval_email(registration):
     """Send email when registration is fully approved"""
-    reg_type = 'समयदानी कार्यकर्ता' if registration.registration_type == 'volunteer' else 'प्रतिभागी'
+    if registration.registration_type == 'volunteer':
+        reg_type = 'समयदानी कार्यकर्ता'
+    elif registration.registration_type == 'organization_representative':
+        reg_type = 'संगठन प्रतिनिधि'
+    else:
+        reg_type = 'प्रतिभागी'
+    
     subject = f'{reg_type} पंजीकरण अप्रूव - {registration.event.title}'
     
     print(f"\n=== EMAIL SENDING DEBUG ===")
@@ -43,7 +49,13 @@ def send_registration_approval_email(registration):
 
 def send_registration_details_email(registration):
     """Send registration details email (for resend functionality)"""
-    reg_type = 'सहयोगी कार्यकर्ता' if registration.registration_type == 'volunteer' else 'प्रतिभागी'
+    if registration.registration_type == 'volunteer':
+        reg_type = 'समयदानी कार्यकर्ता'
+    elif registration.registration_type == 'organization_representative':
+        reg_type = 'संगठन प्रतिनिधि'
+    else:
+        reg_type = 'प्रतिभागी'
+    
     subject = f'{reg_type} पंजीकरण विवरण - {registration.event.title}'
     
     print(f"\n=== EMAIL RESEND DEBUG ===")

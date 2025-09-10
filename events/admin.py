@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
-from .models import Event, EventRegistration, EventImage, ApprovalUser
+from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
 
 class EventImageInline(admin.TabularInline):
@@ -395,3 +395,20 @@ class ApprovalUserAdmin(admin.ModelAdmin):
     def export_pdf(self, request, queryset):
         return ExportManager.export_to_pdf(queryset, 'approval_users_export', APPROVAL_USER_FIELDS, 'Approval Users Report')
     export_pdf.short_description = "Export to PDF"
+
+@admin.register(ResponsibilityOption)
+class ResponsibilityOptionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name',)
+    list_editable = ('order', 'is_active')
+    ordering = ('order', 'name')
+    
+    fieldsets = (
+        ('जिम्मेदारी जानकारी', {
+            'fields': ('name', 'order', 'is_active')
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('order', 'name')

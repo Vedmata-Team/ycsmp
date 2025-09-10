@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}संगठन प्रतिनिधि रजिस्ट्रेशन{% if event %} - {{ event.title }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/registration_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/organization_styles.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="registration-form-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-container" data-aos="fade-up">
+                    <!-- Form Header -->
+                    <div class="form-header organization-header">
+                        <h2 style="color: #ffffffff;">
+                            <i class="bi bi-building me-2" style="color: #ffffffff;"></i>
+                            संगठन प्रतिनिधि रजिस्ट्रेशन
+                        </h2>
+                        <p class="mb-0" style="color: #ffffffff;">कृपया सभी जानकारी सही तरीके से भरें</p>
+                        <div class="alert alert-info mt-2 mb-0">
+                            <small><i class="bi bi-info-circle me-1"></i><span class="text-danger">*</span> का मतलब है कि यह फील्ड आवश्यक है | <span class="text-danger">*</span> means this field is required</small>
+                        </div>
+                    </div>
+
+                    <!-- Form Body -->
+                    <div class="form-body">
+                        <!-- Error Messages -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger" data-aos="fade-up" data-aos-delay="300">
+                                <h6><i class="bi bi-exclamation-triangle-fill me-2"></i>कृपया निम्नलिखित त्रुटियों को ठीक करें:</h6>
+                                <ul class="mb-0">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Multi-step Form -->
+                        <form method="post" id="registrationForm" data-aos="fade-up" data-aos-delay="400">
+                            {% csrf_token %}
+                            <input type="hidden" name="registration_type" value="organization_representative">
+
+                            <!-- Step Indicator -->
+                            <div class="step-indicator">
+                                <div class="step active" id="step-1">1</div>
+                                <div class="step" id="step-2">2</div>
+                                <div class="step" id="step-3">3</div>
+                            </div>
+
+                            <!-- Step 1: Personal Information -->
+                            <div class="form-step active" id="step-1-content">
+                                <h4 class="mb-4">व्यक्तिगत जानकारी</h4>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.full_name.id_for_label }}" class="form-label">{{ form.full_name.label }} <span class="text-danger">*</span></label>
+                                            {{ form.full_name }}
+                                            {% if form.full_name.errors %}
+                                                <script>document.addEventListener('DOMContentLoaded', () => document.querySelector('[name="full_name"]')?.classList.add('is-invalid'));</script>
+                                            {% endif %}
+                                            <div class="field-error" id="error-full_name"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }} <span class="text-danger">*</span></label>
+                                            {{ form.phone }}
+                                            <div class="field-error" id="error-phone"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }} <span class="text-danger">*</span></label>
+                                            {{ form.email }}
+                                            <div class="field-error" id="error-email"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">{{ form.date_of_birth.label }} <span class="text-danger">*</span></label>
+                                            {{ form.date_of_birth }}
+                                            <div class="field-error" id="error-date_of_birth"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.gender.id_for_label }}" class="form-label">{{ form.gender.label }} <span class="text-danger">*</span></label>
+                                            {{ form.gender }}
+                                            <div class="field-error" id="error-gender"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.responsibility.id_for_label }}" class="form-label">{{ form.responsibility.label }} <span class="text-danger">*</span></label>
+                                            {{ form.responsibility }}
+                                            {% if form.responsibility.errors %}
+                                                <script>document.addEventListener('DOMContentLoaded', () => document.querySelector('[name="responsibility"]')?.classList.add('is-invalid'));</script>
+                                            {% endif %}
+                                            <div class="field-error" id="error-responsibility"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.education.id_for_label }}" class="form-label">{{ form.education.label }} <span class="text-danger">*</span></label>
+                                            {{ form.education }}
+                                            <div class="field-error" id="error-education"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.occupation.label_tag }}
+                                            {{ form.occupation }}
+                                            <div class="field-error" id="error-occupation"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.village_taluka.id_for_label }}" class="form-label">{{ form.village_taluka.label }} <span class="text-danger">*</span></label>
+                                            {{ form.village_taluka }}
+                                            <div class="field-error" id="error-village_taluka"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.state.id_for_label }}" class="form-label">{{ form.state.label }} <span class="text-danger">*</span></label>
+                                            {{ form.state }}
+                                            <div class="field-error" id="error-state"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.city.id_for_label }}" class="form-label">{{ form.city.label }} <span class="text-danger">*</span></label>
+                                            {{ form.city }}
+                                            <div class="field-error" id="error-city"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{ form.country }}
+
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-next organization-btn" onclick="nextStep(0)">
+                                        अगला <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Additional Information -->
+                            <div class="form-step" id="step-2-content">
+                                <h4 class="mb-4">अतिरिक्त जानकारी</h4>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.transport_mode.id_for_label }}" class="form-label">{{ form.transport_mode.label }} <span class="text-danger">*</span></label>
+                                            {{ form.transport_mode }}
+                                            {% if form.transport_mode.errors %}
+                                                <script>document.addEventListener('DOMContentLoaded', () => document.querySelector('[name="transport_mode"]')?.classList.add('is-invalid'));</script>
+                                            {% endif %}
+                                            <div class="field-error" id="error-transport_mode"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.arrival_date.id_for_label }}" class="form-label">{{ form.arrival_date.label }} <span class="text-danger">*</span></label>
+                                            {{ form.arrival_date }}
+                                            {% if form.arrival_date.errors %}
+                                                <script>document.addEventListener('DOMContentLoaded', () => document.querySelector('[name="arrival_date"]')?.classList.add('is-invalid'));</script>
+                                            {% endif %}
+                                            <div class="field-error" id="error-arrival_date"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Vehicle number field (conditionally shown) -->
+                                <div class="row" id="vehicle-number-row" style="display: none;">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ form.vehicle_number.label_tag }}
+                                            {{ form.vehicle_number }}
+                                            <div class="field-error" id="error-vehicle_number"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label>क्या आप शांतिकुंज/शाखाओं में शिविर कर चुके हैं? <span class="text-danger">*</span></label>
+                                            <div>
+                                                {% for radio in form.previous_shivir %}
+                                                    <div class="form-check form-check-inline">
+                                                        {{ radio.tag }}
+                                                        {{ radio.choice_label }}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="field-error" id="error-previous_shivir"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label>क्या आप किसी विशेष टीम/सेवा में योगदान देना चाहते हैं? <span class="text-danger">*</span></label>
+                                            <div>
+                                                {% for radio in form.interested_in_volunteering %}
+                                                    <div class="form-check form-check-inline">
+                                                        {{ radio.tag }}
+                                                        {{ radio.choice_label }}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="field-error" id="error-interested_in_volunteering"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12" id="volunteering-details-row" style="display: none;">
+                                        <div class="form-group mb-3">
+                                            {{ form.volunteering_details.label_tag }}
+                                            {{ form.volunteering_details }}
+                                            <div class="field-error" id="error-volunteering_details"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">अभियान चयन करें <span class="text-danger">*</span></label>
+                                            <div class="alert alert-info mb-3">
+                                                <small><i class="bi bi-info-circle"></i> युवा जोड़ो अभियान अनिवार्य है। इसके अतिरिक्त किसी एक और अभियान को चुनें जिसमें आपकी अभिरुचि है।</small>
+                                            </div>
+                                            <div class="campaign-checkboxes">
+                                                {% for choice in form.campaigns %}
+                                                    <div class="form-check">
+                                                        {{ choice.tag }}
+                                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                            {{ choice.choice_label }}
+                                                            {% if choice.data.value == 'youth_connect' %}
+                                                                <span class="badge bg-warning ms-2">अनिवार्य</span>
+                                                            {% endif %}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% if form.campaigns.errors %}
+                                                <script>document.addEventListener('DOMContentLoaded', () => document.querySelector('[name="campaigns"]')?.classList.add('is-invalid'));</script>
+                                            {% endif %}
+                                            <div class="field-error" id="error-campaigns"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-prev organization-btn-secondary" onclick="prevStep(1)">
+                                        <i class="bi bi-arrow-left"></i> पिछला
+                                    </button>
+                                    <button type="button" class="btn btn-next organization-btn" onclick="nextStep(1)">
+                                        अगला <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Confirmation -->
+                            <div class="form-step" id="step-3-content">
+                                <h4 class="mb-4">पुष्टि करें</h4>
+
+                                <div class="confirmation-details">
+                                    <div class="alert alert-info">
+                                        <h6><i class="bi bi-info-circle-fill me-2"></i>कृपया अपनी जानकारी की जांच करें:</h6>
+                                        <div id="confirmation-summary">
+                                            <!-- Details will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                    <label class="form-check-label" for="termsCheck">
+                                        मैं सभी नियम और शर्तों से सहमत हूं और दी गई जानकारी सत्य है।
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-prev organization-btn-secondary" onclick="prevStep(2)">
+                                        <i class="bi bi-arrow-left"></i> पिछला
+                                    </button>
+                                    <button type="submit" class="btn btn-submit organization-btn-submit" id="submitBtn">
+                                        <i class="bi bi-check-circle-fill me-2"></i>संगठन प्रतिनिधि रजिस्ट्रेशन पूरा करें
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/event_location_select.js' %}"></script>
+<script src="{% static 'js/organization_registration_form.js' %}"></script>
+{% endblock %}
