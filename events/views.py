@@ -203,14 +203,16 @@ def event_volunteer_register(request, pk=None):
                     registration = form.save(commit=False)
                     registration.registration_type = 'volunteer'
                     
-                    # Handle campaigns and special skills from POST data
+                    # Handle campaigns, special skills, and vibhags from POST data
                     campaigns = request.POST.getlist('campaigns')
                     special_skills = request.POST.getlist('special_skills')
                     special_skills_other = request.POST.get('special_skills_other', '')
+                    vibhags = request.POST.getlist('vibhags')
                     
                     registration.selected_campaigns = campaigns
                     registration.special_skills = special_skills
                     registration.special_skills_other = special_skills_other
+                    registration.selected_vibhags = vibhags
                     
                     if event:
                         registration.event = event

@@ -101,6 +101,20 @@ class ResponsibilityOption(models.Model):
     def __str__(self):
         return self.name
 
+class VibhagOption(models.Model):
+    name = models.CharField(max_length=100, verbose_name="विभाग नाम")
+    order = models.PositiveIntegerField(default=0, verbose_name="क्रम")
+    is_active = models.BooleanField(default=True, verbose_name="सक्रिय")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "विभाग विकल्प"
+        verbose_name_plural = "विभाग विकल्प"
+        ordering = ['order', 'name']
+    
+    def __str__(self):
+        return self.name
+
 class EventRegistration(models.Model):
     REGISTRATION_TYPE_CHOICES = [
         ('participant', 'प्रतिभागी'),
@@ -206,6 +220,9 @@ class EventRegistration(models.Model):
     interested_in_volunteering = models.BooleanField(default=False, verbose_name="क्या आप किसी विशेष टीम/सेवा में योगदान देना चाहते हैं?")
     volunteering_details = models.TextField(blank=True, verbose_name="आप कैसे योगदान देना चाहते हैं?")
     
+    # Volunteer Vibhag (Department) - Multiple selection for volunteers
+    selected_vibhags = models.JSONField(default=list, blank=True, verbose_name="चयनित विभाग")
+    
     # Campaigns (stored as JSON)
     selected_campaigns = models.JSONField(default=list, verbose_name="चयनित अभियान")
     
@@ -310,6 +327,25 @@ class EventRegistration(models.Model):
                 state_code=state_code,
                 is_state_approver=True
             ).first()
+    
+    def get_campaign_names(self):
+        """Get readable campaign names for export"""
+        if self.selected_campaigns:
+            campaign_dict = dict(self.CAMPAIGN_CHOICES)
+            campaign_names = [campaign_dict.get(code, code) for code in self.selected_campaigns]
+            return ', '.join(campaign_names)
+        return ''
+    
+    def get_vibhag_names(self):
+        """Get readable vibhag names for export"""
+        if self.selected_vibhags:
+            try:
+                vibhag_ids = [int(vid) for vid in self.selected_vibhags if str(vid).isdigit()]
+                vibhags = VibhagOption.objects.filter(id__in=vibhag_ids)
+                return ', '.join([v.name for v in vibhags])
+            except:
+                return str(self.selected_vibhags)
+        return ''
     
     def generate_registration_number(self):
         """Generate registration number: YCS/YCSV-StateCode-CityPrefix-SerialNumber"""

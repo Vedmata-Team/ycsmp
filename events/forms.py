@@ -1,5 +1,5 @@
 from django import forms
-from .models import EventRegistration, ResponsibilityOption
+from .models import EventRegistration, ResponsibilityOption, VibhagOption
 import csv
 import os
 from django.conf import settings
@@ -27,6 +27,14 @@ class EventRegistrationForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'अन्य विशेष कौशल लिखें'}),
         label="अन्य विशेष कौशल"
+    )
+    
+    # Vibhag selection for volunteers
+    vibhags = forms.MultipleChoiceField(
+        choices=[],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+        label="कार्य विभाग चुनें"
     )
     
     def get_state_choices(self):
@@ -100,6 +108,10 @@ class EventRegistrationForm(forms.ModelForm):
         if not self.instance.pk:
             self.fields['campaigns'].initial = ['youth_connect']
         
+        # Set vibhag choices
+        vibhag_choices = [(v.id, v.name) for v in VibhagOption.objects.filter(is_active=True).order_by('order', 'name')]
+        self.fields['vibhags'].choices = vibhag_choices
+        
         self.fields['occupation'].required = False
     
     def clean_vehicle_number(self):
@@ -155,11 +167,28 @@ class EventRegistrationForm(forms.ModelForm):
         
         return campaigns
     
+    def clean_vibhags(self):
+        vibhags = self.cleaned_data.get('vibhags', [])
+        registration_type = None
+        
+        # Check if this is volunteer registration
+        if hasattr(self, 'data') and self.data:
+            registration_type = self.data.get('registration_type')
+        if not registration_type:
+            registration_type = self.initial.get('registration_type')
+        
+        # For volunteers, at least one vibhag must be selected
+        if registration_type == 'volunteer' and not vibhags:
+            raise forms.ValidationError('कृपया कम से कम एक कार्य विभाग चुनें।')
+        
+        return vibhags
+    
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.selected_campaigns = self.cleaned_data.get('campaigns', [])
         instance.special_skills = self.cleaned_data.get('special_skills', [])
         instance.special_skills_other = self.cleaned_data.get('special_skills_other', '')
+        instance.selected_vibhags = self.cleaned_data.get('vibhags', [])
         instance.country = 'India'  # Ensure country is always India
         if commit:
             instance.save()

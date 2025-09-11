@@ -316,9 +316,38 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Vibhag Selection for Volunteers -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">कार्य विभाग चुनें <span class="text-danger">*</span></label>
+                                            <div class="alert alert-info mb-3">
+                                                <small><i class="bi bi-info-circle"></i> कृपया कम से कम एक कार्य विभाग चुनें जिसमें आप योगदान देना चाहते हैं।</small>
+                                            </div>
+                                            <div class="vibhag-checkboxes">
+                                                <div class="row g-2">
+                                                    {% for choice in form.vibhags %}
+                                                        <div class="col-md-4 col-sm-6">
+                                                            <div class="form-check">
+                                                                {{ choice.tag }}
+                                                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                                    {{ choice.choice_label }}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% if form.vibhags.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.vibhags.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="text-end">
-                                    <button type="button" class="btn btn-next volunteer-btn" onclick="nextStep(0)">
+                                    <button type="button" class="btn btn-next volunteer-btn" onclick="nextStep(0)" id="step1NextBtn">
                                         अगला <i class="bi bi-arrow-right"></i>
                                     </button>
                                 </div>

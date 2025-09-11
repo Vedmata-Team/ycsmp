@@ -184,7 +184,8 @@ REGISTRATION_FIELDS = [
     {'field': 'bringing_vehicle', 'header': 'वाहन'},
     {'field': 'vehicle_number', 'header': 'वाहन नंबर'},
     {'field': 'arrival_date', 'header': 'आगमन तिथि'},
-    {'field': 'departure_date', 'header': 'प्रस्थान तिथि'}
+    {'field': 'get_campaign_names', 'header': 'चयनित अभियान'},
+    {'field': 'get_vibhag_names', 'header': 'चयनित विभाग'}
 ]
 
 APPROVAL_USER_FIELDS = [

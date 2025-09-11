@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
-from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption
+from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
 
 class EventImageInline(admin.TabularInline):
@@ -77,7 +77,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('transport_mode', 'vehicle_number')
         }),
         ('अन्य जानकारी', {
-            'fields': ('previous_shivir', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'selected_campaigns')
+            'fields': ('previous_shivir', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
         }),
         ('अप्रूवल स्थिति', {
             'fields': ('approval_status', 'level1_approver', 'level1_approved_at', 'final_approver', 'final_approved_at', 'rejection_reason', 'email_sent')
@@ -96,8 +96,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(self.readonly_fields)
+        readonly.extend(['get_vibhag_names', 'get_campaign_names'])
         if obj:
-            readonly.extend(['selected_campaigns', 'level1_approved_at', 'final_approved_at', 'email_sent'])
+            readonly.extend(['level1_approved_at', 'final_approved_at', 'email_sent'])
         
         # Level 1 approvers cannot edit final approval fields
         if not request.user.is_superuser:
@@ -200,6 +201,25 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         return obj.registration_number or '-'
     registration_number_with_email_button.short_description = 'पंजीकरण संख्या'
     registration_number_with_email_button.allow_tags = True
+    
+    def get_vibhag_names(self, obj):
+        if obj.selected_vibhags:
+            try:
+                vibhag_ids = [int(vid) for vid in obj.selected_vibhags if str(vid).isdigit()]
+                vibhags = VibhagOption.objects.filter(id__in=vibhag_ids)
+                return ', '.join([v.name for v in vibhags])
+            except:
+                return str(obj.selected_vibhags)
+        return '-'
+    get_vibhag_names.short_description = 'चयनित विभाग'
+    
+    def get_campaign_names(self, obj):
+        if obj.selected_campaigns:
+            campaign_dict = dict(EventRegistration.CAMPAIGN_CHOICES)
+            campaign_names = [campaign_dict.get(code, code) for code in obj.selected_campaigns]
+            return ', '.join(campaign_names)
+        return '-'
+    get_campaign_names.short_description = 'चयनित अभियान'
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -406,6 +426,23 @@ class ResponsibilityOptionAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('जिम्मेदारी जानकारी', {
+            'fields': ('name', 'order', 'is_active')
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('order', 'name')
+
+@admin.register(VibhagOption)
+class VibhagOptionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name',)
+    list_editable = ('order', 'is_active')
+    ordering = ('order', 'name')
+    
+    fieldsets = (
+        ('विभाग जानकारी', {
             'fields': ('name', 'order', 'is_active')
         }),
     )
