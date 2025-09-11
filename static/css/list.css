@@ -1052,6 +1052,114 @@
     }
 }
 
+/* Dropdown Z-Index Fixes - Ultra High Values */
+.dropdown {
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+.dropdown-menu {
+    z-index: 100000 !important;
+    position: absolute !important;
+}
+
+.dropdown-toggle {
+    z-index: 99998 !important;
+}
+
+.dropdown.show {
+    z-index: 100001 !important;
+}
+
+.dropdown.show .dropdown-menu {
+    z-index: 100002 !important;
+}
+
+/* Event card dropdown specific */
+.event-card .dropdown {
+    z-index: 100001 !important;
+}
+
+.event-card .dropdown-menu {
+    z-index: 100002 !important;
+}
+
+.event-card .dropdown.show {
+    z-index: 100003 !important;
+}
+
+.event-card .dropdown.show .dropdown-menu {
+    z-index: 100004 !important;
+}
+
+.event-footer .dropdown {
+    z-index: 100003 !important;
+}
+
+.event-footer .dropdown-menu {
+    z-index: 100004 !important;
+}
+
+.event-footer .dropdown.show {
+    z-index: 100005 !important;
+}
+
+.event-footer .dropdown.show .dropdown-menu {
+    z-index: 100006 !important;
+}
+
+/* News card dropdown specific */
+.news-card .dropdown {
+    z-index: 100001 !important;
+}
+
+.news-card .dropdown-menu {
+    z-index: 100002 !important;
+}
+
+.news-card .dropdown.show {
+    z-index: 100003 !important;
+}
+
+.news-card .dropdown.show .dropdown-menu {
+    z-index: 100004 !important;
+}
+
+/* Section z-index management - Lower values */
+.events-grid-section {
+    position: relative;
+    z-index: 1 !important;
+}
+
+.news-grid-section {
+    position: relative;
+    z-index: 1 !important;
+}
+
+.event-card {
+    position: relative;
+    z-index: 2 !important;
+    overflow: visible !important;
+}
+
+.news-card {
+    position: relative;
+    z-index: 2 !important;
+    overflow: visible !important;
+}
+
+.event-footer {
+    position: relative;
+    z-index: 3 !important;
+    overflow: visible !important;
+}
+
+.footer-actions {
+    position: relative;
+    z-index: 4 !important;
+    overflow: visible !important;
+}
+
 /* Print Styles */
 @media print {
     .news-hero-section,

@@ -28,6 +28,7 @@
     <!-- Custom Theme CSS -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dropdown-fix.css' %}">
 
     {% block extra_css %}{% endblock %}
     
@@ -132,6 +133,12 @@
                                             समयदानी कार्यकर्ता पंजीकरण
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'events:organization_register' %}">
+                                            <i class="bi bi-building me-2"></i>
+                                            संगठन प्रतिनिधि पंजीकरण
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         </ul>
@@ -189,33 +196,38 @@
                                 <h4 class="footer-title">युवा चिंतन शिविर भोपाल</h4>
                                 <p class="footer-description">युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम।</p>
                                 
-                                <!-- Social Media Links -->
-                                <div class="social-links">
-                                    <a href="https://wa.me/919258360962" class="social-link" title="WhatsApp">
-                                        <i class="fab fa-whatsapp"></i>
+                                <!-- Contact Links - Only WhatsApp and Call -->
+                                <div class="contact-links">
+                                    <a href="https://wa.me/919258360962" class="btn btn-success btn-sm me-2 mb-2" title="WhatsApp">
+                                        <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                                    </a>
+                                    <a href="tel:+919258360962" class="btn btn-primary btn-sm mb-2" title="Call">
+                                        <i class="bi bi-telephone-fill me-1"></i>Call
                                     </a>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="col-lg-2 col-md-6 mb-4">
-                            <h5 class="footer-heading">Quick Links</h5>
-                            <ul class="footer-links">
-                                <li><a href="{% url 'events:homepage' %}">मुख्य पृष्ठ</a></li>
-                                <li><a href="{% url 'events:list' %}">कार्यक्रम</a></li>
-                                <li><a href="{% url 'events:register' %}">पंजीकरण</a></li>
-                            </ul>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <h5 class="footer-heading">पंजीकरण करें</h5>
+                            <div class="registration-buttons">
+                                <a href="{% url 'events:register' %}" class="btn btn-outline-light btn-sm mb-2 w-100">
+                                    <i class="bi bi-person-plus me-2"></i>प्रतिभागी पंजीकरण
+                                </a>
+                                <a href="{% url 'events:volunteer_register' %}" class="btn btn-outline-light btn-sm mb-2 w-100">
+                                    <i class="bi bi-hand-thumbs-up me-2"></i>समयदानी कार्यकर्ता
+                                </a>
+                                <a href="{% url 'events:organization_register' %}" class="btn btn-outline-light btn-sm mb-2 w-100">
+                                    <i class="bi bi-building me-2"></i>संगठन प्रतिनिधि
+                                </a>
+                            </div>
                         </div>
                         
-                        <div class="col-lg-2 col-md-6 mb-4">
-                            <h5 class="footer-heading">Categories</h5>
-                            <ul class="footer-links">
-                                <li><a href="#">समाजसेवा</a></li>
-                                <li><a href="#">शिक्षा</a></li>
-                                <li><a href="#">युवा गतिविधि</a></li>
-                                <li><a href="#">सांस्कृतिक</a></li>
-                                <li><a href="#">खेल</a></li>
-                            </ul>
+                        <div class="col-lg-1 col-md-6 mb-4">
+                            <h5 class="footer-heading">स्थिति जांचें</h5>
+                            <a href="{% url 'events:check_status' %}" class="btn btn-success btn-sm w-100">
+                                <i class="bi bi-search me-2"></i>जांचें
+                            </a>
                         </div>
                         
                         <div class="col-lg-4 mb-4">

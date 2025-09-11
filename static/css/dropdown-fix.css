@@ -1,0 +1,70 @@
+/* Global Dropdown Z-Index Fix - Ultra High Priority */
+
+/* Base dropdown styles with maximum z-index */
+.dropdown {
+    position: relative !important;
+    z-index: 999999 !important;
+}
+
+.dropdown-menu {
+    z-index: 1000000 !important;
+    position: absolute !important;
+}
+
+.dropdown-toggle {
+    z-index: 999998 !important;
+}
+
+/* When dropdown is open */
+.dropdown.show {
+    z-index: 1000001 !important;
+}
+
+.dropdown.show .dropdown-menu {
+    z-index: 1000002 !important;
+}
+
+/* Ensure parent containers don't clip dropdowns */
+.card,
+.event-card,
+.news-card,
+.modern-card,
+.registration-sidebar,
+.event-detail-card,
+.action-btn,
+.quick-actions,
+.featured-events,
+.events-grid-section,
+.event-detail-section {
+    overflow: visible !important;
+}
+
+/* Specific overrides for common containers */
+.container,
+.row,
+.col-lg-4,
+.col-md-6,
+.col-lg-3,
+.footer-actions,
+.registration-actions,
+.event-footer {
+    overflow: visible !important;
+}
+
+/* Bootstrap dropdown menu positioning */
+.dropdown-menu.show {
+    z-index: 1000003 !important;
+    display: block !important;
+}
+
+/* Ensure dropdowns appear above modals and other high z-index elements */
+.dropdown-menu {
+    z-index: 1000004 !important;
+}
+
+/* Fix for any potential transform issues */
+.dropdown,
+.dropdown-menu {
+    transform: none !important;
+    will-change: auto !important;
+}

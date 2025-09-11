@@ -125,17 +125,25 @@
         
         /* Dropdown z-index fixes - Very high values */
         .dropdown {
-            position: relative;
-            z-index: 9999;
+            position: relative !important;
+            z-index: 99999 !important;
         }
         
         .dropdown-menu {
-            z-index: 10000 !important;
+            z-index: 100000 !important;
             position: absolute !important;
         }
         
         .dropdown-toggle {
-            z-index: 9998;
+            z-index: 99998 !important;
+        }
+        
+        .dropdown.show {
+            z-index: 100001 !important;
+        }
+        
+        .dropdown.show .dropdown-menu {
+            z-index: 100002 !important;
         }
         
         /* Section z-index management - Lower values */
@@ -165,11 +173,19 @@
         }
         
         .event-card .dropdown {
-            z-index: 10001;
+            z-index: 100001 !important;
         }
         
         .event-card .dropdown-menu {
-            z-index: 10002 !important;
+            z-index: 100002 !important;
+        }
+        
+        .event-card .dropdown.show {
+            z-index: 100003 !important;
+        }
+        
+        .event-card .dropdown.show .dropdown-menu {
+            z-index: 100004 !important;
         }
         
         .action-btn {
@@ -179,15 +195,23 @@
         
         /* Quick actions dropdown specific */
         .quick-actions .dropdown {
-            z-index: 10003 !important;
+            z-index: 100003 !important;
         }
         
         .quick-actions .dropdown-menu {
-            z-index: 10004 !important;
+            z-index: 100004 !important;
         }
         
         .quick-actions .dropdown-toggle {
-            z-index: 10002 !important;
+            z-index: 100002 !important;
+        }
+        
+        .quick-actions .dropdown.show {
+            z-index: 100005 !important;
+        }
+        
+        .quick-actions .dropdown.show .dropdown-menu {
+            z-index: 100006 !important;
         }
         
         /* Mobile Responsiveness */
