@@ -229,6 +229,10 @@ class EventRegistration(models.Model):
     # Organization Representative specific fields
     responsibility = models.ForeignKey(ResponsibilityOption, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="जिम्मेदारी")
     
+    # Volunteer specific fields
+    volunteer_start_date = models.DateField(null=True, blank=True, verbose_name="समयदान प्रारंभ तिथि")
+    volunteer_end_date = models.DateField(null=True, blank=True, verbose_name="समयदान समाप्ति तिथि")
+    
     # Approval System
     approval_status = models.CharField(
         max_length=20,
@@ -285,6 +289,26 @@ class EventRegistration(models.Model):
         return f"{self.full_name} - {self.event.title}"
 
     def save(self, *args, **kwargs):
+        # Validate vibhag data integrity
+        if self.selected_vibhags and isinstance(self.selected_vibhags, list):
+            # Ensure all vibhag IDs are valid
+            try:
+                vibhag_ids = [int(vid) for vid in self.selected_vibhags if str(vid).isdigit()]
+                valid_vibhags = VibhagOption.objects.filter(id__in=vibhag_ids, is_active=True)
+                if len(vibhag_ids) != valid_vibhags.count():
+                    # Log invalid vibhag IDs but don't fail
+                    invalid_ids = set(vibhag_ids) - set(valid_vibhags.values_list('id', flat=True))
+                    print(f"Warning: Invalid vibhag IDs found: {invalid_ids}")
+            except Exception as e:
+                print(f"Warning: Vibhag validation error: {e}")
+        
+        # Validate campaign data integrity
+        if self.selected_campaigns and isinstance(self.selected_campaigns, list):
+            valid_campaigns = [choice[0] for choice in self.CAMPAIGN_CHOICES]
+            invalid_campaigns = [c for c in self.selected_campaigns if c not in valid_campaigns]
+            if invalid_campaigns:
+                print(f"Warning: Invalid campaign codes found: {invalid_campaigns}")
+        
         is_newly_approved = False
         if self.pk:
             old_instance = EventRegistration.objects.get(pk=self.pk)

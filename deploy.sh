@@ -13,7 +13,8 @@ source venv/bin/activate
 echo "📥 Pulling latest changes from Git..."
 git pull origin main
 
-# Collect static files (no input required)
+# Collect static files (no input required)Mohan123#
+
 echo "📦 Collecting static files..."
 python manage.py collectstatic --noinput
 
@@ -32,3 +33,4 @@ sudo systemctl status nginx --no-pager -l
 
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Website: https://ycsmp.in"
+

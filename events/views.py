@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.db import transaction
 from .models import Event, EventRegistration
-from .forms import EventRegistrationForm
+from .forms import EventRegistrationForm, VolunteerRegistrationForm, OrganizationRegistrationForm
 from .email_utils import send_registration_approval_email
 import logging
 
@@ -126,7 +126,7 @@ def event_organization_register(request, pk=None):
     
     if request.method == 'POST':
         print(f"POST data received: {dict(request.POST)}")
-        form = EventRegistrationForm(request.POST)
+        form = OrganizationRegistrationForm(request.POST)
         print(f"Form created with data")
         print(f"Form is_valid: {form.is_valid()}")
         if not form.is_valid():
@@ -172,7 +172,7 @@ def event_organization_register(request, pk=None):
             messages.error(request, 'कृपया सभी फील्ड सही तरीके से भरें।')
     else:
         print("GET request - initializing form")
-        form = EventRegistrationForm(initial={'registration_type': 'organization_representative'})
+        form = OrganizationRegistrationForm(initial={'registration_type': 'organization_representative'})
         print("Form initialized for organization registration")
     
     context = {
@@ -195,7 +195,7 @@ def event_volunteer_register(request, pk=None):
             return redirect('events:detail', pk=pk)
     
     if request.method == 'POST':
-        form = EventRegistrationForm(request.POST)
+        form = VolunteerRegistrationForm(request.POST)
         if form.is_valid():
             try:
                 with transaction.atomic():
@@ -236,7 +236,7 @@ def event_volunteer_register(request, pk=None):
             logger.error(f"Volunteer form validation failed: {form.errors}")
             messages.error(request, 'कृपया सभी फील्ड सही तरीके से भरें।')
     else:
-        form = EventRegistrationForm()
+        form = VolunteerRegistrationForm()
     
     context = {
         'form': form,

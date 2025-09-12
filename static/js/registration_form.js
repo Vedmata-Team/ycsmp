@@ -83,14 +83,7 @@ function nextStep(currentStepIndex) {
         }
     });
     
-    // Special validation for vibhag selection (step 1 for volunteers)
-    if (currentStepIndex === 0) {
-        const vibhagCheckboxes = step.querySelectorAll('[name="vibhags"]:checked');
-        if (vibhagCheckboxes.length === 0) {
-            valid = false;
-            errorMessages.push('कृपया कम से कम एक कार्य विभाग चुनें');
-        }
-    }
+    // No special validation for step 1 in normal registration
     
     // Special validation for campaigns (only in step 2)
     if (currentStepIndex === 1) {
