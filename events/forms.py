@@ -184,6 +184,22 @@ class EventRegistrationForm(BaseEventRegistrationForm):
         label="आगमन तिथि"
     )
     
+    def clean_date_of_birth(self):
+        date_of_birth = self.cleaned_data.get('date_of_birth')
+        
+        # Age validation only for participant registration
+        if date_of_birth:
+            from datetime import date
+            today = date.today()
+            age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+            
+            if age < 18:
+                raise forms.ValidationError('प्रतिभागी पंजीकरण के लिए आयु 18 वर्ष से कम नहीं होनी चाहिए।')
+            elif age > 45:
+                raise forms.ValidationError('प्रतिभागी पंजीकरण के लिए आयु 45 वर्ष से अधिक नहीं होनी चाहिए।')
+        
+        return date_of_birth
+    
     class Meta:
         model = EventRegistration
         fields = [

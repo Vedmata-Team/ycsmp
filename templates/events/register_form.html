@@ -124,6 +124,7 @@
                                         <div class="form-group">
                                             <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">{{ form.date_of_birth.label }} <span class="text-danger">*</span></label>
                                             {{ form.date_of_birth }}
+                                            <small id="age-warning" class="text-danger" style="display: none;">केवल 18 से 45 वर्ष की आयु के लिए</small>
                                             {% if form.date_of_birth.errors %}
                                                 <div class="invalid-feedback">{{ form.date_of_birth.errors.0 }}</div>
                                             {% endif %}
@@ -378,11 +379,13 @@
                                     </div>
                                 </div>
 
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
-                                    <label class="form-check-label" for="termsCheck">
-                                        मैं सभी नियम और शर्तों से सहमत हूं और दी गई जानकारी सत्य है।
-                                    </label>
+                                <div class="alert alert-warning">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                        <label class="form-check-label fw-bold" for="termsCheck">
+                                            <i class="bi bi-check-square me-2"></i>मैं सभी नियम और शर्तों से सहमत हूं और दी गई जानकारी सत्य है।
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <div class="d-flex justify-content-between">
@@ -416,4 +419,54 @@
 {% block extra_js %}
 <script src="{% static 'js/event_location_select.js' %}"></script>
 <script src="{% static 'js/registration_form.js' %}"></script>
+<script>
+// Age validation for participant registration only
+function validateParticipantAge() {
+    const dobInput = document.querySelector('[name="date_of_birth"]');
+    const ageWarning = document.getElementById('age-warning');
+    
+    if (dobInput && dobInput.value) {
+        const dob = new Date(dobInput.value);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        if (age < 18 || age > 45) {
+            ageWarning.style.display = 'block';
+            return false;
+        } else {
+            ageWarning.style.display = 'none';
+            return true;
+        }
+    } else {
+        ageWarning.style.display = 'none';
+    }
+    return true;
+}
+
+// Real-time age validation on date input change
+document.addEventListener('DOMContentLoaded', function() {
+    const dobInput = document.querySelector('[name="date_of_birth"]');
+    if (dobInput) {
+        dobInput.addEventListener('change', validateParticipantAge);
+        dobInput.addEventListener('input', validateParticipantAge);
+    }
+});
+
+// Override nextStep function for participant registration
+window.originalNextStep = window.nextStep;
+window.nextStep = function(currentStepIndex) {
+    // Age validation only for step 0 (first step)
+    if (currentStepIndex === 0) {
+        if (!validateParticipantAge()) {
+            return; // Block progression
+        }
+    }
+    // Call original nextStep function
+    window.originalNextStep(currentStepIndex);
+};
+</script>
 {% endblock %}

@@ -26,11 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadCities(stateName) {
+        const citySelect = document.getElementById('id_city');
+        citySelect.innerHTML = '<option value="">लोड हो रहा है...</option>';
+        citySelect.disabled = true;
+        
         fetch(citiesCSV)
             .then(res => res.text())
             .then(text => {
                 const rows = parseCSV(text);
-                const citySelect = document.getElementById('id_city');
                 citySelect.innerHTML = '<option value="">जनपद/जिला चुनें</option>';
                 rows.forEach((row, idx) => {
                     if (idx === 0) return; // skip header
@@ -39,6 +42,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         citySelect.innerHTML += `<option value="${row[1].replace(/"/g, '')}">${row[1].replace(/"/g, '')}</option>`;
                     }
                 });
+                citySelect.disabled = false;
+            })
+            .catch(() => {
+                citySelect.innerHTML = '<option value="">त्रुटि - पुनः प्रयास करें</option>';
+                citySelect.disabled = false;
             });
     }
 
@@ -47,7 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('id_city').innerHTML = '<option value="">जनपद/जिला चुनें</option>';
     });
     document.getElementById('id_state').addEventListener('change', function() {
-        loadCities(this.value);
+        if (this.value) {
+            loadCities(this.value);
+        } else {
+            document.getElementById('id_city').innerHTML = '<option value="">जनपद/जिला चुनें</option>';
+        }
     });
 
     // On pages load, set default country and load states

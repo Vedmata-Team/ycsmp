@@ -27,7 +27,7 @@ def robots_txt(request):
     return HttpResponse(content, content_type='text/plain')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('control/', admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('sitemap.xml', TemplateView.as_view(template_name='sitemap.xml', content_type='application/xml'), name='sitemap'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots'),

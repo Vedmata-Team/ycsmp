@@ -33,4 +33,3 @@ sudo systemctl status nginx --no-pager -l
 
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Website: https://ycsmp.in"
-
