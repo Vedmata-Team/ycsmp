@@ -87,8 +87,8 @@ class BaseEventRegistrationForm(forms.ModelForm):
             'responsibility': forms.Select(attrs={'class': 'form-select'}),
             'interested_in_volunteering': forms.RadioSelect(choices=[(True, 'हाँ'), (False, 'नहीं')], attrs={'class': 'form-check-input'}),
             'volunteering_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'आप कैसे योगदान देना चाहते हैं?'}),
-            'volunteer_start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'min': '2025-08-12', 'max': '2025-08-30'}),
-            'volunteer_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'min': '2025-08-12', 'max': '2025-08-30'}),
+            'volunteer_start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'min': '2025-10-12', 'max': '2025-10-30'}),
+            'volunteer_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'min': '2025-10-12', 'max': '2025-10-30'}),
         }
     
     def __init__(self, *args, **kwargs):

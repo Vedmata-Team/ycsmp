@@ -56,7 +56,7 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('registration_number_with_email_button', 'full_name', 'event', 'registration_type', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
+    list_display = ('registration_number_with_buttons', 'full_name', 'event', 'registration_type', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
     list_filter = ('event', 'registration_type', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
     actions = ['approve_level1', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
@@ -68,7 +68,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('registration_number', 'event', 'registration_type', 'registration_date')
         }),
         ('व्यक्तिगत जानकारी', {
-            'fields': ('full_name', 'phone', 'email', 'date_of_birth', 'gender', 'education', 'occupation', 'special_skills')
+            'fields': ('full_name', 'phone', 'email', 'date_of_birth', 'gender', 'responsibility', 'education', 'occupation', 'special_skills')
         }),
         ('पता जानकारी', {
             'fields': ('village_taluka', 'city', 'state', 'country')
@@ -89,9 +89,21 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_fieldsets(self, request, obj=None):
         fieldsets = list(super().get_fieldsets(request, obj))
+        is_edit_mode = request.GET.get('edit') == '1'
+        
         if not request.user.is_superuser:
             # Remove स्थिति fieldset for staff users
             fieldsets = [fs for fs in fieldsets if fs[0] != 'स्थिति']
+        
+        # Add mode indicator to first fieldset
+        if fieldsets and obj:
+            mode_text = "Edit Mode" if is_edit_mode else "View & Approve Mode"
+            first_fieldset = list(fieldsets[0])
+            if len(first_fieldset) > 1 and isinstance(first_fieldset[1], dict):
+                first_fieldset[1] = dict(first_fieldset[1])
+                first_fieldset[1]['description'] = f"<strong style='color: {'#dc3545' if is_edit_mode else '#28a745'};'>{mode_text}</strong>"
+                fieldsets[0] = tuple(first_fieldset)
+        
         return fieldsets
     
     def get_readonly_fields(self, request, obj=None):
@@ -100,11 +112,34 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         if obj:
             readonly.extend(['level1_approved_at', 'final_approved_at', 'email_sent'])
         
+        # Check if this is edit mode
+        is_edit_mode = request.GET.get('edit') == '1'
+        
         # Level 1 approvers cannot edit final approval fields
         if not request.user.is_superuser:
             readonly.extend(['final_approver', 'final_approved_at', 'registration_number', 'level1_approver', 'email_sent'])
-            if obj and obj.approval_status in ['approved', 'level1_approved']:
+            if obj and obj.approval_status in ['approved', 'level1_approved'] and not is_edit_mode:
                 readonly.extend(['approval_status'])
+        else:
+            # Even superusers can't edit approver fields if already set (unless in edit mode)
+            if obj and not is_edit_mode:
+                if obj.level1_approver:
+                    readonly.append('level1_approver')
+                if obj.final_approver:
+                    readonly.append('final_approver')
+        
+        # Make email_sent readonly always (it's auto-managed)
+        readonly.append('email_sent')
+        
+        # In view mode (not edit mode), make most fields readonly
+        if not is_edit_mode and obj:
+            readonly.extend([
+                'full_name', 'phone', 'email', 'date_of_birth', 'gender', 'responsibility',
+                'education', 'occupation', 'village_taluka', 'city', 'state', 'country',
+                'transport_mode', 'vehicle_number', 'previous_shivir', 'arrival_date',
+                'interested_in_volunteering', 'volunteering_details', 'special_skills',
+                'volunteer_start_date', 'volunteer_end_date'
+            ])
         
         return readonly
     
@@ -114,6 +149,24 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         class DynamicEventRegistrationForm(form_class):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
+                
+                # Set default approver to logged-in user
+                if 'level1_approver' in self.fields:
+                    if not obj or not obj.level1_approver:
+                        self.fields['level1_approver'].initial = request.user
+                    # Only superusers can change approver
+                    if not request.user.is_superuser:
+                        self.fields['level1_approver'].widget.attrs['readonly'] = True
+                        self.fields['level1_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
+                
+                if 'final_approver' in self.fields:
+                    if not obj or not obj.final_approver:
+                        self.fields['final_approver'].initial = request.user
+                    # Only superusers can change approver
+                    if not request.user.is_superuser:
+                        self.fields['final_approver'].widget.attrs['readonly'] = True
+                        self.fields['final_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
+                
                 # Restrict approval status choices for non-superusers
                 if not request.user.is_superuser and 'approval_status' in self.fields:
                     self.fields['approval_status'].choices = [
@@ -189,18 +242,30 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             self.message_user(request, f'{sent_count} पंजीकरण विवरण ईमेल भेजे गए।')
     send_email_to_approved.short_description = "अप्रूव पंजीकरण को ईमेल भेजें"
     
-    def registration_number_with_email_button(self, obj):
+    def registration_number_with_buttons(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+        
+        buttons = []
+        reg_num = obj.registration_number or '-'
+        
+        # View & Approve button
+        view_url = reverse('admin:events_eventregistration_change', args=[obj.pk])
+        buttons.append(f'<a href="{view_url}" class="button" style="padding: 3px 8px; background: #28a745; color: white; text-decoration: none; border-radius: 3px; font-size: 11px; margin-right: 5px;">View & Approve</a>')
+        
+        # Edit button
+        edit_url = f"{reverse('admin:events_eventregistration_change', args=[obj.pk])}?edit=1"
+        buttons.append(f'<a href="{edit_url}" class="button" style="padding: 3px 8px; background: #007cba; color: white; text-decoration: none; border-radius: 3px; font-size: 11px; margin-right: 5px;">Edit</a>')
+        
+        # Email button for approved registrations
         if obj.approval_status == 'approved' and obj.registration_number:
-            from django.urls import reverse
-            from django.utils.html import format_html
-            url = reverse('events:resend_email', args=[obj.pk])
-            return format_html(
-                '{} <a href="{}" class="button" style="margin-left: 10px; padding: 5px 10px; background: #007cba; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">ईमेल भेजें</a>',
-                obj.registration_number, url
-            )
-        return obj.registration_number or '-'
-    registration_number_with_email_button.short_description = 'पंजीकरण संख्या'
-    registration_number_with_email_button.allow_tags = True
+            email_url = reverse('events:resend_email', args=[obj.pk])
+            buttons.append(f'<a href="{email_url}" class="button" style="padding: 3px 8px; background: #ffc107; color: black; text-decoration: none; border-radius: 3px; font-size: 11px;">Send Email</a>')
+        
+        return format_html(f'{reg_num}<br>{"".join(buttons)}')
+    
+    registration_number_with_buttons.short_description = 'पंजीकरण संख्या / Actions'
+    registration_number_with_buttons.allow_tags = True
     
     def get_vibhag_names(self, obj):
         if obj.selected_vibhags:
@@ -220,6 +285,12 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             return ', '.join(campaign_names)
         return '-'
     get_campaign_names.short_description = 'चयनित अभियान'
+    
+    def get_responsibility_name(self, obj):
+        if obj.registration_type == 'organization_representative' and obj.responsibility:
+            return obj.responsibility.name
+        return '-'
+    get_responsibility_name.short_description = 'जिम्मेदारी/पदनाम'
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -282,14 +353,97 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             pass
         return None
     
+    def response_change(self, request, obj):
+        from django.http import HttpResponseRedirect
+        from django.utils import timezone
+        from django.contrib import messages
+        
+        # Handle custom approval buttons
+        if '_approve_level1' in request.POST:
+            if obj.approval_status == 'pending':
+                obj.approval_status = 'level1_approved'
+                obj.level1_approver = request.user
+                obj.level1_approved_at = timezone.now()
+                obj.save()
+                messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been Level 1 approved.')
+            return HttpResponseRedirect(request.path)
+        
+        elif '_approve_final' in request.POST and request.user.is_superuser:
+            if obj.approval_status == 'level1_approved':
+                obj.approval_status = 'approved'
+                obj.final_approver = request.user
+                obj.final_approved_at = timezone.now()
+                obj.save()  # This will generate registration number and send email
+                messages.success(request, f'Registration {obj.registration_number} has been finally approved and email sent.')
+            return HttpResponseRedirect(request.path)
+        
+        elif '_reject' in request.POST:
+            if obj.approval_status != 'approved':
+                obj.approval_status = 'rejected'
+                obj.save()
+                messages.warning(request, f'Registration {obj.registration_number or obj.full_name} has been rejected.')
+            return HttpResponseRedirect(request.path)
+        
+        return super().response_change(request, obj)
+    
     def save_model(self, request, obj, form, change):
-        # Auto-assign level1_approver for non-superusers
-        if not request.user.is_superuser and obj.approval_status == 'level1_approved' and not obj.level1_approver:
+        from django.utils import timezone
+        from django.contrib import messages
+        
+        # Check if is_confirmed status changed to True
+        send_confirmation_email = False
+        if change and obj.pk:
+            old_obj = EventRegistration.objects.get(pk=obj.pk)
+            if not old_obj.is_confirmed and obj.is_confirmed and not old_obj.email_sent:
+                send_confirmation_email = True
+        elif not change and obj.is_confirmed:
+            send_confirmation_email = True
+        
+        # Auto-assign level1_approver when status changes to level1_approved
+        if obj.approval_status == 'level1_approved' and not obj.level1_approver:
             obj.level1_approver = request.user
             if not obj.level1_approved_at:
-                from django.utils import timezone
                 obj.level1_approved_at = timezone.now()
+        
+        # Auto-assign final_approver when status changes to approved
+        if obj.approval_status == 'approved' and not obj.final_approver:
+            obj.final_approver = request.user
+            if not obj.final_approved_at:
+                obj.final_approved_at = timezone.now()
+        
+        # For non-superusers, ensure they can only set themselves as approver
+        if not request.user.is_superuser:
+            if obj.approval_status == 'level1_approved':
+                obj.level1_approver = request.user
+            elif obj.approval_status == 'approved':
+                obj.final_approver = request.user
+        
         super().save_model(request, obj, form, change)
+        
+        # Send email when is_confirmed is set to True
+        if send_confirmation_email:
+            print(f"\n=== ADMIN EMAIL DEBUG ===")
+            print(f"send_confirmation_email: {send_confirmation_email}")
+            print(f"obj.approval_status: {obj.approval_status}")
+            print(f"obj.is_confirmed: {obj.is_confirmed}")
+            print(f"obj.email_sent: {obj.email_sent}")
+            
+            from .email_utils import send_registration_approval_email
+            try:
+                print(f"Attempting to send email to: {obj.email}")
+                if send_registration_approval_email(obj):
+                    obj.email_sent = True
+                    EventRegistration.objects.filter(pk=obj.pk).update(email_sent=True)
+                    messages.success(request, f'Registration confirmed and email sent to {obj.email}')
+                    print(f"Email sent successfully!")
+                else:
+                    messages.warning(request, f'Registration confirmed but failed to send email to {obj.email}')
+                    print(f"Email sending returned False")
+            except Exception as e:
+                messages.error(request, f'Registration confirmed but email error: {str(e)}')
+                print(f"Email sending exception: {str(e)}")
+                import traceback
+                print(f"Full traceback: {traceback.format_exc()}")
     
     def export_csv(self, request, queryset):
         return ExportManager.export_to_csv(queryset, 'registrations_export', REGISTRATION_FIELDS)

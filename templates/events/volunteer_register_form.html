@@ -323,7 +323,7 @@
                                         <div class="form-group mb-3">
                                             <label class="form-label">समयदान की अवधि <span class="text-danger">*</span></label>
                                             <div class="alert alert-warning mb-3">
-                                                <small><i class="bi bi-calendar-range"></i> कृपया अपने समयदान की अवधि चुनें (12 अगस्त 2025 से 30 अगस्त 2025 तक)</small>
+                                                <small><i class="bi bi-calendar-range"></i> कृपया अपने समयदान की अवधि चुनें (12 अक्टूबर 2025 से 30 अक्टूबर 2025 तक)</small>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -534,9 +534,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const optionDate = new Date(start);
                 optionDate.setDate(start.getDate() - i);
                 
-                // Check if date is within allowed range (12-30 Aug 2025)
-                const minDate = new Date('2025-08-12');
-                const maxDate = new Date('2025-08-30');
+                // Check if date is within allowed range (12-30 Oct 2025)
+                const minDate = new Date('2025-10-12');
+                const maxDate = new Date('2025-10-30');
                 
                 if (optionDate >= minDate && optionDate <= maxDate) {
                     const dateStr = optionDate.toISOString().split('T')[0];
