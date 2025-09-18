@@ -9,12 +9,30 @@ from django.conf import settings
 
 from events.utils import compress_regular_image
 
+class UpZone(models.Model):
+    name = models.CharField(max_length=100, verbose_name="उपजोन नाम")
+    districts = models.JSONField(default=list, verbose_name="जिले")
+    is_active = models.BooleanField(default=True, verbose_name="सक्रिय")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "उपजोन"
+        verbose_name_plural = "उपजोन"
+    
+    def __str__(self):
+        return self.name
+    
+    def get_districts_display(self):
+        return ', '.join(self.districts) if self.districts else 'कोई जिला नहीं'
+
 class ApprovalUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     state_code = models.CharField(max_length=10, verbose_name="राज्य कोड")
     districts = models.JSONField(default=list, blank=True, verbose_name="जिले")  # For MP users
+    upzone = models.ForeignKey(UpZone, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="उपजोन")
     is_state_approver = models.BooleanField(default=False, verbose_name="राज्य अप्रूवर")
     is_district_approver = models.BooleanField(default=False, verbose_name="जिला अप्रूवर")
+    is_upzone_approver = models.BooleanField(default=False, verbose_name="उपजोन अप्रूवर")
     
     class Meta:
         verbose_name = "अप्रूवल यूजर"
@@ -35,6 +53,8 @@ class ApprovalUser(models.Model):
         """Display assignment details"""
         if self.is_district_approver and self.districts:
             return f"{len(self.districts)} जिले"
+        elif self.is_upzone_approver and self.upzone:
+            return f"उपजोन: {self.upzone.name}"
         elif self.is_state_approver:
             return f"1 राज्य ({self.state_code})"
         return "कोई असाइनमेंट नहीं"
@@ -233,20 +253,23 @@ class EventRegistration(models.Model):
     volunteer_start_date = models.DateField(null=True, blank=True, verbose_name="समयदान प्रारंभ तिथि")
     volunteer_end_date = models.DateField(null=True, blank=True, verbose_name="समयदान समाप्ति तिथि")
     
-    # Approval System
+    # 3-Level Approval System: District → UpZone → State
     approval_status = models.CharField(
         max_length=20,
         choices=[
             ('pending', 'प्रतीक्षारत'),
-            ('level1_approved', 'स्तर 1 अप्रूव'),
+            ('district_approved', 'जिला अप्रूव'),
+            ('upzone_approved', 'उपजोन अप्रूव'),
             ('approved', 'अप्रूव'),
             ('rejected', 'अस्वीकृत')
         ],
         default='pending',
         verbose_name="अप्रूवल स्थिति"
     )
-    level1_approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='level1_approvals', verbose_name="स्तर 1 अप्रूवर")
-    level1_approved_at = models.DateTimeField(null=True, blank=True, verbose_name="स्तर 1 अप्रूवल समय")
+    district_approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='district_approvals', verbose_name="जिला अप्रूवर")
+    district_approved_at = models.DateTimeField(null=True, blank=True, verbose_name="जिला अप्रूवल समय")
+    upzone_approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='upzone_approvals', verbose_name="उपजोन अप्रूवर")
+    upzone_approved_at = models.DateTimeField(null=True, blank=True, verbose_name="उपजोन अप्रूवल समय")
     final_approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='final_approvals', verbose_name="अंतिम अप्रूवर")
     final_approved_at = models.DateTimeField(null=True, blank=True, verbose_name="अंतिम अप्रूवल समय")
     rejection_reason = models.TextField(blank=True, verbose_name="अस्वीकृति कारण")
@@ -272,13 +295,26 @@ class EventRegistration(models.Model):
     
     def matches_approval_user(self, approval_user):
         """Check if this registration matches the approval user's assignment"""
-        if approval_user.state_code == 'MP' and approval_user.is_district_approver:
-            # For MP, check district assignment
-            return self.city in approval_user.districts if approval_user.districts else False
+        if approval_user.state_code == 'MP':
+            if approval_user.is_district_approver:
+                # District level - check district assignment
+                return self.city in approval_user.districts if approval_user.districts else False
+            elif approval_user.is_upzone_approver and approval_user.upzone:
+                # UpZone level - check if registration's district is in upzone
+                return self.city in approval_user.upzone.districts if approval_user.upzone.districts else False
+            elif approval_user.is_state_approver:
+                # State level - check state
+                return True
         elif approval_user.is_state_approver:
             # For other states, check state assignment
             return self.state_code == approval_user.state_code
         return False
+    
+    def get_upzone_for_district(self):
+        """Get UpZone for this registration's district"""
+        if self.state_code == 'MP':
+            return UpZone.objects.filter(districts__contains=[self.city], is_active=True).first()
+        return None
 
     class Meta:
         verbose_name = "पंजीकरण"
@@ -335,22 +371,39 @@ class EventRegistration(models.Model):
                 print(f"Error sending approval email to {self.email}: {str(e)}")
 
     
-    def get_approver_for_registration(self):
-        """Get appropriate approver based on state"""
+    def get_approver_for_registration(self, level='district'):
+        """Get appropriate approver based on state and level"""
         state_code = self.state_code
         if state_code == 'MP':
-            # For MP, find district-wise approver
-            return ApprovalUser.objects.filter(
-                state_code='MP',
-                is_district_approver=True,
-                districts__contains=[self.city]
-            ).first()
+            if level == 'district':
+                # For MP, find district-wise approver
+                return ApprovalUser.objects.filter(
+                    state_code='MP',
+                    is_district_approver=True,
+                    districts__contains=[self.city]
+                ).first()
+            elif level == 'upzone':
+                # Find upzone approver for this district
+                upzone = self.get_upzone_for_district()
+                if upzone:
+                    return ApprovalUser.objects.filter(
+                        state_code='MP',
+                        is_upzone_approver=True,
+                        upzone=upzone
+                    ).first()
+            elif level == 'state':
+                # Find state approver
+                return ApprovalUser.objects.filter(
+                    state_code='MP',
+                    is_state_approver=True
+                ).first()
         else:
             # For other states, find state-wise approver
             return ApprovalUser.objects.filter(
                 state_code=state_code,
                 is_state_approver=True
             ).first()
+        return None
     
     def get_campaign_names(self):
         """Get readable campaign names for export"""

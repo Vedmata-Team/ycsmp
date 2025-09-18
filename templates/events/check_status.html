@@ -225,14 +225,17 @@
                                         <h5 style="margin: 0; color: #333;">{{ registration.event.title }}</h5>
                                         <span class="status-badge 
                                             {% if registration.approval_status == 'pending' %}status-pending
-                                            {% elif registration.approval_status == 'level1_approved' %}status-level1
+                                            {% elif registration.approval_status == 'district_approved' %}status-level1
+                                            {% elif registration.approval_status == 'upzone_approved' %}status-level1
                                             {% elif registration.approval_status == 'approved' %}status-approved
                                             {% elif registration.approval_status == 'rejected' %}status-rejected
                                             {% endif %}">
                                             {% if registration.approval_status == 'pending' %}
                                                 प्रतीक्षारत
-                                            {% elif registration.approval_status == 'level1_approved' %}
-                                                स्तर 1 अप्रूव
+                                            {% elif registration.approval_status == 'district_approved' %}
+                                                जिला अप्रूव
+                                            {% elif registration.approval_status == 'upzone_approved' %}
+                                                उपजोन अप्रूव
                                             {% elif registration.approval_status == 'approved' %}
                                                 अप्रूव ✓
                                             {% elif registration.approval_status == 'rejected' %}

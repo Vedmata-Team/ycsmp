@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
-from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption
+from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone
+from .admin_upzone import UpZoneAdmin
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
 
 class EventImageInline(admin.TabularInline):
@@ -58,7 +59,7 @@ class EventAdmin(admin.ModelAdmin):
 class EventRegistrationAdmin(admin.ModelAdmin):
     list_display = ('registration_number_with_buttons', 'full_name', 'event', 'registration_type', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
     list_filter = ('event', 'registration_type', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
-    actions = ['approve_level1', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
+    actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date')
     list_editable = ('is_confirmed',)
@@ -80,7 +81,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('previous_shivir', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
         }),
         ('अप्रूवल स्थिति', {
-            'fields': ('approval_status', 'level1_approver', 'level1_approved_at', 'final_approver', 'final_approved_at', 'rejection_reason', 'email_sent')
+            'fields': ('approval_status', 'district_approver', 'district_approved_at', 'upzone_approver', 'upzone_approved_at', 'final_approver', 'final_approved_at', 'rejection_reason', 'email_sent')
         }),
         ('स्थिति', {
             'fields': ('is_confirmed', 'payment_status')
@@ -110,21 +111,23 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         readonly = list(self.readonly_fields)
         readonly.extend(['get_vibhag_names', 'get_campaign_names'])
         if obj:
-            readonly.extend(['level1_approved_at', 'final_approved_at', 'email_sent'])
+            readonly.extend(['district_approved_at', 'upzone_approved_at', 'final_approved_at', 'email_sent'])
         
         # Check if this is edit mode
         is_edit_mode = request.GET.get('edit') == '1'
         
-        # Level 1 approvers cannot edit final approval fields
+        # Non-superusers cannot edit final approval fields
         if not request.user.is_superuser:
-            readonly.extend(['final_approver', 'final_approved_at', 'registration_number', 'level1_approver', 'email_sent'])
-            if obj and obj.approval_status in ['approved', 'level1_approved'] and not is_edit_mode:
+            readonly.extend(['final_approver', 'final_approved_at', 'registration_number', 'district_approver', 'upzone_approver', 'email_sent'])
+            if obj and obj.approval_status in ['approved', 'upzone_approved', 'district_approved'] and not is_edit_mode:
                 readonly.extend(['approval_status'])
         else:
             # Even superusers can't edit approver fields if already set (unless in edit mode)
             if obj and not is_edit_mode:
-                if obj.level1_approver:
-                    readonly.append('level1_approver')
+                if obj.district_approver:
+                    readonly.append('district_approver')
+                if obj.upzone_approver:
+                    readonly.append('upzone_approver')
                 if obj.final_approver:
                     readonly.append('final_approver')
         
@@ -151,13 +154,19 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 super().__init__(*args, **kwargs)
                 
                 # Set default approver to logged-in user
-                if 'level1_approver' in self.fields:
-                    if not obj or not obj.level1_approver:
-                        self.fields['level1_approver'].initial = request.user
-                    # Only superusers can change approver
+                if 'district_approver' in self.fields:
+                    if not obj or not obj.district_approver:
+                        self.fields['district_approver'].initial = request.user
                     if not request.user.is_superuser:
-                        self.fields['level1_approver'].widget.attrs['readonly'] = True
-                        self.fields['level1_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
+                        self.fields['district_approver'].widget.attrs['readonly'] = True
+                        self.fields['district_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
+                
+                if 'upzone_approver' in self.fields:
+                    if not obj or not obj.upzone_approver:
+                        self.fields['upzone_approver'].initial = request.user
+                    if not request.user.is_superuser:
+                        self.fields['upzone_approver'].widget.attrs['readonly'] = True
+                        self.fields['upzone_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
                 
                 if 'final_approver' in self.fields:
                     if not obj or not obj.final_approver:
@@ -167,40 +176,89 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         self.fields['final_approver'].widget.attrs['readonly'] = True
                         self.fields['final_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
                 
-                # Restrict approval status choices for non-superusers
-                if not request.user.is_superuser and 'approval_status' in self.fields:
-                    self.fields['approval_status'].choices = [
-                        ('pending', 'प्रतीक्षारत'),
-                        ('level1_approved', 'स्तर 1 अप्रूव'),
-                        ('rejected', 'अस्वीकृत')
-                    ]
+                # Restrict approval status choices based on user type
+                if 'approval_status' in self.fields:
+                    try:
+                        approval_user = ApprovalUser.objects.get(user=request.user)
+                        if approval_user.is_district_approver:
+                            self.fields['approval_status'].choices = [
+                                ('pending', 'प्रतीक्षारत'),
+                                ('district_approved', 'जिला अप्रूव'),
+                                ('rejected', 'अस्वीकृत')
+                            ]
+                        elif approval_user.is_upzone_approver:
+                            self.fields['approval_status'].choices = [
+                                ('district_approved', 'जिला अप्रूव'),
+                                ('upzone_approved', 'उपजोन अप्रूव'),
+                                ('rejected', 'अस्वीकृत')
+                            ]
+                        elif not request.user.is_superuser:
+                            self.fields['approval_status'].choices = [
+                                ('upzone_approved', 'उपजोन अप्रूव'),
+                                ('approved', 'अप्रूव'),
+                                ('rejected', 'अस्वीकृत')
+                            ]
+                    except ApprovalUser.DoesNotExist:
+                        pass
         
         return DynamicEventRegistrationForm
     
     def get_actions(self, request):
         actions = super().get_actions(request)
-        # Remove final approval action for non-superusers
-        if not request.user.is_superuser and 'approve_final' in actions:
-            del actions['approve_final']
+        try:
+            approval_user = ApprovalUser.objects.get(user=request.user)
+            # Remove actions based on user level
+            if approval_user.is_district_approver:
+                if 'approve_upzone' in actions:
+                    del actions['approve_upzone']
+                if 'approve_final' in actions:
+                    del actions['approve_final']
+            elif approval_user.is_upzone_approver:
+                if 'approve_district' in actions:
+                    del actions['approve_district']
+                if 'approve_final' in actions:
+                    del actions['approve_final']
+            elif not request.user.is_superuser:
+                if 'approve_district' in actions:
+                    del actions['approve_district']
+                if 'approve_upzone' in actions:
+                    del actions['approve_upzone']
+        except ApprovalUser.DoesNotExist:
+            if not request.user.is_superuser:
+                for action in ['approve_district', 'approve_upzone', 'approve_final']:
+                    if action in actions:
+                        del actions[action]
         return actions
     
-    def approve_level1(self, request, queryset):
+    def approve_district(self, request, queryset):
         from django.utils import timezone
         updated = 0
         for registration in queryset.filter(approval_status='pending'):
-            registration.approval_status = 'level1_approved'
-            registration.level1_approver = request.user
-            registration.level1_approved_at = timezone.now()
+            registration.approval_status = 'district_approved'
+            registration.district_approver = request.user
+            registration.district_approved_at = timezone.now()
             registration.save()
             updated += 1
-        self.message_user(request, f'{updated} पंजीकरण स्तर 1 अप्रूव किए गए।')
-    approve_level1.short_description = "स्तर 1 अप्रूव करें"
+        self.message_user(request, f'{updated} पंजीकरण जिला अप्रूव किए गए।')
+    approve_district.short_description = "जिला अप्रूव करें"
+    
+    def approve_upzone(self, request, queryset):
+        from django.utils import timezone
+        updated = 0
+        for registration in queryset.filter(approval_status='district_approved'):
+            registration.approval_status = 'upzone_approved'
+            registration.upzone_approver = request.user
+            registration.upzone_approved_at = timezone.now()
+            registration.save()
+            updated += 1
+        self.message_user(request, f'{updated} पंजीकरण उपजोन अप्रूव किए गए।')
+    approve_upzone.short_description = "उपजोन अप्रूव करें"
     
     def approve_final(self, request, queryset):
         from django.utils import timezone
         updated = 0
         email_sent = 0
-        for registration in queryset.filter(approval_status='level1_approved'):
+        for registration in queryset.filter(approval_status='upzone_approved'):
             registration.approval_status = 'approved'
             registration.final_approver = request.user
             registration.final_approved_at = timezone.now()
@@ -303,10 +361,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
             
-            # For MP state - filter by assigned districts
-            if approval_user.state_code == 'MP' and approval_user.is_district_approver:
-                if approval_user.districts:
-                    # Filter by city (district) and also check state to be safe
+            # For MP state - filter by assigned districts/upzones
+            if approval_user.state_code == 'MP':
+                if approval_user.is_district_approver and approval_user.districts:
+                    # District level - filter by assigned districts
                     return qs.filter(
                         city__in=approval_user.districts,
                         state__icontains='madhya pradesh'
@@ -314,8 +372,24 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         city__in=approval_user.districts,
                         state__iexact='MP'
                     )
+                elif approval_user.is_upzone_approver and approval_user.upzone:
+                    # UpZone level - filter by upzone districts
+                    return qs.filter(
+                        city__in=approval_user.upzone.districts,
+                        state__icontains='madhya pradesh'
+                    ) | qs.filter(
+                        city__in=approval_user.upzone.districts,
+                        state__iexact='MP'
+                    )
+                elif approval_user.is_state_approver:
+                    # State level - all MP registrations
+                    return qs.filter(
+                        state__icontains='madhya pradesh'
+                    ) | qs.filter(
+                        state__iexact='MP'
+                    )
                 else:
-                    return qs.none()  # No districts assigned
+                    return qs.none()  # No assignment
             
             # For other states - filter by state
             elif approval_user.is_state_approver:
@@ -359,17 +433,26 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         from django.contrib import messages
         
         # Handle custom approval buttons
-        if '_approve_level1' in request.POST:
+        if '_approve_district' in request.POST:
             if obj.approval_status == 'pending':
-                obj.approval_status = 'level1_approved'
-                obj.level1_approver = request.user
-                obj.level1_approved_at = timezone.now()
+                obj.approval_status = 'district_approved'
+                obj.district_approver = request.user
+                obj.district_approved_at = timezone.now()
                 obj.save()
-                messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been Level 1 approved.')
+                messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been district approved.')
+            return HttpResponseRedirect(request.path)
+        
+        elif '_approve_upzone' in request.POST:
+            if obj.approval_status == 'district_approved':
+                obj.approval_status = 'upzone_approved'
+                obj.upzone_approver = request.user
+                obj.upzone_approved_at = timezone.now()
+                obj.save()
+                messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been upzone approved.')
             return HttpResponseRedirect(request.path)
         
         elif '_approve_final' in request.POST and request.user.is_superuser:
-            if obj.approval_status == 'level1_approved':
+            if obj.approval_status == 'upzone_approved':
                 obj.approval_status = 'approved'
                 obj.final_approver = request.user
                 obj.final_approved_at = timezone.now()
@@ -399,11 +482,16 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         elif not change and obj.is_confirmed:
             send_confirmation_email = True
         
-        # Auto-assign level1_approver when status changes to level1_approved
-        if obj.approval_status == 'level1_approved' and not obj.level1_approver:
-            obj.level1_approver = request.user
-            if not obj.level1_approved_at:
-                obj.level1_approved_at = timezone.now()
+        # Auto-assign approvers when status changes
+        if obj.approval_status == 'district_approved' and not obj.district_approver:
+            obj.district_approver = request.user
+            if not obj.district_approved_at:
+                obj.district_approved_at = timezone.now()
+        
+        if obj.approval_status == 'upzone_approved' and not obj.upzone_approver:
+            obj.upzone_approver = request.user
+            if not obj.upzone_approved_at:
+                obj.upzone_approved_at = timezone.now()
         
         # Auto-assign final_approver when status changes to approved
         if obj.approval_status == 'approved' and not obj.final_approver:
@@ -413,8 +501,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         # For non-superusers, ensure they can only set themselves as approver
         if not request.user.is_superuser:
-            if obj.approval_status == 'level1_approved':
-                obj.level1_approver = request.user
+            if obj.approval_status == 'district_approved':
+                obj.district_approver = request.user
+            elif obj.approval_status == 'upzone_approved':
+                obj.upzone_approver = request.user
             elif obj.approval_status == 'approved':
                 obj.final_approver = request.user
         
@@ -470,7 +560,7 @@ class ApprovalUserForm(forms.ModelForm):
         choices=[],
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'searchable-districts'}),
         required=False,
-        label="जिले (केवल MP के लिए)"
+        label="जिले (केवल जिला अप्रूवर के लिए)"
     )
     
     class Meta:
@@ -540,7 +630,7 @@ class ApprovalUserAdmin(admin.ModelAdmin):
             'fields': ('user', 'state_code')
         }),
         ('अधिकार', {
-            'fields': ('is_state_approver', 'is_district_approver', 'districts')
+            'fields': ('is_state_approver', 'is_upzone_approver', 'upzone', 'is_district_approver', 'districts')
         }),
         ('असाइनमेंट जानकारी', {
             'fields': (),

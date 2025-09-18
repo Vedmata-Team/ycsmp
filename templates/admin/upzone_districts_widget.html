@@ -1,0 +1,99 @@
+<div class="districts-selector">
+    <div class="districts-row">
+        <!-- Available Districts -->
+        <div class="districts-column">
+            <h4>उपलब्ध जिले</h4>
+            <input type="text" class="district-search" placeholder="जिला खोजें..." id="search-available">
+            <select multiple class="districts-list" id="available-districts" size="12">
+                {% for district in available_districts %}
+                    <option value="{{ district }}">{{ district }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div class="districts-controls">
+            <button type="button" class="btn-move" id="move-right" title="Add Selected">→</button>
+            <button type="button" class="btn-move" id="move-all-right" title="Add All">⇒</button>
+            <button type="button" class="btn-move" id="move-left" title="Remove Selected">←</button>
+            <button type="button" class="btn-move" id="move-all-left" title="Remove All">⇐</button>
+        </div>
+        
+        <!-- Selected Districts -->
+        <div class="districts-column">
+            <h4>चयनित जिले</h4>
+            <input type="text" class="district-search" placeholder="जिला खोजें..." id="search-selected">
+            <select multiple class="districts-list" id="selected-districts" size="12">
+                {% for district in selected_districts %}
+                    <option value="{{ district }}">{{ district }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <!-- Hidden input to store selected values -->
+    <input type="hidden" name="{{ widget.name }}" id="hidden-{{ widget.name }}" value="">
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const availableList = document.getElementById('available-districts');
+    const selectedList = document.getElementById('selected-districts');
+    const hiddenInput = document.getElementById('hidden-{{ widget.name|escapejs }}');
+    
+    // Update hidden input
+    function updateHiddenInput() {
+        const selected = Array.from(selectedList.options).map(opt => opt.value);
+        hiddenInput.value = JSON.stringify(selected);
+    }
+    
+    // Move functions
+    function moveOptions(from, to) {
+        const selected = Array.from(from.selectedOptions);
+        selected.forEach(option => {
+            to.appendChild(option);
+            option.selected = false;
+        });
+        sortOptions(to);
+        updateHiddenInput();
+    }
+    
+    function moveAllOptions(from, to) {
+        Array.from(from.options).forEach(option => {
+            to.appendChild(option);
+        });
+        sortOptions(to);
+        updateHiddenInput();
+    }
+    
+    function sortOptions(select) {
+        const options = Array.from(select.options);
+        options.sort((a, b) => a.text.localeCompare(b.text));
+        select.innerHTML = '';
+        options.forEach(option => select.appendChild(option));
+    }
+    
+    // Search functionality
+    function setupSearch(searchInput, targetList) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            Array.from(targetList.options).forEach(option => {
+                const text = option.textContent.toLowerCase();
+                option.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+    
+    // Event listeners
+    document.getElementById('move-right').addEventListener('click', () => moveOptions(availableList, selectedList));
+    document.getElementById('move-left').addEventListener('click', () => moveOptions(selectedList, availableList));
+    document.getElementById('move-all-right').addEventListener('click', () => moveAllOptions(availableList, selectedList));
+    document.getElementById('move-all-left').addEventListener('click', () => moveAllOptions(selectedList, availableList));
+    
+    setupSearch(document.getElementById('search-available'), availableList);
+    setupSearch(document.getElementById('search-selected'), selectedList);
+    
+    // Initialize hidden input
+    updateHiddenInput();
+});
+</script>

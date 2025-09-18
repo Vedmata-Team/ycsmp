@@ -186,8 +186,10 @@
                             <span class="detail-value status-badge">
                                 {% if registration.approval_status == 'pending' %}
                                     प्रतीक्षारत
-                                {% elif registration.approval_status == 'level1_approved' %}
-                                    स्तर 1 अप्रूव
+                                {% elif registration.approval_status == 'district_approved' %}
+                                    जिला अप्रूव
+                                {% elif registration.approval_status == 'upzone_approved' %}
+                                    उपजोन अप्रूव
                                 {% elif registration.approval_status == 'approved' %}
                                     अप्रूव
                                 {% elif registration.approval_status == 'rejected' %}
