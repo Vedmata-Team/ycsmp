@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
+from django.urls import path
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone
 from .admin_upzone import UpZoneAdmin
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
@@ -414,54 +417,94 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
             
+            # Debug logging
+            print(f"\n=== QUERYSET DEBUG for {request.user.username} ===")
+            print(f"ApprovalUser: {approval_user}")
+            print(f"State Code: {approval_user.state_code}")
+            print(f"Is UpZone Approver: {approval_user.is_upzone_approver}")
+            print(f"UpZone: {approval_user.upzone}")
+            if approval_user.upzone:
+                print(f"UpZone Districts: {approval_user.upzone.districts}")
+            
             # For MP state - filter by assigned districts/upzones
             if approval_user.state_code == 'MP':
                 if approval_user.is_district_approver and approval_user.districts:
                     # District level - filter by assigned districts
-                    return qs.filter(
+                    filtered_qs = qs.filter(
                         city__in=approval_user.districts,
-                        state__icontains='madhya pradesh'
-                    ) | qs.filter(
-                        city__in=approval_user.districts,
-                        state__iexact='MP'
+                        approval_status__in=['pending', 'district_approved', 'upzone_approved', 'approved']
+                    ).filter(
+                        models.Q(state__icontains='madhya pradesh') |
+                        models.Q(state__iexact='MP')
                     )
+                    print(f"District Approver - Filtered count: {filtered_qs.count()}")
+                    return filtered_qs
+                    
                 elif approval_user.is_upzone_approver and approval_user.upzone:
                     # UpZone level - filter by upzone districts
-                    return qs.filter(
-                        city__in=approval_user.upzone.districts,
-                        state__icontains='madhya pradesh'
-                    ) | qs.filter(
-                        city__in=approval_user.upzone.districts,
-                        state__iexact='MP'
-                    )
+                    upzone_districts = approval_user.upzone.districts or []
+                    print(f"UpZone Districts to filter: {upzone_districts}")
+                    
+                    if upzone_districts:
+                        # Show registrations that are district_approved and from upzone districts
+                        filtered_qs = qs.filter(
+                            city__in=upzone_districts,
+                            approval_status__in=['district_approved', 'upzone_approved', 'approved']
+                        ).filter(
+                            models.Q(state__icontains='madhya pradesh') |
+                            models.Q(state__iexact='MP')
+                        )
+                        print(f"UpZone Approver - Filtered count: {filtered_qs.count()}")
+                        
+                        # Debug: Show what registrations exist
+                        all_mp_regs = qs.filter(
+                            models.Q(state__icontains='madhya pradesh') |
+                            models.Q(state__iexact='MP')
+                        )
+                        print(f"Total MP registrations: {all_mp_regs.count()}")
+                        
+                        district_approved = all_mp_regs.filter(approval_status='district_approved')
+                        print(f"District approved MP registrations: {district_approved.count()}")
+                        
+                        return filtered_qs
+                    else:
+                        print("No districts assigned to UpZone")
+                        return qs.none()
+                        
                 elif approval_user.is_state_approver:
                     # State level - all MP registrations
-                    return qs.filter(
-                        state__icontains='madhya pradesh'
-                    ) | qs.filter(
-                        state__iexact='MP'
+                    filtered_qs = qs.filter(
+                        models.Q(state__icontains='madhya pradesh') |
+                        models.Q(state__iexact='MP')
                     )
+                    print(f"State Approver - Filtered count: {filtered_qs.count()}")
+                    return filtered_qs
                 else:
-                    return qs.none()  # No assignment
+                    print("No valid approver role assigned")
+                    return qs.none()
             
             # For other states - filter by state
             elif approval_user.is_state_approver:
-                # Get state name from state code and filter by multiple variations
                 state_name = self.get_state_name_from_code(approval_user.state_code)
                 if state_name:
-                    return qs.filter(
+                    filtered_qs = qs.filter(
                         models.Q(state__iexact=state_name) |
                         models.Q(state__iexact=approval_user.state_code)
                     )
                 else:
-                    # Fallback to state code only
-                    return qs.filter(state__iexact=approval_user.state_code)
+                    filtered_qs = qs.filter(state__iexact=approval_user.state_code)
+                print(f"Other State Approver - Filtered count: {filtered_qs.count()}")
+                return filtered_qs
             
             else:
-                return qs.none()  # User has no approval permissions
+                print("User has no approval permissions")
+                return qs.none()
                 
         except ApprovalUser.DoesNotExist:
-            # User is not an approval user, show no registrations
+            print(f"No ApprovalUser record found for {request.user.username}")
+            return qs.none()
+        except Exception as e:
+            print(f"Error in get_queryset: {str(e)}")
             return qs.none()
     
     def get_state_name_from_code(self, state_code):
@@ -673,8 +716,8 @@ class ApprovalUserForm(forms.ModelForm):
 @admin.register(ApprovalUser)
 class ApprovalUserAdmin(admin.ModelAdmin):
     form = ApprovalUserForm
-    list_display = ('user', 'state_code', 'is_state_approver', 'is_district_approver', 'get_assignment_display')
-    list_filter = ('state_code', 'is_state_approver', 'is_district_approver')
+    list_display = ('user', 'state_code', 'is_state_approver', 'is_district_approver', 'is_upzone_approver', 'get_assignment_display')
+    list_filter = ('state_code', 'is_state_approver', 'is_district_approver', 'is_upzone_approver', 'upzone')
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
     actions = ['export_csv', 'export_excel', 'export_pdf']
     
@@ -682,12 +725,13 @@ class ApprovalUserAdmin(admin.ModelAdmin):
         ('यूजर जानकारी', {
             'fields': ('user', 'state_code')
         }),
-        ('अधिकार', {
-            'fields': ('is_state_approver', 'is_upzone_approver', 'upzone', 'is_district_approver', 'districts')
+        ('अधिकार स्तर (केवल एक चुनें)', {
+            'fields': ('is_state_approver', 'is_upzone_approver', 'is_district_approver'),
+            'description': 'केवल एक अधिकार स्तर चुनें - राज्य, उपजोन, या जिला'
         }),
-        ('असाइनमेंट जानकारी', {
-            'fields': (),
-            'description': 'इस यूजर को असाइन किए गए जिले/राज्य की जानकारी देखने के लिए सेव करें।'
+        ('असाइनमेंट', {
+            'fields': ('upzone', 'districts'),
+            'description': 'उपजोन अप्रूवर के लिए उपजोन चुनें, जिला अप्रूवर के लिए जिले चुनें'
         })
     )
     
@@ -696,7 +740,7 @@ class ApprovalUserAdmin(admin.ModelAdmin):
     get_assignment_display.short_description = 'असाइनमेंट'
     
     class Media:
-        js = ('admin/js/approval_user.js',)
+        js = ('admin/js/approval_user.js', 'admin/js/approval_user_upzone.js')
         css = {
             'all': ('admin/css/approval_user.css',)
         }
