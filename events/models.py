@@ -253,6 +253,18 @@ class EventRegistration(models.Model):
     volunteer_start_date = models.DateField(null=True, blank=True, verbose_name="समयदान प्रारंभ तिथि")
     volunteer_end_date = models.DateField(null=True, blank=True, verbose_name="समयदान समाप्ति तिथि")
     
+    # Document uploads (only for participant registration) - stored as URLs
+    aadhar_upload_type = models.CharField(
+        max_length=20,
+        choices=[('full', 'पूरा आधार'), ('separate', 'अलग-अलग (आगे-पीछे)')],
+        null=True, blank=True,
+        verbose_name="आधार अपलोड प्रकार"
+    )
+    aadhar_full = models.URLField(null=True, blank=True, verbose_name="पूरा आधार")
+    aadhar_front = models.URLField(null=True, blank=True, verbose_name="आधार आगे")
+    aadhar_back = models.URLField(null=True, blank=True, verbose_name="आधार पीछे")
+    passport_photo = models.URLField(null=True, blank=True, verbose_name="पासपोर्ट फोटो")
+    
     # 3-Level Approval System: District → UpZone → State
     approval_status = models.CharField(
         max_length=20,

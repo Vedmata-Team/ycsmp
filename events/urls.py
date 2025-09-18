@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import export_views
+from . import document_views
 
 app_name = 'events'
 
@@ -19,6 +20,10 @@ urlpatterns = [
     path('check-status/', views.check_status, name='check_status'),
     path('resend-email/<int:registration_id>/', views.resend_registration_email, name='resend_email'),
     path('test-email/', views.test_email, name='test_email'),
+    
+    # Document upload URLs
+    path('upload-document/', document_views.upload_document, name='upload_document'),
+    path('store-temp-user-info/', document_views.store_temp_user_info, name='store_temp_user_info'),
     
     # Export URLs
     path('export/events/', export_views.export_events, name='export_events'),

@@ -6,7 +6,8 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/registration_form.css' %}">
-       
+    <link rel="stylesheet" href="{% static 'css/document_upload.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 {% endblock %}
 
 {% block content %}
@@ -277,6 +278,91 @@
                                     </div>
                                 </div>
 
+                                <!-- Document Upload Section (Only for Participant Registration) -->
+                                <div class="document-upload-section">
+                                    <h5 class="mb-3">
+                                        <i class="bi bi-file-earmark-image"></i>
+                                        दस्तावेज़ अपलोड करें
+                                    </h5>
+                                    
+                                    <!-- Aadhar Card Upload -->
+                                    <div class="aadhar-type-selector">
+                                        <h6>आधार कार्ड अपलोड करें <span class="text-danger">*</span></h6>
+                                        <p class="text-muted mb-3">कृपया आधार कार्ड अपलोड करने का तरीका चुनें:</p>
+                                        
+                                        <div class="aadhar-type-option" onclick="selectAadharType('full')">
+                                            <input type="radio" name="aadhar_upload_type" value="full" id="aadhar_full_type">
+                                            <div>
+                                                <strong>पूरा आधार कार्ड</strong>
+                                                <br><small class="text-muted">यदि आपके पास दोनों तरफ का आधार एक ही फोटो में है</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="aadhar-type-option" onclick="selectAadharType('separate')">
+                                            <input type="radio" name="aadhar_upload_type" value="separate" id="aadhar_separate_type">
+                                            <div>
+                                                <strong>अलग-अलग (आगे-पीछे)</strong>
+                                                <br><small class="text-muted">यदि आपके पास आगे और पीछे की अलग-अलग फोटो है</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Full Aadhar Upload -->
+                                    <div id="aadhar_full_upload" class="aadhar-uploads">
+                                        <div class="document-upload-card" onclick="openDocumentUploader('aadhar_full')">
+                                            <div class="upload-icon doc-type-aadhar">
+                                                <i class="bi bi-card-image"></i>
+                                            </div>
+                                            <div class="upload-text">पूरा आधार कार्ड अपलोड करें</div>
+                                            <div class="upload-subtext">कैमरा या गैलरी से चुनें</div>
+                                            <img id="aadhar_full_preview" class="document-preview" alt="Aadhar Full Preview">
+                                            <input type="hidden" name="aadhar_full" id="aadhar_full_input">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Separate Aadhar Upload -->
+                                    <div id="aadhar_separate_upload" class="aadhar-uploads">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="document-upload-card" onclick="openDocumentUploader('aadhar_front')">
+                                                    <div class="upload-icon doc-type-aadhar">
+                                                        <i class="bi bi-card-image"></i>
+                                                    </div>
+                                                    <div class="upload-text">आधार कार्ड (आगे)</div>
+                                                    <div class="upload-subtext">कैमरा या गैलरी से चुनें</div>
+                                                    <img id="aadhar_front_preview" class="document-preview" alt="Aadhar Front Preview">
+                                                    <input type="hidden" name="aadhar_front" id="aadhar_front_input">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="document-upload-card" onclick="openDocumentUploader('aadhar_back')">
+                                                    <div class="upload-icon doc-type-aadhar">
+                                                        <i class="bi bi-card-image"></i>
+                                                    </div>
+                                                    <div class="upload-text">आधार कार्ड (पीछे)</div>
+                                                    <div class="upload-subtext">कैमरा या गैलरी से चुनें</div>
+                                                    <img id="aadhar_back_preview" class="document-preview" alt="Aadhar Back Preview">
+                                                    <input type="hidden" name="aadhar_back" id="aadhar_back_input">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Passport Photo Upload -->
+                                    <div class="mt-4">
+                                        <h6>पासपोर्ट साइज़ फोटो <span class="text-danger">*</span></h6>
+                                        <div class="document-upload-card" onclick="openDocumentUploader('passport_photo')">
+                                            <div class="upload-icon doc-type-passport">
+                                                <i class="bi bi-person-square"></i>
+                                            </div>
+                                            <div class="upload-text">पासपोर्ट साइज़ फोटो अपलोड करें</div>
+                                            <div class="upload-subtext">कैमरा या गैलरी से चुनें</div>
+                                            <img id="passport_photo_preview" class="document-preview" alt="Passport Photo Preview">
+                                            <input type="hidden" name="passport_photo" id="passport_photo_input">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="text-end">
                                     <button type="button" class="btn btn-next" onclick="nextStep(0)">
                                         अगला <i class="bi bi-arrow-right"></i>
@@ -417,8 +503,10 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="{% static 'js/event_location_select.js' %}"></script>
 <script src="{% static 'js/registration_form.js' %}"></script>
+<script src="{% static 'js/document_upload.js' %}"></script>
 <script>
 // Age validation for participant registration only
 function validateParticipantAge() {
@@ -464,9 +552,30 @@ window.nextStep = function(currentStepIndex) {
         if (!validateParticipantAge()) {
             return; // Block progression
         }
+        // Document validation for step 0
+        if (!validateFormBeforeSubmit()) {
+            return; // Block progression
+        }
     }
     // Call original nextStep function
     window.originalNextStep(currentStepIndex);
 };
+
+// Aadhar type selection function
+function selectAadharType(type) {
+    // Update radio button
+    document.getElementById('aadhar_' + type + '_type').checked = true;
+    
+    // Remove selected class from all options
+    document.querySelectorAll('.aadhar-type-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    event.currentTarget.classList.add('selected');
+    
+    // Trigger validation
+    validateAadharUploads();
+}
 </script>
 {% endblock %}

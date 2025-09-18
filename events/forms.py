@@ -184,6 +184,38 @@ class EventRegistrationForm(BaseEventRegistrationForm):
         label="आगमन तिथि"
     )
     
+    # Document upload fields as URL fields
+    aadhar_upload_type = forms.ChoiceField(
+        choices=[('full', 'पूरा आधार कार्ड'), ('separate', 'अलग-अलग (आगे-पीछे)')],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        required=False,
+        label="आधार कार्ड अपलोड का तरीका"
+    )
+    
+    aadhar_full = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        label="पूरा आधार कार्ड"
+    )
+    
+    aadhar_front = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        label="आधार कार्ड (आगे)"
+    )
+    
+    aadhar_back = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        label="आधार कार्ड (पीछे)"
+    )
+    
+    passport_photo = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        label="पासपोर्ट साइज़ फोटो"
+    )
+    
     def clean_date_of_birth(self):
         date_of_birth = self.cleaned_data.get('date_of_birth')
         
@@ -227,6 +259,7 @@ class EventRegistrationForm(BaseEventRegistrationForm):
             'arrival_date': forms.Select(attrs={'class': 'form-select'}),
             'interested_in_volunteering': forms.RadioSelect(choices=[(True, 'हाँ'), (False, 'नहीं')], attrs={'class': 'form-check-input'}),
             'volunteering_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'आप कैसे योगदान देना चाहते हैं?'}),
+
         }
     
     def clean_campaigns(self):
@@ -241,6 +274,27 @@ class EventRegistrationForm(BaseEventRegistrationForm):
             raise forms.ValidationError('कृपया युवा जोड़ो अभियान के अतिरिक्त कम से कम एक और अभियान चुनें।')
         
         return campaigns
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        aadhar_type = cleaned_data.get('aadhar_upload_type')
+        aadhar_full = cleaned_data.get('aadhar_full')
+        aadhar_front = cleaned_data.get('aadhar_front')
+        aadhar_back = cleaned_data.get('aadhar_back')
+        passport_photo = cleaned_data.get('passport_photo')
+        
+        # Check if user has uploaded aadhar in any valid way
+        has_full_aadhar = bool(aadhar_full and str(aadhar_full).strip())
+        has_front_back = bool(aadhar_front and str(aadhar_front).strip() and aadhar_back and str(aadhar_back).strip())
+        
+        if not has_full_aadhar and not has_front_back:
+            raise forms.ValidationError('आधार कार्ड अपलोड करना आवश्यक है (पूरा या आगे-पीछे)।')
+        
+        # Validate passport photo
+        if not passport_photo or not str(passport_photo).strip():
+            raise forms.ValidationError('कृपया पासपोर्ट साइज़ फोटो अपलोड करें।')
+        
+        return cleaned_data
 
 
 # Volunteer Registration Form

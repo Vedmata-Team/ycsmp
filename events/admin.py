@@ -77,6 +77,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         ('परिवहन जानकारी', {
             'fields': ('transport_mode', 'vehicle_number')
         }),
+('दस्तावेज़ अपलोड', {
+            'fields': ('aadhar_upload_type', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display')
+        }),
         ('अन्य जानकारी', {
             'fields': ('previous_shivir', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
         }),
@@ -109,7 +112,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(self.readonly_fields)
-        readonly.extend(['get_vibhag_names', 'get_campaign_names'])
+        readonly.extend(['get_vibhag_names', 'get_campaign_names', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display'])
         if obj:
             readonly.extend(['district_approved_at', 'upzone_approved_at', 'final_approved_at', 'email_sent'])
         
@@ -343,6 +346,70 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             return ', '.join(campaign_names)
         return '-'
     get_campaign_names.short_description = 'चयनित अभियान'
+    
+    def get_aadhar_full_display(self, obj):
+        from django.utils.html import format_html
+        print(f"\n=== ADMIN DOCUMENT DEBUG - User: {obj.full_name} (ID: {obj.id}) ===")
+        print(f"Aadhar upload type: {obj.aadhar_upload_type}")
+        print(f"Aadhar full field value: '{obj.aadhar_full}'")
+        print(f"Aadhar full field type: {type(obj.aadhar_full)}")
+        
+        if obj.aadhar_full and str(obj.aadhar_full).strip():
+            url = str(obj.aadhar_full)
+            print(f"SUCCESS: Aadhar full URL found: {url}")
+            return format_html(
+                '<div style="border: 2px solid green; padding: 5px; border-radius: 5px;">'
+                '<a href="{}" target="_blank"><img src="{}" style="max-width: 100px; max-height: 60px;"/></a>'
+                '<br><small style="color: green;">✓ Uploaded</small>'
+                '</div>', url, url
+            )
+        else:
+            print(f"ERROR: Aadhar full missing or empty")
+            return format_html(
+                '<div style="border: 2px solid red; padding: 5px; border-radius: 5px; text-align: center;">'
+                '<span style="color: red;">✗ Not Uploaded</span>'
+                '</div>'
+            )
+    get_aadhar_full_display.short_description = 'पूरा आधार कार्ड'
+    
+    def get_aadhar_front_display(self, obj):
+        from django.utils.html import format_html
+        if obj.aadhar_front:
+            return format_html('<a href="{}" target="_blank"><img src="{}" style="max-width: 100px; max-height: 60px;"/></a>', obj.aadhar_front, obj.aadhar_front)
+        return '-'
+    get_aadhar_front_display.short_description = 'आधार कार्ड (आगे)'
+    
+    def get_aadhar_back_display(self, obj):
+        from django.utils.html import format_html
+        if obj.aadhar_back:
+            return format_html('<a href="{}" target="_blank"><img src="{}" style="max-width: 100px; max-height: 60px;"/></a>', obj.aadhar_back, obj.aadhar_back)
+        return '-'
+    get_aadhar_back_display.short_description = 'आधार कार्ड (पीछे)'
+    
+    def get_passport_photo_display(self, obj):
+        from django.utils.html import format_html
+        print(f"Passport photo field value: '{obj.passport_photo}'")
+        print(f"Passport photo field type: {type(obj.passport_photo)}")
+        
+        if obj.passport_photo and str(obj.passport_photo).strip():
+            url = str(obj.passport_photo)
+            print(f"SUCCESS: Passport photo URL found: {url}")
+            print(f"=== END ADMIN DOCUMENT DEBUG ===\n")
+            return format_html(
+                '<div style="border: 2px solid green; padding: 5px; border-radius: 5px;">'
+                '<a href="{}" target="_blank"><img src="{}" style="max-width: 100px; max-height: 60px;"/></a>'
+                '<br><small style="color: green;">✓ Uploaded</small>'
+                '</div>', url, url
+            )
+        else:
+            print(f"ERROR: Passport photo missing or empty")
+            print(f"=== END ADMIN DOCUMENT DEBUG ===\n")
+            return format_html(
+                '<div style="border: 2px solid red; padding: 5px; border-radius: 5px; text-align: center;">'
+                '<span style="color: red;">✗ Not Uploaded</span>'
+                '</div>'
+            )
+    get_passport_photo_display.short_description = 'पासपोर्ट फोटो'
     
     def get_responsibility_name(self, obj):
         if obj.registration_type == 'organization_representative' and obj.responsibility:

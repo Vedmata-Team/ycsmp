@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # YCSMP Deployment Script - One-shot command for git pull, collectstatic, and restart
 echo "🚀 Starting YCSMP deployment..."
 

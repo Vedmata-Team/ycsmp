@@ -1,0 +1,312 @@
+/* Document Upload Styles */
+.document-upload-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.document-upload-card {
+    background: white;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.document-upload-card:hover {
+    border-color: #007bff;
+    background: #f8f9ff;
+}
+
+.document-upload-card.uploaded {
+    border-color: #28a745;
+    border-style: solid;
+    background: #f8fff8;
+    position: relative;
+}
+
+.document-upload-card.uploaded::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.document-upload-card.uploaded::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.upload-icon {
+    font-size: 2rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.document-upload-card:hover .upload-icon {
+    color: #007bff;
+}
+
+.document-upload-card.uploaded .upload-icon {
+    color: #28a745;
+}
+
+.upload-text {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.upload-subtext {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.document-preview {
+    max-width: 120px;
+    max-height: 80px;
+    border-radius: 8px;
+    margin-top: 15px;
+    display: none;
+    border: 2px solid #28a745;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.aadhar-type-selector {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.aadhar-type-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.aadhar-type-option:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.aadhar-type-option.selected {
+    background: #e3f2fd;
+    border-color: #007bff;
+}
+
+.aadhar-type-option input[type="radio"] {
+    margin-right: 10px;
+}
+
+.aadhar-uploads {
+    display: none;
+}
+
+.aadhar-uploads.active {
+    display: block;
+}
+
+/* Modal Styles */
+#documentUploadModal .modal-dialog {
+    max-width: 800px;
+}
+
+.crop-container {
+    max-height: 400px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.btn-group .btn {
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.btn-group .btn i {
+    margin-right: 5px;
+}
+
+/* Loading Animation */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Preview Styles */
+.img-thumbnail {
+    border: 2px solid #28a745;
+}
+
+/* Camera Interface */
+.camera-container {
+    position: relative;
+    display: inline-block;
+}
+
+#cameraVideo {
+    max-width: 100%;
+    max-height: 400px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    background: #000;
+}
+
+#cameraCanvas {
+    display: none;
+}
+
+.btn-group .btn {
+    margin: 0 2px;
+}
+
+/* Camera Options Styling */
+#cameraOptions .btn-group {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#cameraOptions .btn {
+    min-width: 120px;
+}
+
+/* Capture Button Styling */
+#captureBtn {
+    font-size: 1.1rem;
+    padding: 12px 24px;
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+#captureBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .document-upload-card {
+        padding: 15px;
+    }
+    
+    .upload-icon {
+        font-size: 1.5rem;
+    }
+    
+    #documentUploadModal .modal-dialog {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .crop-container {
+        max-height: 300px;
+    }
+    
+    #cameraVideo {
+        max-height: 250px;
+    }
+    
+    #cameraOptions .btn {
+        min-width: 100px;
+        font-size: 0.9rem;
+    }
+    
+    #captureBtn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+}
+
+/* Success States */
+.upload-success {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.upload-success i {
+    margin-right: 5px;
+}
+
+/* Error States */
+.upload-error {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.upload-error i {
+    margin-right: 5px;
+}
+
+/* File Size Info */
+.file-size-info {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Document Type Icons */
+.doc-type-aadhar {
+    color: #ff6b35;
+}
+
+.doc-type-passport {
+    color: #4285f4;
+}
+
+/* Validation Error Styles */
+.document-upload-card.validation-error {
+    border-color: #dc3545;
+    background: #fff5f5;
+    border-style: solid;
+}
+
+.aadhar-type-selector.validation-error {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.validation-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 8px;
+    padding: 5px 8px;
+    background: #f8d7da;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+}
