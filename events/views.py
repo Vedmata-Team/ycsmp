@@ -313,62 +313,18 @@ def event_register(request, pk=None):
                     registration.special_skills_other = special_skills_other
                     print("Campaign and skills data set")
                     
-                    # Debug document uploads
-                    print("\n--- DOCUMENT UPLOAD DEBUG ---")
+                    # Save document URLs to registration object
                     aadhar_type = request.POST.get('aadhar_upload_type')
                     aadhar_full = request.POST.get('aadhar_full')
                     aadhar_front = request.POST.get('aadhar_front')
                     aadhar_back = request.POST.get('aadhar_back')
                     passport_photo = request.POST.get('passport_photo')
                     
-                    print(f"Aadhar upload type: {aadhar_type}")
-                    print(f"Aadhar full URL: {aadhar_full}")
-                    print(f"Aadhar front URL: {aadhar_front}")
-                    print(f"Aadhar back URL: {aadhar_back}")
-                    print(f"Passport photo URL: {passport_photo}")
-                    
-                    # Validate document uploads
-                    documents_valid = True
-                    if aadhar_type == 'full':
-                        if not aadhar_full or not aadhar_full.strip():
-                            print("ERROR: Full aadhar card not uploaded")
-                            documents_valid = False
-                        else:
-                            print("SUCCESS: Full aadhar card uploaded")
-                    elif aadhar_type == 'separate':
-                        if not aadhar_front or not aadhar_front.strip():
-                            print("ERROR: Aadhar front not uploaded")
-                            documents_valid = False
-                        else:
-                            print("SUCCESS: Aadhar front uploaded")
-                        if not aadhar_back or not aadhar_back.strip():
-                            print("ERROR: Aadhar back not uploaded")
-                            documents_valid = False
-                        else:
-                            print("SUCCESS: Aadhar back uploaded")
-                    
-                    if not passport_photo or not passport_photo.strip():
-                        print("ERROR: Passport photo not uploaded")
-                        documents_valid = False
-                    else:
-                        print("SUCCESS: Passport photo uploaded")
-                    
-                    print(f"Documents validation result: {documents_valid}")
-                    
-                    # Save document URLs to registration object
                     registration.aadhar_upload_type = aadhar_type
                     registration.aadhar_full = aadhar_full if aadhar_full and aadhar_full.strip() else None
                     registration.aadhar_front = aadhar_front if aadhar_front and aadhar_front.strip() else None
                     registration.aadhar_back = aadhar_back if aadhar_back and aadhar_back.strip() else None
                     registration.passport_photo = passport_photo if passport_photo and passport_photo.strip() else None
-                    
-                    print(f"Saved to registration object:")
-                    print(f"  aadhar_upload_type: {registration.aadhar_upload_type}")
-                    print(f"  aadhar_full: {registration.aadhar_full}")
-                    print(f"  aadhar_front: {registration.aadhar_front}")
-                    print(f"  aadhar_back: {registration.aadhar_back}")
-                    print(f"  passport_photo: {registration.passport_photo}")
-                    print("--- END DOCUMENT DEBUG ---\n")
                     
                     if event:
                         registration.event = event

@@ -349,14 +349,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_aadhar_full_display(self, obj):
         from django.utils.html import format_html
-        print(f"\n=== ADMIN DOCUMENT DEBUG - User: {obj.full_name} (ID: {obj.id}) ===")
-        print(f"Aadhar upload type: {obj.aadhar_upload_type}")
-        print(f"Aadhar full field value: '{obj.aadhar_full}'")
-        print(f"Aadhar full field type: {type(obj.aadhar_full)}")
-        
         if obj.aadhar_full and str(obj.aadhar_full).strip():
             url = str(obj.aadhar_full)
-            print(f"SUCCESS: Aadhar full URL found: {url}")
             return format_html(
                 '<div style="border: 2px solid green; padding: 5px; border-radius: 5px;">'
                 '<a href="{}" target="_blank"><img src="{}" style="max-width: 100px; max-height: 60px;"/></a>'
@@ -364,7 +358,6 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 '</div>', url, url
             )
         else:
-            print(f"ERROR: Aadhar full missing or empty")
             return format_html(
                 '<div style="border: 2px solid red; padding: 5px; border-radius: 5px; text-align: center;">'
                 '<span style="color: red;">✗ Not Uploaded</span>'
@@ -388,13 +381,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_passport_photo_display(self, obj):
         from django.utils.html import format_html
-        print(f"Passport photo field value: '{obj.passport_photo}'")
-        print(f"Passport photo field type: {type(obj.passport_photo)}")
-        
         if obj.passport_photo and str(obj.passport_photo).strip():
             url = str(obj.passport_photo)
-            print(f"SUCCESS: Passport photo URL found: {url}")
-            print(f"=== END ADMIN DOCUMENT DEBUG ===\n")
             return format_html(
                 '<div style="border: 2px solid green; padding: 5px; border-radius: 5px;">'
                 '<a href="{}" target="_blank"><img src="{}" style="max-width: 100px; max-height: 60px;"/></a>'
@@ -402,8 +390,6 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 '</div>', url, url
             )
         else:
-            print(f"ERROR: Passport photo missing or empty")
-            print(f"=== END ADMIN DOCUMENT DEBUG ===\n")
             return format_html(
                 '<div style="border: 2px solid red; padding: 5px; border-radius: 5px; text-align: center;">'
                 '<span style="color: red;">✗ Not Uploaded</span>'
