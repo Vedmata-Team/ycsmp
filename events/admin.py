@@ -446,10 +446,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     print(f"UpZone Districts to filter: {upzone_districts}")
                     
                     if upzone_districts:
-                        # Show registrations that are district_approved and from upzone districts
+                        # Show all registrations from upzone districts (pending to approved)
                         filtered_qs = qs.filter(
-                            city__in=upzone_districts,
-                            approval_status__in=['district_approved', 'upzone_approved', 'approved']
+                            city__in=upzone_districts
                         ).filter(
                             models.Q(state__icontains='madhya pradesh') |
                             models.Q(state__iexact='MP')
