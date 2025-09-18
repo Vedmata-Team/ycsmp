@@ -125,6 +125,10 @@
                                         <div class="form-group">
                                             <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">{{ form.date_of_birth.label }} <span class="text-danger">*</span></label>
                                             {{ form.date_of_birth }}
+                                            <small class="text-danger d-block mt-1" style="color: #8B0000 !important;">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                <strong>चेतावनी:</strong> जन्म तिथि आधार कार्ड के अनुसार भरें, अन्यथा फॉर्म अस्वीकृत हो जाएगा।
+                                            </small>
                                             <small id="age-warning" class="text-danger" style="display: none;">केवल 18 से 45 वर्ष की आयु के लिए</small>
                                             {% if form.date_of_birth.errors %}
                                                 <div class="invalid-feedback">{{ form.date_of_birth.errors.0 }}</div>
