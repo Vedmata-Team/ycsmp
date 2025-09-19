@@ -212,6 +212,24 @@
                                     </div>
                                 </div>
                                 <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label>क्या आपने गायत्री दीक्षा ली है?</label>
+                                            <div>
+                                                {% for radio in form.gayatri_diksha %}
+                                                    <div class="form-check form-check-inline">
+                                                        {{ radio.tag }}
+                                                        {{ radio.choice_label }}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% if form.gayatri_diksha.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.gayatri_diksha.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="{{ form.village_taluka.id_for_label }}" class="form-label">{{ form.village_taluka.label }} <span class="text-danger">*</span></label>

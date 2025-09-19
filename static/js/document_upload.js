@@ -81,10 +81,34 @@ class DocumentUploader {
                         <div id="cropArea" style="display: none;">
                             <div class="text-center mb-3">
                                 <h6>फोटो को क्रॉप करें</h6>
-                                <small class="text-muted">बेहतर गुणवत्ता के लिए फोटो को समायोजित करें</small>
+                                <small class="text-muted">फोटो को खींचें और ज़ूम करें</small>
                             </div>
-                            <div class="crop-container">
+                            
+                            <!-- Mobile-friendly crop controls -->
+                            <div class="crop-controls mb-3 d-block d-md-none">
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="zoomInBtn">
+                                        <i class="bi bi-zoom-in"></i> ज़ूम इन
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="zoomOutBtn">
+                                        <i class="bi bi-zoom-out"></i> ज़ूम आउट
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="resetCropBtn">
+                                        <i class="bi bi-arrow-clockwise"></i> रीसेट
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="crop-container" style="max-height: 400px; overflow: hidden;">
                                 <img id="cropImage" style="max-width: 100%; display: block;">
+                            </div>
+                            
+                            <!-- Crop instructions for mobile -->
+                            <div class="crop-instructions d-block d-md-none mt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    टिप: फोटो को खींचकर पोजीशन करें, पिंच करके ज़ूम करें
+                                </small>
                             </div>
                         </div>
 
@@ -119,11 +143,14 @@ class DocumentUploader {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn">रद्द करें</button>
+                        <button type="button" class="btn btn-outline-warning" id="skipCropBtn" style="display: none;">
+                            <i class="bi bi-skip-forward"></i> क्रॉप नहीं करें
+                        </button>
                         <button type="button" class="btn btn-primary" id="cropOkBtn" style="display: none;">
-                            ठीक है
+                            <i class="bi bi-crop"></i> क्रॉप करें
                         </button>
                         <button type="button" class="btn btn-success" id="finalOkBtn" style="display: none;">
-                            अपलोड करें
+                            <i class="bi bi-cloud-upload"></i> अपलोड करें
                         </button>
                     </div>
                 </div>
@@ -177,6 +204,24 @@ class DocumentUploader {
         // Crop OK button
         document.getElementById('cropOkBtn').addEventListener('click', () => {
             this.processCroppedImage();
+        });
+        
+        // Skip crop button
+        document.getElementById('skipCropBtn').addEventListener('click', () => {
+            this.processOriginalImage();
+        });
+        
+        // Mobile crop controls
+        document.getElementById('zoomInBtn').addEventListener('click', () => {
+            if (this.cropper) this.cropper.zoom(0.1);
+        });
+        
+        document.getElementById('zoomOutBtn').addEventListener('click', () => {
+            if (this.cropper) this.cropper.zoom(-0.1);
+        });
+        
+        document.getElementById('resetCropBtn').addEventListener('click', () => {
+            if (this.cropper) this.cropper.reset();
         });
 
         // Final OK button
@@ -337,6 +382,7 @@ class DocumentUploader {
             document.getElementById('uploadOptions').style.display = 'none';
             document.getElementById('cropArea').style.display = 'block';
             document.getElementById('cropOkBtn').style.display = 'inline-block';
+            document.getElementById('skipCropBtn').style.display = 'inline-block';
 
             // Initialize cropper
             if (this.cropper) {
@@ -346,15 +392,30 @@ class DocumentUploader {
             this.cropper = new Cropper(cropImage, {
                 aspectRatio: this.getAspectRatio(),
                 viewMode: 1,
-                autoCropArea: 0.8,
+                autoCropArea: 0.9,
                 responsive: true,
-                background: false,
-                guides: true,
-                center: true,
+                restore: false,
+                guides: false,
+                center: false,
                 highlight: false,
                 cropBoxMovable: true,
                 cropBoxResizable: true,
                 toggleDragModeOnDblclick: false,
+                minCropBoxHeight: 100,
+                minCropBoxWidth: 100,
+                // Mobile-friendly settings
+                wheelZoomRatio: 0.1,
+                checkOrientation: false,
+                modal: true,
+                background: true,
+                // Touch-friendly cropping
+                movable: true,
+                rotatable: false,
+                scalable: true,
+                zoomable: true,
+                zoomOnTouch: true,
+                zoomOnWheel: true,
+                cropBoxResizable: window.innerWidth > 768, // Only allow resize on desktop
             });
         };
         reader.readAsDataURL(file);
@@ -374,6 +435,7 @@ class DocumentUploader {
         // Show loading
         document.getElementById('cropArea').style.display = 'none';
         document.getElementById('cropOkBtn').style.display = 'none';
+        document.getElementById('skipCropBtn').style.display = 'none';
         document.getElementById('loadingArea').style.display = 'block';
 
         // Start progress animation
@@ -398,6 +460,70 @@ class DocumentUploader {
             alert('फोटो प्रोसेसिंग में त्रुटि हुई');
             this.resetModal();
         }
+    }
+    
+    async processOriginalImage() {
+        if (!this.currentFile) return;
+
+        // Show loading
+        document.getElementById('cropArea').style.display = 'none';
+        document.getElementById('cropOkBtn').style.display = 'none';
+        document.getElementById('skipCropBtn').style.display = 'none';
+        document.getElementById('loadingArea').style.display = 'block';
+
+        // Start progress animation
+        this.animateProgress();
+
+        try {
+            // Create canvas from original file
+            const canvas = await this.createCanvasFromFile(this.currentFile);
+            
+            // Compress image
+            const compressedBlob = await this.compressImage(canvas);
+            
+            // Show preview
+            this.showPreview(compressedBlob);
+        } catch (error) {
+            console.error('Error processing image:', error);
+            alert('फोटो प्रोसेसिंग में त्रुटि हुई');
+            this.resetModal();
+        }
+    }
+    
+    async createCanvasFromFile(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Calculate dimensions maintaining aspect ratio
+                const maxWidth = this.getTargetWidth();
+                const maxHeight = this.getTargetHeight();
+                
+                let { width, height } = img;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
     }
 
     getTargetWidth() {
@@ -601,6 +727,7 @@ class DocumentUploader {
         
         // Reset buttons
         document.getElementById('cropOkBtn').style.display = 'none';
+        document.getElementById('skipCropBtn').style.display = 'none';
         document.getElementById('finalOkBtn').style.display = 'none';
         
         // Reset progress

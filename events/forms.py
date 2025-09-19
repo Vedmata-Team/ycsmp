@@ -44,6 +44,14 @@ class BaseEventRegistrationForm(forms.ModelForm):
         label="कार्य विभाग चुनें"
     )
     
+    # Gayatri Diksha field
+    gayatri_diksha = forms.ChoiceField(
+        choices=[(True, 'हाँ'), (False, 'नहीं')],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        required=False,
+        label="क्या आपने गायत्री दीक्षा ली है?"
+    )
+    
     def get_state_choices(self):
         choices = [('', 'राज्य चुनें')]
         try:
@@ -61,7 +69,7 @@ class BaseEventRegistrationForm(forms.ModelForm):
         model = EventRegistration
         fields = [
             'full_name', 'phone', 'email', 'date_of_birth', 'gender',
-            'transport_mode', 'vehicle_number', 'previous_shivir',
+            'transport_mode', 'vehicle_number', 'previous_shivir', 'gayatri_diksha',
             'education', 'occupation', 'village_taluka', 'country', 'state', 'city',
             'responsibility', 'interested_in_volunteering', 'volunteering_details',
             'volunteer_start_date', 'volunteer_end_date'
@@ -106,7 +114,7 @@ class BaseEventRegistrationForm(forms.ModelForm):
         
         # Set state choices from CSV
         self.fields['state'].choices = self.get_state_choices()
-        self.fields['city'].choices = [('', 'जनपद/जिला चुनें')]
+        self.fields['city'].choices = [('', 'जिला चुनें')]
         
         # Set responsibility choices (only if field exists)
         if 'responsibility' in self.fields:
@@ -159,6 +167,11 @@ class BaseEventRegistrationForm(forms.ModelForm):
         instance.special_skills_other = self.cleaned_data.get('special_skills_other', '')
         instance.selected_vibhags = self.cleaned_data.get('vibhags', [])
         instance.country = 'India'  # Ensure country is always India
+        
+        # Handle gayatri_diksha conversion
+        gayatri_diksha = self.cleaned_data.get('gayatri_diksha')
+        if gayatri_diksha is not None:
+            instance.gayatri_diksha = gayatri_diksha == 'True' or gayatri_diksha is True
         
         # Handle arrival_date separately
         arrival_date = self.cleaned_data.get('arrival_date')
@@ -236,7 +249,7 @@ class EventRegistrationForm(BaseEventRegistrationForm):
         model = EventRegistration
         fields = [
             'full_name', 'phone', 'email', 'date_of_birth', 'gender',
-            'transport_mode', 'vehicle_number', 'previous_shivir',
+            'transport_mode', 'vehicle_number', 'previous_shivir', 'gayatri_diksha',
             'education', 'occupation', 'village_taluka', 'country', 'state', 'city',
             'arrival_date', 'interested_in_volunteering', 'volunteering_details'
         ]

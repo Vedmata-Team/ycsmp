@@ -216,6 +216,7 @@ class EventRegistration(models.Model):
     
     # Previous Experience
     previous_shivir = models.BooleanField(default=False, verbose_name="क्या आप शांतिकुंज या अन्य शाखाओं में पहले कोई शिविर कर चुके हैं?")
+    gayatri_diksha = models.BooleanField(null=True, blank=True, verbose_name="क्या आपने गायत्री दीक्षा ली है?")
     
     # Education & Skills
     education = models.CharField(max_length=50, choices=EDUCATION_CHOICES, verbose_name="शैक्षणिक योग्यता")
@@ -227,7 +228,7 @@ class EventRegistration(models.Model):
     village_taluka = models.CharField(max_length=100, verbose_name="गांव/तालुका")
     country = models.CharField(max_length=64, default='India', blank=True, verbose_name="देश")
     state = models.CharField(max_length=64, verbose_name="राज्य")
-    city = models.CharField(max_length=64, verbose_name="जनपद/जिला")
+    city = models.CharField(max_length=64, verbose_name="जिला")
     
     # Other Details
     ARRIVAL_DATE_CHOICES = [

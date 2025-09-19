@@ -84,7 +84,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('aadhar_upload_type', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display')
         }),
         ('अन्य जानकारी', {
-            'fields': ('previous_shivir', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
+            'fields': ('previous_shivir', 'gayatri_diksha', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
         }),
         ('अप्रूवल स्थिति', {
             'fields': ('approval_status', 'district_approver', 'district_approved_at', 'upzone_approver', 'upzone_approved_at', 'final_approver', 'final_approved_at', 'rejection_reason', 'email_sent')
