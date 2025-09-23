@@ -61,7 +61,7 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
     list_display = ('registration_number_with_buttons', 'full_name', 'event', 'registration_type', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
-    list_filter = ('event', 'registration_type', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
+    list_filter = ('event', 'registration_type', 'state', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date')
@@ -211,6 +211,13 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_actions(self, request):
         actions = super().get_actions(request)
+        
+        # Remove export actions for non-superusers
+        if not request.user.is_superuser:
+            for action in ['export_csv', 'export_excel', 'export_pdf']:
+                if action in actions:
+                    del actions[action]
+        
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
             # Remove actions based on user level
@@ -231,7 +238,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     del actions['approve_upzone']
         except ApprovalUser.DoesNotExist:
             if not request.user.is_superuser:
-                for action in ['approve_district', 'approve_upzone', 'approve_final']:
+                for action in ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved']:
                     if action in actions:
                         del actions[action]
         return actions
@@ -413,9 +420,17 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         
+        # Staff users with 'view all registrations' permission can see everything
+        if request.user.has_perm('events.view_all_eventregistration'):
+            return qs
+        
         # Check if user has approval permissions
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
+            
+            # Super approvers can see all registrations
+            if approval_user.is_super_approver:
+                return qs
             
             # Debug logging
             print(f"\n=== QUERYSET DEBUG for {request.user.username} ===")
@@ -715,8 +730,8 @@ class ApprovalUserForm(forms.ModelForm):
 @admin.register(ApprovalUser)
 class ApprovalUserAdmin(admin.ModelAdmin):
     form = ApprovalUserForm
-    list_display = ('user', 'state_code', 'is_state_approver', 'is_district_approver', 'is_upzone_approver', 'get_assignment_display')
-    list_filter = ('state_code', 'is_state_approver', 'is_district_approver', 'is_upzone_approver', 'upzone')
+    list_display = ('user', 'state_code', 'is_super_approver', 'is_state_approver', 'is_district_approver', 'is_upzone_approver', 'get_assignment_display')
+    list_filter = ('state_code', 'is_super_approver', 'is_state_approver', 'is_district_approver', 'is_upzone_approver', 'upzone')
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
     actions = ['export_csv', 'export_excel', 'export_pdf']
     
@@ -725,8 +740,8 @@ class ApprovalUserAdmin(admin.ModelAdmin):
             'fields': ('user', 'state_code')
         }),
         ('अधिकार स्तर (केवल एक चुनें)', {
-            'fields': ('is_state_approver', 'is_upzone_approver', 'is_district_approver'),
-            'description': 'केवल एक अधिकार स्तर चुनें - राज्य, उपजोन, या जिला'
+            'fields': ('is_super_approver', 'is_state_approver', 'is_upzone_approver', 'is_district_approver'),
+            'description': 'केवल एक अधिकार स्तर चुनें - सुपर, राज्य, उपजोन, या जिला'
         }),
         ('असाइनमेंट', {
             'fields': ('upzone', 'districts'),

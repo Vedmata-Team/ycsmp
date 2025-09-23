@@ -11,6 +11,8 @@ from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPR
 @staff_member_required
 @require_http_methods(["GET"])
 def export_events(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Access denied'}, status=403)
     format_type = request.GET.get('format', 'csv')
     event_ids = request.GET.getlist('ids')
     
@@ -29,6 +31,8 @@ def export_events(request):
 @staff_member_required
 @require_http_methods(["GET"])
 def export_registrations(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Access denied'}, status=403)
     format_type = request.GET.get('format', 'csv')
     registration_ids = request.GET.getlist('ids')
     event_id = request.GET.get('event_id')
@@ -53,6 +57,8 @@ def export_registrations(request):
 @staff_member_required
 @require_http_methods(["GET"])
 def export_approval_users(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Access denied'}, status=403)
     format_type = request.GET.get('format', 'csv')
     user_ids = request.GET.getlist('ids')
     
@@ -71,6 +77,8 @@ def export_approval_users(request):
 @method_decorator(staff_member_required, name='dispatch')
 class BulkExportView(View):
     def get(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({'error': 'Access denied'}, status=403)
         return render(request, 'admin/bulk_export.html', {
             'events_count': Event.objects.count(),
             'registrations_count': EventRegistration.objects.count(),
@@ -78,6 +86,8 @@ class BulkExportView(View):
         })
     
     def post(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({'error': 'Access denied'}, status=403)
         export_type = request.POST.get('export_type')
         format_type = request.POST.get('format')
         

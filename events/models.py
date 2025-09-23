@@ -9,6 +9,29 @@ from django.conf import settings
 
 from events.utils import compress_regular_image
 
+# Location Models
+class Country(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10)
+    
+    def __str__(self):
+        return self.name
+
+class State(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.name
+
+class City(models.Model):
+    name = models.CharField(max_length=100)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.name}, {self.state.name}"
+
 class UpZone(models.Model):
     name = models.CharField(max_length=100, verbose_name="उपजोन नाम")
     districts = models.JSONField(default=list, verbose_name="जिले")
@@ -30,6 +53,7 @@ class ApprovalUser(models.Model):
     state_code = models.CharField(max_length=10, verbose_name="राज्य कोड")
     districts = models.JSONField(default=list, blank=True, verbose_name="जिले")  # For MP users
     upzone = models.ForeignKey(UpZone, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="उपजोन")
+    is_super_approver = models.BooleanField(default=False, verbose_name="सुपर अप्रूवर (सभी स्तर)")
     is_state_approver = models.BooleanField(default=False, verbose_name="राज्य अप्रूवर")
     is_district_approver = models.BooleanField(default=False, verbose_name="जिला अप्रूवर")
     is_upzone_approver = models.BooleanField(default=False, verbose_name="उपजोन अप्रूवर")
@@ -51,7 +75,9 @@ class ApprovalUser(models.Model):
     
     def get_assignment_display(self):
         """Display assignment details"""
-        if self.is_district_approver and self.districts:
+        if self.is_super_approver:
+            return "सभी देश (सुपर अप्रूवर)"
+        elif self.is_district_approver and self.districts:
             return f"{len(self.districts)} जिले"
         elif self.is_upzone_approver and self.upzone:
             return f"उपजोन: {self.upzone.name}"
@@ -333,6 +359,9 @@ class EventRegistration(models.Model):
         verbose_name = "पंजीकरण"
         verbose_name_plural = "पंजीकरण"
         ordering = ['-registration_date']
+        permissions = [
+            ('view_all_eventregistration', 'Can view all registrations'),
+        ]
 
     def __str__(self):
         return f"{self.full_name} - {self.event.title}"

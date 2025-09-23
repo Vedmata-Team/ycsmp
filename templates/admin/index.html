@@ -4,6 +4,7 @@
 {% block content %}
 {{ block.super }}
 
+{% if user.is_superuser %}
 <div class="module" style="margin-top: 20px;">
     <h2>Export Tools</h2>
     <div class="form-row">
@@ -17,6 +18,7 @@
         </ul>
     </div>
 </div>
+{% endif %}
 
 <style>
 .button {

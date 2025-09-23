@@ -447,3 +447,6 @@ def test_email(request):
         import traceback
         print(f"Full traceback: {traceback.format_exc()}")
         return HttpResponse(f'Test email failed: {str(e)}')
+
+def contact_page(request):
+    return render(request, 'contact.html')

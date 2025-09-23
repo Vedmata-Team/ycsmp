@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import export_views
 from . import document_views
+from . import location_views
 
 app_name = 'events'
 
@@ -30,4 +31,11 @@ urlpatterns = [
     path('export/registrations/', export_views.export_registrations, name='export_registrations'),
     path('export/approval-users/', export_views.export_approval_users, name='export_approval_users'),
     path('export/bulk/', export_views.BulkExportView.as_view(), name='bulk_export'),
+    
+    # Location API URLs
+    path('api/states/', location_views.get_states, name='api_states'),
+    path('api/cities/', location_views.get_cities, name='api_cities'),
+    
+    # Contact page
+    path('contact/', views.contact_page, name='contact'),
 ]

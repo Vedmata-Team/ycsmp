@@ -1,66 +1,52 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const countriesCSV = '/static/csv/countries.csv';
-    const statesCSV = '/static/csv/states.csv';
-    const citiesCSV = '/static/csv/cities.csv';
-    let allCities = []; // Store all cities for faster filtering
+    let statesData = [];
+    let citiesData = [];
 
-    function parseCSV(text) {
-        return text.trim().split('\n').map(row => row.split(','));
+    // Load all data once when page loads
+    Promise.all([
+        fetch('/api/states/').then(res => res.json()),
+        fetch('/api/cities/').then(res => res.json())
+    ]).then(([statesResponse, citiesResponse]) => {
+        statesData = statesResponse.states;
+        citiesData = citiesResponse.cities;
+        populateStates();
+    }).catch(err => console.error('Failed to load location data:', err));
+
+    function populateStates() {
+        const stateSelect = document.getElementById('id_state');
+        stateSelect.innerHTML = '<option value="">राज्य चुनें</option>';
+        statesData.forEach(state => {
+            stateSelect.innerHTML += `<option value="${state.name}" data-id="${state.id}">${state.name}</option>`;
+        });
     }
 
-    // Preload all cities on page load
-    function preloadAllCities() {
-        fetch(citiesCSV)
-            .then(res => res.text())
-            .then(text => {
-                const rows = parseCSV(text);
-                allCities = rows.slice(1); // Skip header
-            })
-            .catch(err => console.error('Failed to preload cities:', err));
-    }
-
-    function loadStates(countryName) {
-        fetch(statesCSV)
-            .then(res => res.text())
-            .then(text => {
-                const rows = parseCSV(text);
-                const stateSelect = document.getElementById('id_state');
-                stateSelect.innerHTML = '<option value="">राज्य चुनें</option>';
-                rows.forEach((row, idx) => {
-                    if (idx === 0) return; // skip header
-                    if (row[4].replace(/"/g, '') === countryName) {
-                        stateSelect.innerHTML += `<option value="${row[1].replace(/"/g, '')}">${row[1].replace(/"/g, '')}</option>`;
-                    }
-                });
-            });
-    }
-
-    function loadCities(stateName) {
+    function loadCities(stateId) {
         const citySelect = document.getElementById('id_city');
         citySelect.innerHTML = '<option value="">जिला चुनें</option>';
         
-        // Use preloaded cities for faster filtering
-        allCities.forEach(row => {
-            // row[4] is state_name in cities.csv
-            if (row[4].replace(/"/g, '') === stateName) {
-                citySelect.innerHTML += `<option value="${row[1].replace(/"/g, '')}">${row[1].replace(/"/g, '')}</option>`;
-            }
+        if (!stateId) return;
+        
+        // Filter cities instantly from local data
+        const stateCities = citiesData.filter(city => city.state_id == stateId);
+        stateCities.forEach(city => {
+            citySelect.innerHTML += `<option value="${city.name}">${city.name}</option>`;
         });
     }
 
     document.getElementById('id_country').addEventListener('change', function() {
-        loadStates(this.value);
+        if (this.value === 'India') {
+            populateStates();
+        }
         document.getElementById('id_city').innerHTML = '<option value="">जिला चुनें</option>';
     });
+    
     document.getElementById('id_state').addEventListener('change', function() {
-        if (this.value) {
-            loadCities(this.value);
+        const selectedOption = this.options[this.selectedIndex];
+        const stateId = selectedOption.getAttribute('data-id');
+        if (stateId) {
+            loadCities(stateId);
         } else {
             document.getElementById('id_city').innerHTML = '<option value="">जिला चुनें</option>';
         }
     });
-
-    // Preload cities and set default country
-    preloadAllCities();
-    loadStates('India');
 });

@@ -181,15 +181,10 @@
                                     <i class="bi bi-search me-1"></i>स्थिति जांचें
                                 </a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link modern-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-info-circle me-1"></i>जानकारी
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="{% url 'events:contact' %}">
+                                    <i class="bi bi-telephone me-1"></i>संपर्क
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-people me-2"></i>हमारे बारे में</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-telephone me-2"></i>संपर्क</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle me-2"></i>सहायता</a></li>
-                                </ul>
                             </li>
                             {% if user.is_staff %}
                             <li class="nav-item dropdown">
@@ -284,12 +279,12 @@
                                 <h4 class="footer-title">प्रान्तीय युवा चिंतन शिविर भोपाल 2025</h4>
                                 <p class="footer-description">युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम।</p>
                                 
-                                <!-- Contact Links - Only WhatsApp and Call -->
+                                <!-- Contact Links - Redirect to Contact Page -->
                                 <div class="contact-links">
-                                    <a href="https://wa.me/919258360962" class="btn btn-success btn-sm me-2 mb-2" title="WhatsApp">
+                                    <a href="{% url 'events:contact' %}" class="btn btn-success btn-sm me-2 mb-2" title="WhatsApp">
                                         <i class="fab fa-whatsapp me-1"></i>WhatsApp
                                     </a>
-                                    <a href="tel:+919258360962" class="btn btn-primary btn-sm mb-2" title="Call">
+                                    <a href="{% url 'events:contact' %}" class="btn btn-primary btn-sm mb-2" title="Call">
                                         <i class="bi bi-telephone-fill me-1"></i>Call
                                     </a>
                                 </div>
@@ -311,14 +306,17 @@
                             </div>
                         </div>
                         
-                        <div class="col-lg-1 col-md-6 mb-4">
-                            <h5 class="footer-heading">स्थिति जांचें</h5>
-                            <a href="{% url 'events:check_status' %}" class="btn btn-success btn-sm w-100">
-                                <i class="bi bi-search me-2"></i>जांचें
+                        <div class="col-lg-2 col-md-6 mb-4">
+                            <h5 class="footer-heading">Quick Links</h5>
+                            <a href="{% url 'events:check_status' %}" class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="bi bi-search me-2"></i>स्थिति जांचें
+                            </a>
+                            <a href="{% url 'events:contact' %}" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-telephone me-2"></i>संपर्क
                             </a>
                         </div>
                         
-                        <div class="col-lg-4 mb-4">
+                        <div class="col-lg-3 mb-4">
                             <h5 class="footer-heading">Contact Info</h5>
                             <div class="contact-info">
                                 <div class="contact-item">
@@ -327,7 +325,7 @@
                                 </div>
                                 <div class="contact-item">
                                     <i class="bi bi-telephone-fill"></i>
-                                    <a href="tel:+919258360962">9258360962</a>
+                                    <a href="{% url 'events:contact' %}">संपर्क विवरण देखें</a>
                                 </div>
                                 <div class="contact-item">
                                     <i class="bi bi-envelope-fill"></i>
