@@ -67,6 +67,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('registration_number', 'registration_date')
     list_editable = ('is_confirmed',)
     date_hierarchy = 'registration_date'
+    show_full_result_count = True
     
     fieldsets = (
         ('पंजीकरण जानकारी', {

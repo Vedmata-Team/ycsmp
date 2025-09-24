@@ -1,0 +1,31 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add counts to "All" options in filters
+    const filterLists = document.querySelectorAll('#changelist-filter ul');
+    
+    filterLists.forEach(function(filterList) {
+        const allLink = filterList.querySelector('li:first-child a');
+        if (allLink && allLink.textContent.trim() === 'All') {
+            // Get total count from the first filter item with count
+            const countItems = filterList.querySelectorAll('li a');
+            let totalCount = 0;
+            
+            countItems.forEach(function(item) {
+                const match = item.textContent.match(/\((\d+)\)/);
+                if (match) {
+                    totalCount += parseInt(match[1]);
+                }
+            });
+            
+            if (totalCount > 0) {
+                allLink.textContent = `All (${totalCount})`;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
