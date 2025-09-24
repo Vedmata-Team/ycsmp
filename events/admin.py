@@ -660,6 +660,14 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def export_pdf(self, request, queryset):
         return ExportManager.export_to_pdf(queryset, 'registrations_export', REGISTRATION_FIELDS, 'Registrations Report')
     export_pdf.short_description = "Export to PDF"
+    
+    def changelist_view(self, request, extra_context=None):
+        if '_facets' not in request.GET:
+            from django.http import HttpResponseRedirect
+            from django.urls import reverse
+            url = reverse('admin:events_eventregistration_changelist')
+            return HttpResponseRedirect(f'{url}?_facets=True')
+        return super().changelist_view(request, extra_context)
 
 @admin.register(EventImage)
 class EventImageAdmin(admin.ModelAdmin):
