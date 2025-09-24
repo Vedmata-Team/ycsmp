@@ -60,12 +60,13 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('registration_number_with_buttons', 'full_name', 'event', 'registration_type', 'email', 'phone', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
-    list_filter = ('event', 'registration_type', 'state', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir')
+    list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
+    list_filter = ('event', 'registration_type', 'state', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date')
     list_editable = ('is_confirmed',)
+    date_hierarchy = 'registration_date'
     
     fieldsets = (
         ('पंजीकरण जानकारी', {
@@ -406,6 +407,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 '</div>'
             )
     get_passport_photo_display.short_description = 'पासपोर्ट फोटो'
+    
+
     
     def get_responsibility_name(self, obj):
         if obj.registration_type == 'organization_representative' and obj.responsibility:
