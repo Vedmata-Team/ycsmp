@@ -232,12 +232,12 @@
 
         <!-- Warning Strip -->
         {% for warning in site_warnings %}
-        <div style="background: #dc3545; color: white; padding: 8px 0; text-align: center; font-size: 14px; position: fixed; top: 0; left: 0; width: 100%; z-index: 1025; animation: pulse 2s infinite;">
+        <div style="background: #dc3545; color: white; padding: 8px 0; text-align: center; font-size: 14px; position: fixed; top: 0; left: 0; width: 100%; z-index: 1025; animation: pulse 2s infinite;" class="warning-strip-responsive">
             <div class="container">
                 <div class="d-flex align-items-center justify-content-center">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     <span><strong>{{ warning.title }}:</strong> {{ warning.message }}</span>
-                    <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.parentElement.style.display='none'" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white ms-3" onclick="closeWarning(this)" aria-label="Close"></button>
                 </div>
             </div>
         </div>
@@ -424,6 +424,23 @@
             offset: 60,
             easing: 'ease-out-cubic'
         });
+        
+        function closeWarning(button) {
+            const warningStrip = button.parentElement.parentElement.parentElement;
+            const header = document.querySelector('.main-header');
+            const mainContent = document.querySelector('.main-content');
+            
+            warningStrip.style.display = 'none';
+            
+            // Adjust header and content positioning
+            if (window.innerWidth <= 575) {
+                header.style.top = '0px';
+                mainContent.style.paddingTop = '100px';
+            } else {
+                header.style.top = '0px';
+                mainContent.style.paddingTop = '100px';
+            }
+        }
     </script>
 
 

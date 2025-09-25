@@ -754,6 +754,19 @@ a:hover {
         margin-bottom: var(--spacing-lg);
     }
     
+    .warning-strip-responsive {
+        padding: 4px 0 !important;
+        font-size: 12px !important;
+    }
+    
+    .main-header {
+        top: 28px !important;
+    }
+    
+    .main-content {
+        padding-top: 120px !important;
+    }
+    
     .footer-wave svg {
         height: 30px; /* Smaller wave on mobile */
     }
