@@ -8,6 +8,7 @@ import os
 from django.conf import settings
 
 from events.utils import compress_regular_image
+from .models_location import StateDistrict
 
 # Location Models
 class Country(models.Model):

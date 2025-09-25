@@ -35,6 +35,8 @@ urlpatterns = [
     # Location API URLs
     path('api/states/', location_views.get_states, name='api_states'),
     path('api/cities/', location_views.get_cities, name='api_cities'),
+    path('api/admin-states/', location_views.get_admin_states, name='api_admin_states'),
+    path('api/admin-districts/', location_views.get_admin_districts, name='api_admin_districts'),
     
     # Contact page
     path('contact/', views.contact_page, name='contact'),

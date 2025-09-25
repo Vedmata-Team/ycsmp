@@ -4,7 +4,8 @@ from django.db import models
 from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone
+from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City
+from .models_location import StateDistrict
 from .admin_upzone import UpZoneAdmin
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
 
@@ -677,6 +678,8 @@ class EventImageAdmin(admin.ModelAdmin):
 
 # Removed EventRegistrationAdminForm as it's now handled dynamically
 
+# Register UpZone admin from separate file
+
 class ApprovalUserForm(forms.ModelForm):
     districts = forms.MultipleChoiceField(
         choices=[],
@@ -816,3 +819,25 @@ class VibhagOptionAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('order', 'name')
+
+# StateDistrict admin access removed
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code')
+    search_fields = ('name', 'code')
+    ordering = ('name',)
+
+@admin.register(State)
+class StateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'country')
+    list_filter = ('country',)
+    search_fields = ('name', 'code')
+    ordering = ('country', 'name')
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'state')
+    list_filter = ('state__country', 'state')
+    search_fields = ('name', 'state__name')
+    ordering = ('state', 'name')
