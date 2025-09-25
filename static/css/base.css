@@ -162,7 +162,7 @@ a:hover {
     border-bottom: 1px solid rgba(253, 133, 53, 0.1);
     box-shadow: var(--shadow-md);
     position: fixed;
-    top: 0;
+    top: 40px;
     left: 0;
     width: 100%;
     z-index: var(--z-sticky);
@@ -811,7 +811,7 @@ a:hover {
 
 /* Main content spacing for fixed header */
 .main-content {
-    padding-top: 100px;
+    padding-top: 140px;
 }
 
 /* Animation Classes */
@@ -851,5 +851,20 @@ a:hover {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }

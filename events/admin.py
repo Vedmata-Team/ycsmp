@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City
 from .models_location import StateDistrict
+from .models_warning import SiteWarning
 from .admin_upzone import UpZoneAdmin
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
 
@@ -679,6 +680,20 @@ class EventImageAdmin(admin.ModelAdmin):
 # Removed EventRegistrationAdminForm as it's now handled dynamically
 
 # Register UpZone admin from separate file
+
+@admin.register(SiteWarning)
+class SiteWarningAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('title', 'message')
+    list_editable = ('is_active',)
+    ordering = ('-created_at',)
+    
+    fieldsets = (
+        ('चेतावनी जानकारी', {
+            'fields': ('title', 'message', 'is_active')
+        }),
+    )
 
 class ApprovalUserForm(forms.ModelForm):
     districts = forms.MultipleChoiceField(
