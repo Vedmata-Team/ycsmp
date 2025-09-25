@@ -70,7 +70,7 @@
     --transition-slow: 0.5s ease-in-out;
     
     /* Z-index Scale */
-    --z-dropdown: 1000;
+    --z-dropdown: 1030;
     --z-sticky: 1020;
     --z-fixed: 1030;
     --z-modal-backdrop: 1040;
@@ -788,6 +788,24 @@ a:hover {
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs) var(--spacing-sm);
     }
+}
+
+/* Dropdown Menu Fix */
+.dropdown-menu {
+    z-index: 9999 !important;
+    position: absolute !important;
+}
+
+.navbar .dropdown-menu {
+    z-index: 9999 !important;
+}
+
+.nav-item .dropdown-menu {
+    z-index: 9999 !important;
+}
+
+.dropdown {
+    z-index: 9999 !important;
 }
 
 /* Utility Classes */

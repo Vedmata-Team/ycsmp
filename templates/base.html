@@ -432,13 +432,13 @@
             
             warningStrip.style.display = 'none';
             
-            // Adjust header and content positioning
+            // Force CSS override with !important
+            header.style.cssText = 'top: 0px !important; transition: top 0.3s ease !important;';
+            
             if (window.innerWidth <= 575) {
-                header.style.top = '0px';
-                mainContent.style.paddingTop = '100px';
+                mainContent.style.cssText = 'padding-top: 80px !important; transition: padding-top 0.3s ease !important;';
             } else {
-                header.style.top = '0px';
-                mainContent.style.paddingTop = '100px';
+                mainContent.style.cssText = 'padding-top: 100px !important; transition: padding-top 0.3s ease !important;';
             }
         }
     </script>
