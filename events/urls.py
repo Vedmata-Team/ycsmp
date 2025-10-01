@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import export_views
+from . import admin_export_views
 from . import document_views
 from . import location_views
 
@@ -31,6 +32,13 @@ urlpatterns = [
     path('export/registrations/', export_views.export_registrations, name='export_registrations'),
     path('export/approval-users/', export_views.export_approval_users, name='export_approval_users'),
     path('export/bulk/', export_views.BulkExportView.as_view(), name='bulk_export'),
+    
+    # Enhanced Admin Export URLs
+    path('admin/bulk-export/', admin_export_views.admin_bulk_export, name='admin_bulk_export'),
+    path('admin/start-export/', admin_export_views.start_export, name='admin_start_export'),
+    path('admin/export-status/<str:export_id>/', admin_export_views.export_status, name='admin_export_status'),
+    path('admin/download/<str:filename>/', admin_export_views.download_export, name='admin_download_export'),
+    path('admin/quick-stats/', admin_export_views.quick_stats, name='admin_quick_stats'),
     
     # Location API URLs
     path('api/states/', location_views.get_states, name='api_states'),

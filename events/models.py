@@ -58,6 +58,7 @@ class ApprovalUser(models.Model):
     is_state_approver = models.BooleanField(default=False, verbose_name="राज्य अप्रूवर")
     is_district_approver = models.BooleanField(default=False, verbose_name="जिला अप्रूवर")
     is_upzone_approver = models.BooleanField(default=False, verbose_name="उपजोन अप्रूवर")
+    allowed_registration_types = models.JSONField(default=list, blank=True, verbose_name="अनुमतित पंजीकरण प्रकार")
     
     class Meta:
         verbose_name = "अप्रूवल यूजर"
@@ -76,15 +77,24 @@ class ApprovalUser(models.Model):
     
     def get_assignment_display(self):
         """Display assignment details"""
+        assignment = ""
         if self.is_super_approver:
-            return "सभी देश (सुपर अप्रूवर)"
+            assignment = "सभी देश (सुपर अप्रूवर)"
         elif self.is_district_approver and self.districts:
-            return f"{len(self.districts)} जिले"
+            assignment = f"{len(self.districts)} जिले"
         elif self.is_upzone_approver and self.upzone:
-            return f"उपजोन: {self.upzone.name}"
+            assignment = f"उपजोन: {self.upzone.name}"
         elif self.is_state_approver:
-            return f"1 राज्य ({self.state_code})"
-        return "कोई असाइनमेंट नहीं"
+            assignment = f"1 राज्य ({self.state_code})"
+        else:
+            assignment = "कोई असाइनमेंट नहीं"
+        
+        # Add registration types if specified
+        if self.allowed_registration_types:
+            reg_types = [dict(EventRegistration.REGISTRATION_TYPE_CHOICES).get(rt, rt) for rt in self.allowed_registration_types]
+            assignment += f" | प्रकार: {', '.join(reg_types)}"
+        
+        return assignment
 
 class Event(models.Model):
     title = models.CharField(max_length=200, verbose_name="कार्यक्रम नाम")
@@ -335,6 +345,10 @@ class EventRegistration(models.Model):
     
     def matches_approval_user(self, approval_user):
         """Check if this registration matches the approval user's assignment"""
+        # First check registration type permission
+        if approval_user.allowed_registration_types and self.registration_type not in approval_user.allowed_registration_types:
+            return False
+        
         if approval_user.state_code == 'MP':
             if approval_user.is_district_approver:
                 # District level - check district assignment

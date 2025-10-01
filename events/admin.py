@@ -5,6 +5,7 @@ from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City
+from .admin_filters import UpZoneFilter
 from .models_location import StateDistrict
 from .models_warning import SiteWarning
 from .admin_upzone import UpZoneAdmin
@@ -63,7 +64,7 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
-    list_filter = ('event', 'registration_type', 'state', 'city', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
+    list_filter = ('event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date')
@@ -458,6 +459,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         models.Q(state__icontains='madhya pradesh') |
                         models.Q(state__iexact='MP')
                     )
+                    # Filter by allowed registration types if specified
+                    if approval_user.allowed_registration_types:
+                        filtered_qs = filtered_qs.filter(registration_type__in=approval_user.allowed_registration_types)
                     print(f"District Approver - Filtered count: {filtered_qs.count()}")
                     return filtered_qs
                     
@@ -703,6 +707,13 @@ class ApprovalUserForm(forms.ModelForm):
         label="जिले (केवल जिला अप्रूवर के लिए)"
     )
     
+    allowed_registration_types = forms.MultipleChoiceField(
+        choices=EventRegistration.REGISTRATION_TYPE_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="अनुमतित पंजीकरण प्रकार"
+    )
+    
     class Meta:
         model = ApprovalUser
         fields = '__all__'
@@ -747,12 +758,16 @@ class ApprovalUserForm(forms.ModelForm):
             pass
         return sorted(list(set(choices)))
         
-        if self.instance.pk and self.instance.districts:
-            self.fields['districts'].initial = self.instance.districts
+        if self.instance.pk:
+            if self.instance.districts:
+                self.fields['districts'].initial = self.instance.districts
+            if self.instance.allowed_registration_types:
+                self.fields['allowed_registration_types'].initial = self.instance.allowed_registration_types
     
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.districts = list(self.cleaned_data.get('districts', []))
+        instance.allowed_registration_types = list(self.cleaned_data.get('allowed_registration_types', []))
         if commit:
             instance.save()
         return instance
@@ -774,8 +789,8 @@ class ApprovalUserAdmin(admin.ModelAdmin):
             'description': 'केवल एक अधिकार स्तर चुनें - सुपर, राज्य, उपजोन, या जिला'
         }),
         ('असाइनमेंट', {
-            'fields': ('upzone', 'districts'),
-            'description': 'उपजोन अप्रूवर के लिए उपजोन चुनें, जिला अप्रूवर के लिए जिले चुनें'
+            'fields': ('upzone', 'districts', 'allowed_registration_types'),
+            'description': 'उपजोन अप्रूवर के लिए उपजोन चुनें, जिला अप्रूवर के लिए जिले चुनें, और अनुमतित पंजीकरण प्रकार चुनें'
         })
     )
     

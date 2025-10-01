@@ -13,3 +13,5 @@ __pycache__/
 restart.sh
 static/github.md
 update.sh
+
+staticfiles/

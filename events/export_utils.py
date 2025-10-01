@@ -181,11 +181,12 @@ REGISTRATION_FIELDS = [
     {'field': 'event.title', 'header': 'कार्यक्रम'},
     {'field': 'approval_status', 'header': 'अप्रूवल स्थिति'},
     {'field': 'registration_date', 'header': 'पंजीकरण तिथि'},
-    {'field': 'bringing_vehicle', 'header': 'वाहन'},
+    {'field': 'transport_mode', 'header': 'यातायात माध्यम'},
     {'field': 'vehicle_number', 'header': 'वाहन नंबर'},
     {'field': 'arrival_date', 'header': 'आगमन तिथि'},
     {'field': 'get_campaign_names', 'header': 'चयनित अभियान'},
-    {'field': 'get_vibhag_names', 'header': 'चयनित विभाग'}
+    {'field': 'get_vibhag_names', 'header': 'चयनित विभाग'},
+    {'field': 'responsibility.name', 'header': 'जिम्मेदारी'}
 ]
 
 APPROVAL_USER_FIELDS = [

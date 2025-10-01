@@ -10,7 +10,8 @@
     <div class="form-row">
         <p>Export all data in various formats:</p>
         <ul>
-            <li><a href="{% url 'events:bulk_export' %}" class="button">Bulk Export Tool</a></li>
+            <li><a href="{% url 'events:admin_bulk_export' %}" class="button enhanced-export">🚀 Enhanced Bulk Export (Fast & Filtered)</a></li>
+            <li><a href="{% url 'events:bulk_export' %}" class="button">Basic Bulk Export Tool</a></li>
             <li><a href="{% url 'events:export_events' %}?format=csv" class="button">Export All Events (CSV)</a></li>
             <li><a href="{% url 'events:export_events' %}?format=excel" class="button">Export All Events (Excel)</a></li>
             <li><a href="{% url 'events:export_registrations' %}?format=csv" class="button">Export All Registrations (CSV)</a></li>
@@ -35,6 +36,16 @@
 .button:hover {
     background: #205067;
     color: white;
+}
+
+.enhanced-export {
+    background: #28a745 !important;
+    font-weight: bold;
+    border: 2px solid #1e7e34;
+}
+
+.enhanced-export:hover {
+    background: #218838 !important;
 }
 </style>
 {% endblock %}
