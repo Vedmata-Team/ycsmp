@@ -11,8 +11,7 @@ source venv/bin/activate
 echo "📥 Pulling latest changes from Git..."
 git pull origin main
 
-# Collect static files (no input required)Mohan123#
-
+# Collect static files (no input required)
 echo "📦 Collecting static files..."
 python manage.py collectstatic --noinput
 
