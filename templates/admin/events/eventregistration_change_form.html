@@ -1,92 +1,157 @@
 {% extends "admin/change_form.html" %}
 {% load i18n admin_urls static admin_modify %}
 
-{% block extrahead %}
+{% block submit_buttons_bottom %}
 {{ block.super }}
+
+{% if original %}
+<div class="approval-buttons" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+    <h3 style="margin-bottom: 15px; color: #495057;">Approval Actions</h3>
+    
+    <div class="current-status" style="margin-bottom: 15px;">
+        <strong>Current Status:</strong> 
+        <span class="status-badge status-{{ original.approval_status }}">
+            {{ original.get_approval_status_display }}
+        </span>
+    </div>
+    
+    {% if approval_buttons %}
+    <div class="button-group">
+        {% for button in approval_buttons %}
+        <button type="submit" name="{{ button.name }}" class="approval-btn {{ button.class }}" 
+                onclick="return confirm('Are you sure you want to {{ button.label }}?')">
+            {{ button.label }}
+        </button>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #6c757d; font-style: italic;">
+        {% if original.approval_status == 'approved' %}
+            ✅ This registration is already approved.
+        {% elif original.approval_status == 'rejected' %}
+            ❌ This registration has been rejected.
+        {% else %}
+            ℹ️ No approval actions available for your permission level.
+        {% endif %}
+    </p>
+    {% endif %}
+    
+    {% if original.approval_status != 'pending' %}
+    <div class="approval-history" style="margin-top: 15px; padding: 10px; background: #e9ecef; border-radius: 3px;">
+        <h4 style="margin-bottom: 10px;">Approval History:</h4>
+        <ul style="margin: 0; padding-left: 20px;">
+            {% if original.district_approver %}
+            <li><strong>District:</strong> {{ original.district_approver.first_name }} on {{ original.district_approved_at|date:"d M Y, H:i" }}</li>
+            {% endif %}
+            {% if original.upzone_approver %}
+            <li><strong>UpZone:</strong> {{ original.upzone_approver.first_name }} on {{ original.upzone_approved_at|date:"d M Y, H:i" }}</li>
+            {% endif %}
+            {% if original.final_approver %}
+            <li><strong>Final:</strong> {{ original.final_approver.first_name }} on {{ original.final_approved_at|date:"d M Y, H:i" }}</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
 <style>
-.mode-indicator {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
+.approval-buttons {
+    border-left: 4px solid #007cba;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 3px;
     font-weight: bold;
+    text-transform: uppercase;
+    font-size: 11px;
 }
-.view-mode {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+
+.status-pending { background: #ffc107; color: #212529; }
+.status-district_approved { background: #17a2b8; color: white; }
+.status-upzone_approved { background: #6f42c1; color: white; }
+.status-approved { background: #28a745; color: white; }
+.status-rejected { background: #dc3545; color: white; }
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
-.edit-mode {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.mode-buttons {
-    margin: 10px 0;
-}
-.mode-buttons .button {
-    margin-right: 10px;
-    padding: 8px 15px;
-    text-decoration: none;
+
+.approval-btn {
+    padding: 8px 16px;
+    border: none;
     border-radius: 4px;
+    cursor: pointer;
     font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
 }
-.btn-view {
-    background-color: #28a745;
+
+.btn-success {
+    background: #28a745;
     color: white;
 }
-.btn-edit {
-    background-color: #007bff;
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-primary {
+    background: #007bff;
     color: white;
 }
-.btn-view:hover, .btn-edit:hover {
-    opacity: 0.8;
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.approval-history ul {
+    list-style-type: none;
+}
+
+.approval-history li {
+    margin-bottom: 5px;
+    padding: 3px 0;
 }
 </style>
+{% endif %}
 {% endblock %}
 
-{% block content %}
-{% if original %}
-    {% url 'admin:events_eventregistration_change' original.pk as view_url %}
-    {% url 'admin:events_eventregistration_change' original.pk as edit_url %}
-    
-    <div class="mode-buttons">
-        {% if request.GET.edit == '1' %}
-            <div class="mode-indicator edit-mode">
-                <i class="fas fa-edit"></i> Edit Mode - You can modify all fields
-            </div>
-            <a href="{{ view_url }}" class="button btn-view">
-                <i class="fas fa-eye"></i> Switch to View & Approve Mode
-            </a>
-        {% else %}
-            <div class="mode-indicator view-mode">
-                <i class="fas fa-eye"></i> View & Approve Mode - Focus on approval actions
-            </div>
-            <a href="{{ edit_url }}?edit=1" class="button btn-edit">
-                <i class="fas fa-edit"></i> Switch to Edit Mode
-            </a>
-        {% endif %}
-    </div>
-{% endif %}
-
+{% block extrahead %}
 {{ block.super }}
-{% endblock %}
-
-{% block submit_buttons_bottom %}
-{% if request.GET.edit == '1' %}
-    {{ block.super }}
-{% else %}
-    <div class="submit-row">
-        {% if original.approval_status == 'pending' %}
-            <input type="submit" value="Level 1 Approve" class="default" name="_approve_level1" style="background-color: #28a745;">
-        {% endif %}
-        {% if original.approval_status == 'level1_approved' and user.is_superuser %}
-            <input type="submit" value="Final Approve" class="default" name="_approve_final" style="background-color: #007bff;">
-        {% endif %}
-        {% if original.approval_status != 'approved' %}
-            <input type="submit" value="Reject" name="_reject" style="background-color: #dc3545; color: white;">
-        {% endif %}
-        <input type="submit" value="Save" class="default" name="_save">
-        <input type="submit" value="Save and continue editing" name="_continue">
-    </div>
-{% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add confirmation dialogs for approval actions
+    const approvalButtons = document.querySelectorAll('.approval-btn');
+    approvalButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const action = this.textContent.trim();
+            if (!confirm(`Are you sure you want to ${action}?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

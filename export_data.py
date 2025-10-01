@@ -39,6 +39,9 @@ def get_upzone_cache():
     global UPZONE_CACHE
     if not UPZONE_CACHE:
         for upzone in UpZone.objects.filter(is_active=True):
+            # Skip MP Central Zone for data mapping (it's only for access control)
+            if upzone.name == 'MP Central Zone':
+                continue
             for district in upzone.districts or []:
                 UPZONE_CACHE[district] = upzone.name
     return UPZONE_CACHE
@@ -47,7 +50,11 @@ def get_upzone_for_district(city, state):
     """Get UpZone name for a district using cache"""
     if state and 'madhya pradesh' in state.lower():
         cache = get_upzone_cache()
-        return cache.get(city, 'No UpZone')
+        upzone_name = cache.get(city, 'No UpZone')
+        # Exclude MP Central Zone from exports (it's only for access control)
+        if upzone_name == 'MP Central Zone':
+            return 'No UpZone'
+        return upzone_name
     return 'Not MP'
 
 def get_document_info(registration):

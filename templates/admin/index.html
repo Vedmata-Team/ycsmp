@@ -19,6 +19,16 @@
         </ul>
     </div>
 </div>
+
+<div class="module" style="margin-top: 20px;">
+    <h2>Account Settings</h2>
+    <div class="form-row">
+        <p>Manage your account:</p>
+        <ul>
+            <li><a href="{% url 'events:admin_password_change' %}" class="button password-change">🔒 Change Password</a></li>
+        </ul>
+    </div>
+</div>
 {% endif %}
 
 <style>
@@ -46,6 +56,17 @@
 
 .enhanced-export:hover {
     background: #218838 !important;
+}
+
+.password-change {
+    background: #ffc107 !important;
+    color: #212529 !important;
+    font-weight: bold;
+}
+
+.password-change:hover {
+    background: #e0a800 !important;
+    color: #212529 !important;
 }
 </style>
 {% endblock %}

@@ -99,6 +99,7 @@ DATABASES = {
         'PASSWORD': 'Ycsmp123#',
         'HOST': '69.62.78.57',
         'PORT': '5432',
+        'CONN_MAX_AGE': 600
     }
 }
 
@@ -176,11 +177,8 @@ EMAIL_TIMEOUT = 10
 # Cache Configuration
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
@@ -191,6 +189,17 @@ SESSION_COOKIE_AGE = 3600
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
+# Admin Performance
+ADMIN_PAGINATION_SIZE = 50
+CACHE_TIMEOUT = 300  # 5 minutes
+
+# Session optimization (disabled for local memory cache)
+# SESSION_CACHE_ALIAS = 'default'
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+# Database query optimization
+DATABASE_QUERY_TIMEOUT = 30
 
 # Security for high load
 SECURE_BROWSER_XSS_FILTER = True

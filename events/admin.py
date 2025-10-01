@@ -70,7 +70,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('registration_number', 'registration_date')
     list_editable = ('is_confirmed',)
     date_hierarchy = 'registration_date'
-    show_full_result_count = True
+    show_full_result_count = False
+    list_per_page = 50
+    list_max_show_all = 200
+    preserve_filters = True
     
     fieldsets = (
         ('पंजीकरण जानकारी', {
@@ -106,6 +109,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         if not request.user.is_superuser:
             # Remove स्थिति fieldset for staff users
             fieldsets = [fs for fs in fieldsets if fs[0] != 'स्थिति']
+        
+        # Hide document upload section for non-participant registrations
+        if obj and obj.registration_type != 'participant':
+            fieldsets = [fs for fs in fieldsets if fs[0] != 'दस्तावेज़ अपलोड']
         
         # Add mode indicator to first fieldset
         if fieldsets and obj:
@@ -156,6 +163,72 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             ])
         
         return readonly
+    
+    def get_approval_buttons(self, request, obj):
+        """Get available approval buttons based on user permissions"""
+        if not obj:
+            return []
+        
+        buttons = []
+        
+        try:
+            approval_user = ApprovalUser.objects.get(user=request.user)
+            
+            # Check if user can approve this registration type
+            if approval_user.allowed_registration_types and obj.registration_type not in approval_user.allowed_registration_types:
+                return buttons
+            
+            # District level approval
+            if (approval_user.is_district_approver and 
+                obj.approval_status == 'pending' and 
+                obj.matches_approval_user(approval_user)):
+                buttons.append({
+                    'name': '_approve_district',
+                    'label': 'जिला अप्रूव करें',
+                    'class': 'btn-success'
+                })
+            
+            # UpZone level approval
+            if (approval_user.is_upzone_approver and 
+                obj.approval_status == 'district_approved' and 
+                obj.matches_approval_user(approval_user)):
+                buttons.append({
+                    'name': '_approve_upzone',
+                    'label': 'उपजोन अप्रूव करें',
+                    'class': 'btn-primary'
+                })
+            
+            # State level approval
+            if ((approval_user.is_state_approver or request.user.is_superuser) and 
+                obj.approval_status == 'upzone_approved'):
+                buttons.append({
+                    'name': '_approve_final',
+                    'label': 'अंतिम अप्रूव करें',
+                    'class': 'btn-warning'
+                })
+            
+            # Reject button (available at any level if not already approved)
+            if obj.approval_status != 'approved' and obj.approval_status != 'rejected':
+                buttons.append({
+                    'name': '_reject',
+                    'label': 'अस्वीकृत करें',
+                    'class': 'btn-danger'
+                })
+        
+        except ApprovalUser.DoesNotExist:
+            # Superuser can always approve
+            if request.user.is_superuser:
+                if obj.approval_status == 'pending':
+                    buttons.append({'name': '_approve_district', 'label': 'जिला अप्रूव करें', 'class': 'btn-success'})
+                elif obj.approval_status == 'district_approved':
+                    buttons.append({'name': '_approve_upzone', 'label': 'उपजोन अप्रूव करें', 'class': 'btn-primary'})
+                elif obj.approval_status == 'upzone_approved':
+                    buttons.append({'name': '_approve_final', 'label': 'अंतिम अप्रूव करें', 'class': 'btn-warning'})
+                
+                if obj.approval_status != 'approved':
+                    buttons.append({'name': '_reject', 'label': 'अस्वीकृत करें', 'class': 'btn-danger'})
+        
+        return buttons
     
     def get_form(self, request, obj=None, **kwargs):
         form_class = super().get_form(request, obj, **kwargs)
@@ -309,7 +382,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 else:
                     failed_count += 1
             except Exception as e:
-                print(f"Failed to send email to {registration.email}: {e}")
+                pass
                 failed_count += 1
         
         if failed_count > 0:
@@ -421,7 +494,17 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     get_responsibility_name.short_description = 'जिम्मेदारी/पदनाम'
     
     def get_queryset(self, request):
+        """Optimized queryset with select_related for better performance"""
         qs = super().get_queryset(request)
+        
+        # Use select_related for foreign keys to reduce database queries
+        qs = qs.select_related(
+            'event',
+            'responsibility', 
+            'district_approver',
+            'upzone_approver',
+            'final_approver'
+        )
         
         # Superusers can see all registrations
         if request.user.is_superuser:
@@ -439,14 +522,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             if approval_user.is_super_approver:
                 return qs
             
-            # Debug logging
-            print(f"\n=== QUERYSET DEBUG for {request.user.username} ===")
-            print(f"ApprovalUser: {approval_user}")
-            print(f"State Code: {approval_user.state_code}")
-            print(f"Is UpZone Approver: {approval_user.is_upzone_approver}")
-            print(f"UpZone: {approval_user.upzone}")
-            if approval_user.upzone:
-                print(f"UpZone Districts: {approval_user.upzone.districts}")
+
             
             # For MP state - filter by assigned districts/upzones
             if approval_user.state_code == 'MP':
@@ -462,13 +538,13 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     # Filter by allowed registration types if specified
                     if approval_user.allowed_registration_types:
                         filtered_qs = filtered_qs.filter(registration_type__in=approval_user.allowed_registration_types)
-                    print(f"District Approver - Filtered count: {filtered_qs.count()}")
+
                     return filtered_qs
                     
                 elif approval_user.is_upzone_approver and approval_user.upzone:
                     # UpZone level - filter by upzone districts
                     upzone_districts = approval_user.upzone.districts or []
-                    print(f"UpZone Districts to filter: {upzone_districts}")
+
                     
                     if upzone_districts:
                         # Show all registrations from upzone districts (pending to approved)
@@ -478,21 +554,11 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                             models.Q(state__icontains='madhya pradesh') |
                             models.Q(state__iexact='MP')
                         )
-                        print(f"UpZone Approver - Filtered count: {filtered_qs.count()}")
-                        
-                        # Debug: Show what registrations exist
-                        all_mp_regs = qs.filter(
-                            models.Q(state__icontains='madhya pradesh') |
-                            models.Q(state__iexact='MP')
-                        )
-                        print(f"Total MP registrations: {all_mp_regs.count()}")
-                        
-                        district_approved = all_mp_regs.filter(approval_status='district_approved')
-                        print(f"District approved MP registrations: {district_approved.count()}")
+
                         
                         return filtered_qs
                     else:
-                        print("No districts assigned to UpZone")
+
                         return qs.none()
                         
                 elif approval_user.is_state_approver:
@@ -501,10 +567,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         models.Q(state__icontains='madhya pradesh') |
                         models.Q(state__iexact='MP')
                     )
-                    print(f"State Approver - Filtered count: {filtered_qs.count()}")
+
                     return filtered_qs
                 else:
-                    print("No valid approver role assigned")
+
                     return qs.none()
             
             # For other states - filter by state
@@ -517,18 +583,18 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     )
                 else:
                     filtered_qs = qs.filter(state__iexact=approval_user.state_code)
-                print(f"Other State Approver - Filtered count: {filtered_qs.count()}")
+
                 return filtered_qs
             
             else:
-                print("User has no approval permissions")
+
                 return qs.none()
                 
         except ApprovalUser.DoesNotExist:
-            print(f"No ApprovalUser record found for {request.user.username}")
+
             return qs.none()
         except Exception as e:
-            print(f"Error in get_queryset: {str(e)}")
+
             return qs.none()
     
     def get_state_name_from_code(self, state_code):
@@ -546,6 +612,17 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         except:
             pass
         return None
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """Add approval buttons to change view context"""
+        extra_context = extra_context or {}
+        
+        if object_id:
+            obj = self.get_object(request, object_id)
+            if obj:
+                extra_context['approval_buttons'] = self.get_approval_buttons(request, obj)
+        
+        return super().change_view(request, object_id, form_url, extra_context)
     
     def response_change(self, request, obj):
         from django.http import HttpResponseRedirect
@@ -632,28 +709,16 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         # Send email when is_confirmed is set to True
         if send_confirmation_email:
-            print(f"\n=== ADMIN EMAIL DEBUG ===")
-            print(f"send_confirmation_email: {send_confirmation_email}")
-            print(f"obj.approval_status: {obj.approval_status}")
-            print(f"obj.is_confirmed: {obj.is_confirmed}")
-            print(f"obj.email_sent: {obj.email_sent}")
-            
             from .email_utils import send_registration_approval_email
             try:
-                print(f"Attempting to send email to: {obj.email}")
                 if send_registration_approval_email(obj):
                     obj.email_sent = True
                     EventRegistration.objects.filter(pk=obj.pk).update(email_sent=True)
                     messages.success(request, f'Registration confirmed and email sent to {obj.email}')
-                    print(f"Email sent successfully!")
                 else:
                     messages.warning(request, f'Registration confirmed but failed to send email to {obj.email}')
-                    print(f"Email sending returned False")
             except Exception as e:
                 messages.error(request, f'Registration confirmed but email error: {str(e)}')
-                print(f"Email sending exception: {str(e)}")
-                import traceback
-                print(f"Full traceback: {traceback.format_exc()}")
     
     def export_csv(self, request, queryset):
         return ExportManager.export_to_csv(queryset, 'registrations_export', REGISTRATION_FIELDS)

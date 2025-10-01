@@ -4,6 +4,7 @@ from . import export_views
 from . import admin_export_views
 from . import document_views
 from . import location_views
+from . import password_views
 
 app_name = 'events'
 
@@ -48,4 +49,7 @@ urlpatterns = [
     
     # Contact page
     path('contact/', views.contact_page, name='contact'),
+    
+    # Password change URLs
+    path('admin/password_change/', password_views.admin_password_change, name='admin_password_change'),
 ]

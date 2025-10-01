@@ -365,9 +365,22 @@ class EventRegistration(models.Model):
         return False
     
     def get_upzone_for_district(self):
-        """Get UpZone for this registration's district"""
+        """Get UpZone for this registration's district with caching"""
         if self.state_code == 'MP':
-            return UpZone.objects.filter(districts__contains=[self.city], is_active=True).first()
+            # Try cache first
+            from django.core.cache import cache
+            cache_key = f"upzone_{self.city.replace(' ', '_')}_MP"
+            upzone = cache.get(cache_key)
+            
+            if upzone is None:
+                upzone = UpZone.objects.filter(
+                    districts__contains=[self.city], 
+                    is_active=True
+                ).exclude(name='MP Central Zone').first()
+                # Cache for 1 hour
+                cache.set(cache_key, upzone, 3600)
+            
+            return upzone
         return None
 
     class Meta:
