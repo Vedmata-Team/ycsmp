@@ -385,7 +385,7 @@ def pending_approval(request, registration_id):
     return render(request, 'events/pending.html', context)
 
 def check_status(request):
-    """Check registration status by mobile number"""
+    """Check registration status by mobile number with profile links"""
     registrations = []
     phone = None
     

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: 833px 1240px;
+            margin: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        html {
+            margin: 0;
+            padding: 0;
+            width: 833px;
+            height: 1240px;
+            min-height: 1240px;
+            overflow: visible;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            width: 833px;
+            height: 1240px;
+            min-height: 1240px;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            background-image: url('data:image/png;base64,{{ bg_image_base64 }}');
+            background-size: 833px 1240px;
+            background-position: top left;
+            background-repeat: no-repeat;
+            overflow: visible;
+        }
+        
+        .content-area {
+            position: absolute;
+            top: 425px; /* 3.6cm */
+            left: 71px;  /* 0.6cm */
+            right: 71px; /* 0.6cm */
+            bottom: 71px; /* 0.6cm */
+            text-align: center;
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 25px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            background: white;
+        }
+        
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .registration-number {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 48px;
+            color: #1976d2;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+        
+        .residence-status {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 32px;
+            color: #666;
+            margin-bottom: 35px;
+            padding: 8px 16px;
+            background: rgba(245, 245, 245, 0.9);
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .details {
+            text-align: left;
+            font-size: 36px;
+            line-height: 1.4;
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+        
+        .detail-row {
+            margin-bottom: 25px;
+        }
+        
+        .detail-label {
+            font-weight: 700;
+            color: #1976d2;
+        }
+        
+        .responsibility {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px solid #eee;
+            color: #d32f2f;
+            font-weight: 600;
+            font-size: 36px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-area">
+        <!-- QR Code -->
+        <div class="qr-code">
+            <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code">
+        </div>
+        
+        <!-- Registration Number -->
+        <div class="registration-number">
+            {{ registration.registration_number|default:"पंजीकरण संख्या" }}
+        </div>
+        
+        <!-- Residence Status -->
+        <div class="residence-status">
+            {{ residence_status }}
+        </div>
+        
+        <!-- Personal Details -->
+        <div class="details">
+            <div class="detail-row">
+                <span class="detail-label">नाम:</span> {{ registration.full_name }}
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">मोबाइल:</span> {{ registration.phone }}
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">राज्य:</span> {{ registration.state }}
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">जिला:</span> {{ registration.city }}
+            </div>
+            
+            {% if registration.registration_type == 'organization_representative' and registration.responsibility %}
+            <div class="responsibility">
+                <span class="detail-label">जिम्मेदारी:</span> {{ registration.responsibility.name }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

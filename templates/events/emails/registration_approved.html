@@ -2,131 +2,61 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>पंजीकरण स्वीकृत</title>
+    <title>Registration Approved</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { color: white; padding: 20px; text-align: center; }
-        .header-participant { background: linear-gradient(135deg, #007bff, #0056b3); }
-        .header-volunteer { background: linear-gradient(135deg, #28a745, #20c997); }
-        .header-organization { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
-        .content { padding: 20px; background: #f9f9f9; }
-        .footer { padding: 15px; text-align: center; font-size: 12px; color: #666; }
-        .success { background: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0; }
-        .reg-number { font-size: 24px; font-weight: bold; text-align: center; padding: 15px; background: white; margin: 15px 0; }
-        .reg-number-participant { color: #007bff; border: 2px solid #007bff; }
-        .reg-number-volunteer { color: #28a745; border: 2px solid #28a745; }
-        .reg-number-organization { color: #6f42c1; border: 2px solid #6f42c1; }
+        .header { background: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #2196F3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .info-box { background: white; padding: 20px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #4CAF50; }
+        .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header {% if registration.registration_type == 'volunteer' %}header-volunteer{% elif registration.registration_type == 'organization_representative' %}header-organization{% else %}header-participant{% endif %}">
-            <h2>🎉 बधाई हो! 🎉</h2>
-            <p>आपका {% if registration.registration_type == 'volunteer' %}समयदानी कार्यकर्ता{% elif registration.registration_type == 'organization_representative' %}संगठन प्रतिनिधि{% else %}प्रतिभागी{% endif %} पंजीकरण स्वीकृत हो गया है</p>
+        <div class="header">
+            <h1>🎉 बधाई हो! आपका पंजीकरण अप्रूव हो गया</h1>
         </div>
         
         <div class="content">
             <p>प्रिय {{ registration.full_name }},</p>
             
-            <div class="success">
-                <strong>आपका पंजीकरण सफलतापूर्वक स्वीकृत हो गया है!</strong>
+            <p>आपका <strong>{{ event.title }}</strong> के लिए पंजीकरण सफलतापूर्वक अप्रूव हो गया है।</p>
+            
+            <div class="info-box">
+                <h3>📋 पंजीकरण विवरण:</h3>
+                <p><strong>पंजीकरण संख्या:</strong> {{ registration.registration_number }}</p>
+                <p><strong>नाम:</strong> {{ registration.full_name }}</p>
+                <p><strong>प्रकार:</strong> {{ registration.get_registration_type_display }}</p>
+                <p><strong>कार्यक्रम:</strong> {{ event.title }}</p>
+                <p><strong>तिथि:</strong> {{ event.event_date|date:"d M Y" }}</p>
+                <p><strong>स्थान:</strong> {{ event.venue }}</p>
             </div>
             
-            <div class="reg-number {% if registration.registration_type == 'volunteer' %}reg-number-volunteer{% elif registration.registration_type == 'organization_representative' %}reg-number-organization{% else %}reg-number-participant{% endif %}">
-                आपका पंजीकरण नंबर: {{ registration.registration_number }}
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ profile_url }}" class="button">
+                    👤 अपनी पूरी प्रोफाइल देखें
+                </a>
             </div>
             
-            <p><strong>पंजीकरण विवरण:</strong></p>
-            <ul>
-                <li><strong>नाम:</strong> {{ registration.full_name }}</li>
-                <li><strong>पंजीकरण नंबर:</strong> {{ registration.registration_number }}</li>
-                <li><strong>मोबाइल:</strong> {{ registration.phone }}</li>
-                {% if registration.event %}<li><strong>कार्यक्रम:</strong> {{ registration.event.title }}</li>{% endif %}
-                <li><strong>पंजीकरण प्रकार:</strong> {% if registration.registration_type == 'volunteer' %}समयदानी कार्यकर्ता{% elif registration.registration_type == 'organization_representative' %}संगठन प्रतिनिधि{% else %}प्रतिभागी{% endif %}</li>
-                {% if registration.registration_type == 'organization_representative' and registration.responsibility %}
-                <li><strong>जिम्मेदारी:</strong> {{ registration.responsibility.name }}</li>
-                {% endif %}
-                <li><strong>आगमन दिनांक:</strong> {{ registration.arrival_date }}</li>
-            </ul>
-            
-            <p><strong>महत्वपूर्ण निर्देश:</strong></p>
-            <ul>
-                <li>कृपया अपना पंजीकरण नंबर सुरक्षित रखें</li>
-                <li>शिविर में आते समय यह नंबर साथ लाएं</li>
-                <li><strong>यह पंजीकरण केवल इस कार्यक्रम "{{ registration.event.title }}" के लिए मान्य है</strong></li>
-                <li>आगे की जानकारी SMS/WhatsApp से मिलेगी</li>
-            </ul>
-            
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #28a745; margin-bottom: 15px;">✅ शिविर में क्या करें (Do's):</h3>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li><strong>परिचय पत्र</strong> शिविर में आरम्भ से अंत तक अवश्य लगाकर रखें। यह स्वागत काउंटर से प्राप्त करें।</li>
-                    <li>शिविर परिसर में <strong>मिशन के निर्धारित गणवेश</strong> पहनें (भाई: पीला धोती-कुर्ता | बहने: पीली साड़ी / पीला सलवार-कुर्ता)।</li>
-                    <li><strong>दिनचर्या</strong> का पालन करें – प्रत्येक सत्र के 5 मिनट पूर्व कार्यक्रम स्थल पर पहुँचें।</li>
-                    <li><strong>अनुशासन</strong> व <strong>पंक्तिबद्धता</strong> प्रसाधन, भोजनालय, स्टॉल आदि में बनाए रखें।</li>
-                    <li>प्रत्येक कार्य <strong>धैर्यपूर्वक</strong> एवं <strong>पंक्तिबद्ध</strong> होकर करें। बहिनों को प्राथमिकता दें।</li>
-                    <li>सभी सत्रों में <strong>अनिवार्य रूप से उपस्थित</strong> रहें व निर्देशों को ध्यान से सुनें।</li>
-                    <li>केवल <strong>आवंटित आवास</strong> में ही रहें। अन्यत्र न शिफ्ट हों।</li>
-                    <li>किसी असुविधा पर <strong>मुख्य कार्यालय</strong> से संपर्क करें।</li>
-                    <li>अपने आस-पास <strong>सफाई</strong> रखें। कचरा केवल निर्धारित स्थान पर ही डालें।</li>
-                    <li>अपने सामान की <strong>सुरक्षा</strong> स्वयं करें। मोबाइल, पर्स, नगदी आदि सदा साथ रखें।</li>
-                    <li>किसी भी <strong>अपरिचित या संदिग्ध व्यक्ति/गतिविधि</strong> की सूचना तुरंत सुरक्षा नियंत्रण कक्ष को दें।</li>
-                </ul>
-                
-                <h3 style="color: #dc3545; margin: 20px 0 15px 0;">❌ शिविर में क्या न करें (Don'ts):</h3>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li><strong>बरमूड़ा, शॉर्ट्स, नाइट ड्रेस</strong> आदि में आवास से बाहर न निकलें।</li>
-                    <li>सत्रों के दौरान <strong>मोबाइल</strong> साइलेंट या बंद रखें। मध्य में उठकर फोन पर बात न करें।</li>
-                    <li><strong>शिविर परिसर से बाहर</strong> बिना अनुमति शहर में न जाएं। आवश्यकता होने पर जोन प्रभारी या मुख्य कार्यालय को सूचित करें।</li>
-                    <li><strong>मोबाइल चार्जिंग</strong> अपनी उपस्थिति में ही करें, अन्यथा सावधानी रखें।</li>
+            <div class="info-box">
+                <h3>📍 महत्वपूर्ण निर्देश:</h3>
+                <ul>
+                    <li>कृपया अपना पंजीकरण नंबर सुरक्षित रखें</li>
+                    <li>कार्यक्रम में भाग लेने के लिए यह ईमेल या पंजीकरण नंबर साथ लाएं</li>
+                    <li>अपनी पूरी प्रोफाइल देखने के लिए ऊपर दिए गए लिंक पर क्लिक करें</li>
+                    <li>कोई भी समस्या होने पर संपर्क करें</li>
                 </ul>
             </div>
             
-            <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <h3 style="margin: 0 0 15px 0; color: #28a745;">📞 महत्वपूर्ण संपर्क नंबर:</h3>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #007bff;">📝 पंजीयन सहायता:</h4>
-                    <p style="margin: 3px 0;"><strong>दीपचंद्र मालवी जी:</strong> 8770 113449</p>
-                    <p style="margin: 3px 0;"><strong>युवा प्रकोष्ठ:</strong> 9258 360962</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #17a2b8;">🏠 आवास व्यवस्था:</h4>
-                    <p style="margin: 3px 0;"><strong>प्रभा कांत तिवारी:</strong> 8770 516798</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #ffc107;">🚌 परिवहन व्यवस्था:</h4>
-                    <p style="margin: 3px 0;"><strong>रघुनाथ प्रसाद हजारी:</strong> 9425 492970</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #dc3545;">🏥 चिकित्सा सहायता:</h4>
-                    <p style="margin: 3px 0;"><strong>डॉ. शैलेन्द्र सिंह:</strong> 9826 071550</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #fd7e14;">⚠️ आपातकालीन सहायता:</h4>
-                    <p style="margin: 3px 0;"><strong>राजेश पटेल:</strong> 9425 060396</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #28a745;">🛡️ सुरक्षा व्यवस्था:</h4>
-                    <p style="margin: 3px 0;"><strong>दिनेश देशमुख जी:</strong> 9407 056024</p>
-                </div>
-                
-                <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #856404;">🏢 शिविर स्थान:</h4>
-                    <p style="margin: 3px 0; color: #856404;"><strong>सरस्वती विद्या मंदिर शारदा विहार भोपाल</strong></p>
-                </div>
-            </div>
+            <p>धन्यवाद!</p>
+            <p><strong>युवा चिंतन शिविर भोपाल टीम</strong></p>
         </div>
         
         <div class="footer">
-            <p>&copy; 2025 प्रान्तीय युवा चिंतन शिविर भोपाल 2025 | अखिल विश्व गायत्री परिवार</p>
+            <p>यह एक स्वचालित ईमेल है। कृपया इसका उत्तर न दें।</p>
+            <p>संपर्क: youthcell@awgp.org</p>
         </div>
     </div>
 </body>

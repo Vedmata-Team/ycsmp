@@ -1,167 +1,59 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>पंजीकरण विवरण</title>
+    <title>Registration Details</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .header-participant { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); }
-        .header-volunteer { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-        .header-organization { background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%); }
-        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-        .registration-card { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .reg-number { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; }
-        .reg-number-participant { color: #007bff; }
-        .reg-number-volunteer { color: #28a745; }
-        .reg-number-organization { color: #6f42c1; }
-        .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .details-table th, .details-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        .details-table th { background-color: #f8f9fa; font-weight: bold; }
-        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-        .info-badge { background: #17a2b8; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+        .header { background: #2196F3; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .info-box { background: white; padding: 20px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196F3; }
+        .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header {% if registration.registration_type == 'volunteer' %}header-volunteer{% elif registration.registration_type == 'organization_representative' %}header-organization{% else %}header-participant{% endif %}">
-            <h1>📋 {% if registration.registration_type == 'volunteer' %}समयदानी कार्यकर्ता{% elif registration.registration_type == 'organization_representative' %}संगठन प्रतिनिधि{% else %}प्रतिभागी{% endif %} पंजीकरण</h1>
-            <p>आपके पंजीकरण की पूरी जानकारी</p>
+        <div class="header">
+            <h1>📄 पंजीकरण विवरण</h1>
         </div>
         
         <div class="content">
-            <div class="registration-card">
-                <div class="reg-number {% if registration.registration_type == 'volunteer' %}reg-number-volunteer{% elif registration.registration_type == 'organization_representative' %}reg-number-organization{% else %}reg-number-participant{% endif %}">
-                    पंजीकरण संख्या: {{ registration.registration_number }}
-                </div>
-                <div style="text-align: center;">
-                    <span class="info-badge">✓ पुष्ट</span>
-                </div>
-                
-                <table class="details-table">
-                    <tr>
-                        <th>नाम</th>
-                        <td>{{ registration.full_name }}</td>
-                    </tr>
-                    <tr>
-                        <th>कार्यक्रम</th>
-                        <td>{{ event.title }}</td>
-                    </tr>
-                    <tr>
-                        <th>दिनांक</th>
-                        <td>{{ event.event_date|date:"d F Y" }}</td>
-                    </tr>
-                    <tr>
-                        <th>समय</th>
-                        <td>{{ event.event_date|time:"H:i" }}</td>
-                    </tr>
-                    <tr>
-                        <th>स्थान</th>
-                        <td>{{ event.venue }}</td>
-                    </tr>
-                    <tr>
-                        <th>ईमेल</th>
-                        <td>{{ registration.email }}</td>
-                    </tr>
-                    <tr>
-                        <th>मोबाइल</th>
-                        <td>{{ registration.phone }}</td>
-                    </tr>
-                    <tr>
-                        <th>जन्म तिथि</th>
-                        <td>{{ registration.date_of_birth|date:"d F Y" }}</td>
-                    </tr>
-                    <tr>
-                        <th>पंजीकरण प्रकार</th>
-                        <td>{% if registration.registration_type == 'volunteer' %}समयदानी कार्यकर्ता{% elif registration.registration_type == 'organization_representative' %}संगठन प्रतिनिधि{% else %}प्रतिभागी{% endif %}</td>
-                    </tr>
-                    {% if registration.registration_type == 'organization_representative' and registration.responsibility %}
-                    <tr>
-                        <th>जिम्मेदारी</th>
-                        <td>{{ registration.responsibility.name }}</td>
-                    </tr>
-                    {% endif %}
-                    <tr>
-                        <th>लिंग</th>
-                        <td>{{ registration.get_gender_display }}</td>
-                    </tr>
-                    <tr>
-                        <th>शिक्षा</th>
-                        <td>{{ registration.get_education_display }}</td>
-                    </tr>
-                    <tr>
-                        <th>व्यवसाय</th>
-                        <td>{{ registration.occupation|default:"नहीं दिया गया" }}</td>
-                    </tr>
-                    <tr>
-                        <th>पता</th>
-                        <td>{{ registration.village_taluka }}, {{ registration.city }}, {{ registration.state }}</td>
-                    </tr>
-                    <tr>
-                        <th>आगमन तिथि</th>
-                        <td>{{ registration.get_arrival_date_display }}</td>
-                    </tr>
-                    {% if registration.bringing_vehicle %}
-                    <tr>
-                        <th>वाहन नंबर</th>
-                        <td>{{ registration.vehicle_number }}</td>
-                    </tr>
-                    {% endif %}
-                    {% if registration.special_skills %}
-                    <tr>
-                        <th>विशेष कौशल</th>
-                        <td>{{ registration.special_skills }}</td>
-                    </tr>
-                    {% endif %}
-                </table>
-                
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                    <h3 style="margin: 0 0 10px 0; color: #856404;">महत्वपूर्ण सूचना:</h3>
-                    <p style="margin: 5px 0; font-weight: bold; color: #856404;">यह पंजीकरण केवल "{{ event.title }}" के लिए मान्य है।</p>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="color: #28a745; margin-bottom: 15px; text-align: center;">🛡️ शिविर अनुशासन दिशानिर्देश</h3>
-                    
-                    <h4 style="color: #28a745; margin: 20px 0 10px 0;">✅ क्या करें (Do's):</h4>
-                    <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li><strong>परिचय पत्र</strong> शिविर में आरम्भ से अंत तक अवश्य लगाकर रखें। यह स्वागत काउंटर से प्राप्त करें।</li>
-                        <li>शिविर परिसर में <strong>मिशन के निर्धारित गणवेश</strong> पहनें (भाई: पीला धोती-कुर्ता | बहने: पीली साड़ी / पीला सलवार-कुर्ता)।</li>
-                        <li><strong>दिनचर्या</strong> का पालन करें – प्रत्येक सत्र के 5 मिनट पूर्व कार्यक्रम स्थल पर पहुँचें।</li>
-                        <li><strong>अनुशासन</strong> व <strong>पंक्तिबद्धता</strong> प्रसाधन, भोजनालय, स्टॉल आदि में बनाए रखें।</li>
-                        <li>प्रत्येक कार्य <strong>धैर्यपूर्वक</strong> एवं <strong>पंक्तिबद्ध</strong> होकर करें। बहिनों को प्राथमिकता दें।</li>
-                        <li>सभी सत्रों में <strong>अनिवार्य रूप से उपस्थित</strong> रहें व निर्देशों को ध्यान से सुनें।</li>
-                        <li>केवल <strong>आवंटित आवास</strong> में ही रहें। अन्यत्र न शिफ्ट हों।</li>
-                        <li>किसी असुविधा पर <strong>मुख्य कार्यालय</strong> से संपर्क करें।</li>
-                        <li>अपने आस-पास <strong>सफाई</strong> रखें। कचरा केवल निर्धारित स्थान पर ही डालें।</li>
-                        <li>अपने सामान की <strong>सुरक्षा</strong> स्वयं करें। मोबाइल, पर्स, नगदी आदि सदा साथ रखें।</li>
-                        <li>किसी भी <strong>अपरिचित या संदिग्ध व्यक्ति/गतिविधि</strong> की सूचना तुरंत सुरक्षा नियंत्रण कक्ष को दें।</li>
-                    </ul>
-                    
-                    <h4 style="color: #dc3545; margin: 20px 0 10px 0;">❌ क्या न करें (Don'ts):</h4>
-                    <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li><strong>बरमूड़ा, शॉर्ट्स, नाइट ड्रेस</strong> आदि में आवास से बाहर न निकलें।</li>
-                        <li>सत्रों के दौरान <strong>मोबाइल</strong> साइलेंट या बंद रखें। मध्य में उठकर फोन पर बात न करें।</li>
-                        <li><strong>शिविर परिसर से बाहर</strong> बिना अनुमति शहर में न जाएं। आवश्यकता होने पर जोन प्रभारी या मुख्य कार्यालय को सूचित करें।</li>
-                        <li><strong>मोबाइल चार्जिंग</strong> अपनी उपस्थिति में ही करें, अन्यथा सावधानी रखें।</li>
-                    </ul>
-                </div>
-                
-                <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h3 style="margin: 0 0 10px 0; color: #28a745;">संपर्क जानकारी:</h3>
-                    <p style="margin: 5px 0;"><strong>फोन:</strong> 9258360962</p>
-                    <p style="margin: 5px 0;"><strong>ईमेल:</strong> youthcell@awgp.org</p>
-                    <p style="margin: 5px 0;"><strong>पता:</strong> युवा प्रकोष्ठ शान्तिकुञ्ज</p>
-                </div>
+            <p>प्रिय {{ registration.full_name }},</p>
+            
+            <p>यहाँ आपके <strong>{{ event.title }}</strong> पंजीकरण का विवरण है:</p>
+            
+            <div class="info-box">
+                <h3>📋 पंजीकरण जानकारी:</h3>
+                <p><strong>पंजीकरण संख्या:</strong> {{ registration.registration_number|default:"अभी तक जेनरेट नहीं" }}</p>
+                <p><strong>नाम:</strong> {{ registration.full_name }}</p>
+                <p><strong>प्रकार:</strong> {{ registration.get_registration_type_display }}</p>
+                <p><strong>स्थिति:</strong> {{ registration.get_approval_status_display }}</p>
+                <p><strong>कार्यक्रम:</strong> {{ event.title }}</p>
+                <p><strong>तिथि:</strong> {{ event.event_date|date:"d M Y" }}</p>
+                <p><strong>स्थान:</strong> {{ event.venue }}</p>
             </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ profile_url }}" class="button">
+                    👤 पूरी प्रोफाइल देखें
+                </a>
+            </div>
+            
+            <div class="info-box">
+                <h3>📱 स्थिति जांचने के लिए:</h3>
+                <p>अपने मोबाइल नंबर {{ registration.phone }} से स्थिति जांच सकते हैं:</p>
+                <p><a href="https://ycsmp.in/check-status/">https://ycsmp.in/check-status/</a></p>
+            </div>
+            
+            <p>धन्यवाद!</p>
+            <p><strong>युवा चिंतन शिविर भोपाल टीम</strong></p>
         </div>
         
         <div class="footer">
-            <p><strong>युवा चिंतन शिविर भोपाल</strong></p>
-            <p>संपर्क: 9258360962 | ईमेल: youthcell@awgp.org</p>
-            <p>यह एक स्वचालित ईमेल है, कृपया इसका उत्तर न दें।</p>
+            <p>यह एक स्वचालित ईमेल है। कृपया इसका उत्तर न दें।</p>
+            <p>संपर्क: youthcell@awgp.org</p>
         </div>
     </div>
 </body>

@@ -25,6 +25,7 @@ def send_registration_approval_email(registration):
     context = {
         'registration': registration,
         'event': registration.event,
+        'profile_url': registration.get_profile_url(),
     }
     
     html_message = render_to_string('events/emails/registration_approved.html', context)
@@ -65,6 +66,7 @@ def send_registration_details_email(registration):
     context = {
         'registration': registration,
         'event': registration.event,
+        'profile_url': registration.get_profile_url(),
     }
     
     html_message = render_to_string('events/emails/registration_details.html', context)

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .profile_views import registration_profile
 from . import export_views
 from . import admin_export_views
 from . import document_views
@@ -52,4 +53,7 @@ urlpatterns = [
     
     # Password change URLs
     path('admin/password_change/', password_views.admin_password_change, name='admin_password_change'),
+    
+    # Profile URL
+    path('profile/<str:profile_id>/', registration_profile, name='registration_profile'),
 ]

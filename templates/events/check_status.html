@@ -221,8 +221,15 @@
                                         </div>
                                     {% endif %}
                                     
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h5 style="margin: 0; color: #333;">{{ registration.event.title }}</h5>
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 style="margin: 0; color: #333;">{{ registration.event.title }}</h5>
+                                            {% if registration.registration_number %}
+                                            <div class="mt-2">
+                                                <strong style="color: #1976d2; font-size: 1.1rem;">पंजीकरण नंबर: {{ registration.registration_number }}</strong>
+                                            </div>
+                                            {% endif %}
+                                        </div>
                                         <span class="status-badge 
                                             {% if registration.approval_status == 'pending' %}status-pending
                                             {% elif registration.approval_status == 'district_approved' %}status-level1
@@ -243,6 +250,22 @@
                                             {% endif %}
                                         </span>
                                     </div>
+                                    
+                                    {% if registration.approval_status == 'approved' %}
+                                    <div class="mb-3">
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <a href="{{ registration.get_profile_url }}" class="btn btn-info btn-sm" target="_blank">
+                                                <i class="bi bi-eye"></i> प्रोफाइल देखें
+                                            </a>
+                                            <a href="/id/preview/{{ registration.id }}/" class="btn btn-warning btn-sm" target="_blank">
+                                                <i class="bi bi-card-image"></i> ID कार्ड देखें
+                                            </a>
+                                            <a href="/id/card/{{ registration.id }}/?format=PNG" class="btn btn-success btn-sm">
+                                                <i class="bi bi-download"></i> ID कार्ड डाउनलोड
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                     
                                     <div class="reg-details">
                                         <div class="reg-detail">
@@ -275,12 +298,7 @@
                                             <span class="detail-label">स्थान:</span>
                                             <span class="detail-value">{{ registration.event.venue }}</span>
                                         </div>
-                                        {% if registration.registration_number %}
-                                        <div class="reg-detail">
-                                            <span class="detail-label">पंजीकरण नंबर:</span>
-                                            <span class="detail-value" style="font-weight: bold; color: #1976d2;">{{ registration.registration_number }}</span>
-                                        </div>
-                                        {% endif %}
+
                                         <div class="reg-detail">
                                             <span class="detail-label">राज्य:</span>
                                             <span class="detail-value">{{ registration.state }}</span>

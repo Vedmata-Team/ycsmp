@@ -393,6 +393,15 @@ class EventRegistration(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.event.title}"
+    
+    def get_profile_url(self):
+        """Generate unique profile URL with phone and name"""
+        # Clean name: replace spaces with underscores, remove special chars
+        clean_name = self.full_name.replace(' ', '_').replace('-', '_')
+        clean_name = ''.join(c for c in clean_name if c.isalnum() or c == '_')
+        
+        profile_id = f"{self.phone}_{clean_name}"
+        return f"/profile/{profile_id}/"
 
     def save(self, *args, **kwargs):
         # Validate vibhag data integrity
