@@ -24,15 +24,16 @@ def registration_profile(request, profile_id):
     # Extract phone from profile_id for faster lookup
     phone = profile_id.split('_')[0]
     
-    # Direct database lookup by phone
-    try:
-        registration = EventRegistration.objects.select_related('event', 'responsibility').get(phone=phone)
-        
-        # Verify profile_id matches
-        if generate_profile_url(registration) != profile_id:
-            raise EventRegistration.DoesNotExist
-            
-    except EventRegistration.DoesNotExist:
+    # Get all registrations for this phone and find matching profile_id
+    registrations = EventRegistration.objects.select_related('event', 'responsibility').filter(phone=phone)
+    
+    registration = None
+    for reg in registrations:
+        if generate_profile_url(reg) == profile_id:
+            registration = reg
+            break
+    
+    if not registration:
         raise Http404("Registration not found")
     
     # Get vibhag names only if needed
