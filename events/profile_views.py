@@ -12,31 +12,38 @@ def generate_profile_url(registration):
     
     return f"{registration.phone}_{clean_name}"
 
+def profile_loading(request, profile_id):
+    """Show loading page before profile"""
+    actual_profile_url = f'/profile/{profile_id}/view/'
+    return render(request, 'events/profile_loading.html', {
+        'actual_profile_url': actual_profile_url
+    })
+
 def registration_profile(request, profile_id):
-    """Display registration profile page"""
-    # Find registration by matching profile_id
-    registrations = EventRegistration.objects.select_related('event', 'responsibility')
+    """Display registration profile page - optimized"""
+    # Extract phone from profile_id for faster lookup
+    phone = profile_id.split('_')[0]
     
-    registration = None
-    for reg in registrations:
-        if generate_profile_url(reg) == profile_id:
-            registration = reg
-            break
-    
-    if not registration:
+    # Direct database lookup by phone
+    try:
+        registration = EventRegistration.objects.select_related('event', 'responsibility').get(phone=phone)
+        
+        # Verify profile_id matches
+        if generate_profile_url(registration) != profile_id:
+            raise EventRegistration.DoesNotExist
+            
+    except EventRegistration.DoesNotExist:
         raise Http404("Registration not found")
     
-    # Get vibhag names for volunteers
+    # Get vibhag names only if needed
     vibhag_names = []
     if registration.registration_type == 'volunteer' and registration.selected_vibhags:
-        try:
-            vibhag_ids = [int(vid) for vid in registration.selected_vibhags if str(vid).isdigit()]
-            vibhags = VibhagOption.objects.filter(id__in=vibhag_ids, is_active=True)
-            vibhag_names = [v.name for v in vibhags]
-        except:
-            pass
+        vibhag_ids = [int(vid) for vid in registration.selected_vibhags if str(vid).isdigit()]
+        if vibhag_ids:
+            vibhags = VibhagOption.objects.filter(id__in=vibhag_ids, is_active=True).values_list('name', flat=True)
+            vibhag_names = list(vibhags)
     
-    # Get campaign names
+    # Get campaign names only if needed
     campaign_names = []
     if registration.selected_campaigns:
         campaign_dict = dict(registration.CAMPAIGN_CHOICES)
@@ -46,7 +53,6 @@ def registration_profile(request, profile_id):
         'registration': registration,
         'vibhag_names': vibhag_names,
         'campaign_names': campaign_names,
-        'venue_location': 'https://maps.google.com/maps?q=Shantikunj,+Haridwar',  # Default venue
     }
     
     return render(request, 'events/registration_profile.html', context)

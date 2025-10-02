@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>प्रोफाइल लोड हो रहा है...</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        .loading-container {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 25px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        .loading-title {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .loading-status {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        .loading-percent {
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-title">प्रोफाइल लोड हो रहा है...</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="loading-status" id="loadingStatus">कृपया प्रतीक्षा करें...</div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+    </div>
+
+    <script>
+        let progress = 0;
+        let actualPageLoaded = false;
+        const loadingMessages = [
+            'डेटा लोड कर रहे हैं...',
+            'प्रोफाइल जानकारी प्राप्त कर रहे हैं...',
+            'दस्तावेज़ सत्यापित कर रहे हैं...',
+            'स्थिति अपडेट कर रहे हैं...',
+            'अंतिम विवरण तैयार कर रहे हैं...'
+        ];
+        
+        // Start loading actual page in background
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = '{{ actual_profile_url }}';
+        document.body.appendChild(iframe);
+        
+        iframe.onload = function() {
+            actualPageLoaded = true;
+        };
+        
+        function updateProgress() {
+            if (!actualPageLoaded) {
+                progress += Math.random() * 8 + 3;
+                if (progress > 85) progress = 85;
+            } else {
+                progress = 100;
+                clearInterval(progressInterval);
+                document.getElementById('loadingStatus').textContent = 'पूर्ण!';
+                setTimeout(() => {
+                    window.location.href = '{{ actual_profile_url }}';
+                }, 300);
+            }
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('loadingPercent').textContent = Math.round(progress) + '%';
+            
+            if (progress < 100) {
+                const messageIndex = Math.floor((progress / 85) * (loadingMessages.length - 1));
+                document.getElementById('loadingStatus').textContent = loadingMessages[messageIndex] || loadingMessages[0];
+            }
+        }
+        
+        const progressInterval = setInterval(updateProgress, 200);
+        
+        // Fallback timeout
+        setTimeout(() => {
+            if (!actualPageLoaded) {
+                actualPageLoaded = true;
+            }
+        }, 8000);
+    </script>
+</body>
+</html>

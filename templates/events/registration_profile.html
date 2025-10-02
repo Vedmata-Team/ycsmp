@@ -6,10 +6,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ registration.full_name }} - Registration Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
     <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
         .profile-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            {% if registration.registration_type == 'volunteer' %}
+                background: linear-gradient(135deg, #990000 0%, #cc0000 100%);
+            {% elif registration.registration_type == 'participant' %}
+                background: linear-gradient(135deg, #0066cc 0%, #0080ff 100%);
+            {% elif registration.registration_type == 'organization_representative' %}
+                background: linear-gradient(135deg, #ff9900 0%, #ffb366 100%);
+            {% else %}
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            {% endif %}
             color: white;
             padding: 2rem 0;
         }
@@ -54,7 +109,15 @@
         
         .residence-card {
             background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-            border-left: 4px solid #007bff;
+            {% if registration.registration_type == 'volunteer' %}
+                border-left: 4px solid #990000;
+            {% elif registration.registration_type == 'participant' %}
+                border-left: 4px solid #0066cc;
+            {% elif registration.registration_type == 'organization_representative' %}
+                border-left: 4px solid #ff9900;
+            {% else %}
+                border-left: 4px solid #007bff;
+            {% endif %}
         }
         
         .venue-map {
@@ -72,13 +135,31 @@
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h5 id="loadingTitle">प्रोफाइल लोड हो रहा है...</h5>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div id="loadingStatus">कृपया प्रतीक्षा करें...</div>
+            <div id="loadingPercent">0%</div>
+        </div>
+    </div>
     <!-- Header -->
     <div class="profile-header">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h1 class="mb-2">{{ registration.full_name }}</h1>
-                    <p class="mb-3">{{ registration.get_registration_type_display }} - {{ registration.event.title }}</p>
+                    <div class="mb-3">
+                        <span class="badge bg-light text-dark me-2">{{ registration.get_registration_type_display }}</span>
+                        {% if registration.registration_type == 'organization_representative' and registration.responsibility %}
+                            <span class="badge bg-warning text-dark me-2">{{ registration.responsibility.name }}</span>
+                        {% endif %}
+                        <span class="badge bg-info text-white">{{ registration.event.title }}</span>
+                    </div>
                     <span class="status-badge status-{{ registration.approval_status }}">
                         {% if registration.approval_status == 'approved' %}
                             <i class="fas fa-check-circle"></i> अप्रूव्ड
@@ -127,14 +208,14 @@
                         <h5 class="card-title"><i class="fas fa-home"></i> आवास विवरण</h5>
                         <div class="info-label">आवास स्थिति:</div>
                         <div class="info-value">
-                            <span class="badge bg-warning">अभी तक आवंटित नहीं</span>
+                            <span class="badge bg-dark">अभी तक आवंटित नहीं</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Personal Information -->
                 <div class="card info-card">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header text-white" style="background-color: {% if registration.registration_type == 'volunteer' %}#990000{% elif registration.registration_type == 'participant' %}#0066cc{% elif registration.registration_type == 'organization_representative' %}#ff9900{% else %}#007bff{% endif %}">
                         <h5 class="mb-0"><i class="fas fa-user"></i> व्यक्तिगत जानकारी</h5>
                     </div>
                     <div class="card-body">
@@ -279,15 +360,14 @@
                         <h5 class="mb-0"><i class="fas fa-map"></i> कार्यक्रम स्थल</h5>
                     </div>
                     <div class="card-body p-0">
-                        <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3462.5!2d78.1642!3d29.9457!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ee9648c2ff0d7%3A0x69d2c5cd6b1b1b1b!2sShantikunj%2C%20Haridwar!5e0!3m2!1sen!2sin!4v1234567890"
-                            class="venue-map"
-                            style="border:0;"
-                            allowfullscreen=""
-                            loading="lazy">
-                        </iframe>
+                        <div id="mapPlaceholder" class="venue-map d-flex align-items-center justify-content-center bg-light" style="cursor: pointer;" onclick="loadMap()">
+                            <div class="text-center">
+                                <i class="fas fa-map-marker-alt fa-3x text-primary mb-2"></i>
+                                <p>मैप लोड करने के लिए क्लिक करें</p>
+                            </div>
+                        </div>
                         <div class="p-3">
-                            <a href="{{ venue_location }}" target="_blank" class="btn btn-primary btn-sm w-100">
+                            <a href="https://maps.app.goo.gl/jdnvJ5SPGFwP7tum6" target="_blank" class="btn btn-primary btn-sm w-100">
                                 <i class="fas fa-external-link-alt"></i> मैप में देखें
                             </a>
                         </div>
@@ -329,5 +409,49 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function loadMap() {
+            const placeholder = document.getElementById('mapPlaceholder');
+            placeholder.innerHTML = '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3490.9428267678036!2d77.36068657500815!3d23.183373110308917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x397c5cc6f278ff1d%3A0x46b55c53ffc08049!2sSaraswati%20Vidya%20Mandir%20Sharda%20Vihar!5e1!3m2!1sen!2sin!4v1752292992897!5m2!1sen!2sin" class="venue-map" style="border:0;" allowfullscreen="" loading="lazy"></iframe>';
+        }
+    </script>
+    <script>
+        let progress = 0;
+        const loadingMessages = [
+            'डेटा लोड कर रहे हैं...',
+            'प्रोफाइल जानकारी प्राप्त कर रहे हैं...',
+            'दस्तावेज़ सत्यापित कर रहे हैं...',
+            'स्थिति अपडेट कर रहे हैं...',
+            'अंतिम विवरण तैयार कर रहे हैं...'
+        ];
+        
+        function updateProgress() {
+            progress += Math.random() * 15 + 5;
+            if (progress > 95) progress = 95;
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('loadingPercent').textContent = Math.round(progress) + '%';
+            
+            const messageIndex = Math.floor((progress / 100) * loadingMessages.length);
+            if (messageIndex < loadingMessages.length) {
+                document.getElementById('loadingStatus').textContent = loadingMessages[messageIndex];
+            }
+        }
+        
+        const progressInterval = setInterval(updateProgress, 300);
+        
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('loadingPercent').textContent = '100%';
+                document.getElementById('loadingStatus').textContent = 'पूर्ण!';
+                
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+    </script>
 </body>
 </html>

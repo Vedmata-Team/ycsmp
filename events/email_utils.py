@@ -1,10 +1,37 @@
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
+from django.http import HttpResponse
+import io
+import tempfile
+import os
+
+def generate_id_card_for_email(registration):
+    """Generate ID card image for email attachment"""
+    try:
+        from ID.fallback_views import generate_id_card_with_fallback
+        from django.test import RequestFactory
+        
+        # Create fake request for ID card generation
+        factory = RequestFactory()
+        request = factory.get(f'/id/card/{registration.id}/')
+        
+        # Generate ID card
+        response = generate_id_card_with_fallback(request, registration.id)
+        
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"ID card generation failed with status {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"Error generating ID card for email: {e}")
+        return None
 
 def send_registration_approval_email(registration):
-    """Send email when registration is fully approved"""
+    """Send email when registration is fully approved with ID card attachment"""
     if registration.registration_type == 'volunteer':
         reg_type = 'समयदानी कार्यकर्ता'
     elif registration.registration_type == 'organization_representative':
@@ -17,10 +44,6 @@ def send_registration_approval_email(registration):
     print(f"\n=== EMAIL SENDING DEBUG ===")
     print(f"Attempting to send email to: {registration.email}")
     print(f"Subject: {subject}")
-    print(f"From email: {settings.DEFAULT_FROM_EMAIL}")
-    print(f"SMTP Host: {settings.EMAIL_HOST}")
-    print(f"SMTP Port: {settings.EMAIL_PORT}")
-    print(f"Use TLS: {settings.EMAIL_USE_TLS}")
     
     context = {
         'registration': registration,
@@ -32,16 +55,31 @@ def send_registration_approval_email(registration):
     plain_message = strip_tags(html_message)
     
     try:
-        send_mail(
+        # Create email message
+        email = EmailMessage(
             subject=subject,
-            message=plain_message,
+            body=html_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[registration.email],
-            html_message=html_message,
-            fail_silently=False,
+            to=[registration.email],
         )
+        email.content_subtype = 'html'
+        
+        # Generate and attach ID card if approved
+        if registration.approval_status == 'approved':
+            print("Generating ID card for email attachment...")
+            id_card_data = generate_id_card_for_email(registration)
+            
+            if id_card_data:
+                filename = f"id_card_{registration.registration_number or registration.id}.png"
+                email.attach(filename, id_card_data, 'image/png')
+                print(f"ID card attached to email: {filename}")
+            else:
+                print("Failed to generate ID card for attachment")
+        
+        email.send(fail_silently=False)
         print(f"Email sent successfully to {registration.email}")
         return True
+        
     except Exception as e:
         print(f"Email sending failed: {e}")
         import traceback

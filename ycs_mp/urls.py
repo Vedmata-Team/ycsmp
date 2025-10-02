@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from events.sitemap_views import sitemap_view
 
 def robots_txt(request):
     content = render_to_string('robots.txt')
@@ -29,7 +30,7 @@ def robots_txt(request):
 urlpatterns = [
     path('control/', admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('sitemap.xml', TemplateView.as_view(template_name='sitemap.xml', content_type='application/xml'), name='sitemap'),
+    path('sitemap.xml', sitemap_view, name='sitemap'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots'),
     path('id/', include('ID.urls')),
     path('', include('events.urls')),

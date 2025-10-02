@@ -219,19 +219,12 @@
             
             document.getElementById('loadingOverlay').style.display = 'flex';
             
-            updateStatus('Initializing download... 15%', 'Setting up browser engine');
-            
-            setTimeout(() => {
-                updateStatus('Rendering ID card... 35%', 'Converting HTML to image format');
-            }, 1000);
-            
-            setTimeout(() => {
-                updateStatus('Processing image... 65%', 'Applying final touches and optimizations');
-            }, 3000);
-            
-            setTimeout(() => {
-                updateStatus('Almost ready... 85%', 'Preparing download');
-            }, 5000);
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 95) progress = 95;
+                updateStatus(`Processing... ${Math.round(progress)}%`, 'Generating ID card');
+            }, 200);
             
             const link = document.createElement('a');
             link.href = url;
@@ -241,11 +234,12 @@
             document.body.removeChild(link);
             
             setTimeout(() => {
+                clearInterval(progressInterval);
                 updateStatus('Download complete! 100%', 'Your ID card has been saved');
                 setTimeout(() => {
                     hideLoading();
                 }, 1000);
-            }, 6000);
+            }, 3000);
         }
         
         function updateStatus(status, progress) {

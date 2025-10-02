@@ -4,14 +4,6 @@ Allow: /
 # Sitemap
 Sitemap: https://ycsmp.in/sitemap.xml
 
-# Disallow admin and sensitive areas
-Disallow: /admin/
-Disallow: /mahakal/
-Disallow: /static/admin/
-Disallow: /*.pdf$
-Disallow: /*.excel$
-Disallow: /*.csv$
-
 # Allow important pages
 Allow: /
 Allow: /events/
@@ -19,9 +11,13 @@ Allow: /register/
 Allow: /volunteer-register/
 Allow: /organization-register/
 Allow: /check-status/
-Allow: /static/css/
-Allow: /static/js/
-Allow: /static/images/
+Allow: /contact/
+
+# Disallow admin and private areas
+Disallow: /control/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /media/documents/
 
 # Crawl delay
 Crawl-delay: 1

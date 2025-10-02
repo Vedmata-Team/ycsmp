@@ -8,13 +8,35 @@ import io
 import os
 import base64
 import tempfile
+import logging
 from events.models import EventRegistration
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+logger = logging.getLogger(__name__)
+
 def generate_id_card(request, registration_id):
     """Generate ID card using HTML-to-image conversion for perfect Hindi rendering"""
     registration = get_object_or_404(EventRegistration, id=registration_id)
+    
+    # Check if Chrome/ChromeDriver is available
+    try:
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.common.by import By
+        # Test if ChromeDriver is accessible
+        test_options = Options()
+        test_options.add_argument('--headless')
+        test_options.add_argument('--no-sandbox')
+        test_driver = webdriver.Chrome(options=test_options)
+        test_driver.quit()
+    except Exception as e:
+        # Return error response if Chrome is not available
+        return HttpResponse(
+            f"ID card generation service is temporarily unavailable. "
+            f"Chrome/ChromeDriver not found: {str(e)}",
+            status=503,
+            content_type='text/plain'
+        )
     
     # Generate QR code
     profile_url = f"https://ycsmp.in{registration.get_profile_url()}"
@@ -58,7 +80,7 @@ def generate_id_card(request, registration_id):
         temp_html_path = f.name
     
     try:
-        # Setup Chrome options
+        # Setup Chrome options for deployment
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
@@ -66,12 +88,27 @@ def generate_id_card(request, registration_id):
         chrome_options.add_argument('--hide-scrollbars')
         chrome_options.add_argument('--disable-web-security')
         chrome_options.add_argument('--force-device-scale-factor=1')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--disable-plugins')
+        chrome_options.add_argument('--disable-images')
+        chrome_options.add_argument('--disable-javascript')
+        chrome_options.add_argument('--virtual-time-budget=5000')
         
-        # Create driver with much larger window to avoid cutting
-        driver = webdriver.Chrome(options=chrome_options)
+        # Try to find ChromeDriver in common locations
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+        except Exception as e:
+            # Try with explicit path
+            try:
+                driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
+            except Exception as e2:
+                raise Exception(f"ChromeDriver not found. Install Chrome and ChromeDriver: {str(e2)}")
         driver.set_window_size(900, 1400)  # Much larger height
         driver.execute_script("document.body.style.zoom='1.0'")
-        driver.get(f'file:///{temp_html_path.replace(chr(92), "/")}')
+        # Use proper file URL format for both Windows and Linux
+        file_url = f'file://{temp_html_path.replace(chr(92), "/")}' if os.name == 'nt' else f'file://{temp_html_path}'
+        driver.get(file_url)
         
         # Wait for page to load completely
         import time
@@ -97,9 +134,15 @@ def generate_id_card(request, registration_id):
         cropped_img.save(buffer, format='PNG')
         png_bytes = buffer.getvalue()
         
+    except Exception as e:
+        logger.error(f"Error generating ID card for registration {registration_id}: {str(e)}")
+        raise e
     finally:
         # Clean up temp file
-        os.unlink(temp_html_path)
+        if os.path.exists(temp_html_path):
+            os.unlink(temp_html_path)
+    
+    logger.info(f"Successfully generated ID card for registration {registration_id}")
     
     # Convert format if needed
     format_type = request.GET.get('format', 'PNG').upper()
