@@ -322,7 +322,33 @@ class EventRegistration(models.Model):
     upzone_approved_at = models.DateTimeField(null=True, blank=True, verbose_name="उपजोन अप्रूवल समय")
     final_approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='final_approvals', verbose_name="अंतिम अप्रूवर")
     final_approved_at = models.DateTimeField(null=True, blank=True, verbose_name="अंतिम अप्रूवल समय")
+    rejected_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='rejections', verbose_name="अस्वीकृत करने वाला")
+    rejected_at = models.DateTimeField(null=True, blank=True, verbose_name="अस्वीकृति समय")
     rejection_reason = models.TextField(blank=True, verbose_name="अस्वीकृति कारण")
+    
+    def get_approval_status_display_with_user(self):
+        """Get approval status with approver name"""
+        status_map = {
+            'pending': 'प्रतीक्षारत',
+            'district_approved': f'जिला अप्रूव ({self.district_approver.get_full_name() or self.district_approver.username if self.district_approver else "अज्ञात"}) - {self.district_approved_at.strftime("%d/%m/%Y %H:%M") if self.district_approved_at else ""}',
+            'upzone_approved': f'उपजोन अप्रूव ({self.upzone_approver.get_full_name() or self.upzone_approver.username if self.upzone_approver else "अज्ञात"}) - {self.upzone_approved_at.strftime("%d/%m/%Y %H:%M") if self.upzone_approved_at else ""}',
+            'approved': f'अप्रूव ({self.final_approver.get_full_name() or self.final_approver.username if self.final_approver else "अज्ञात"}) - {self.final_approved_at.strftime("%d/%m/%Y %H:%M") if self.final_approved_at else ""}',
+            'rejected': f'अस्वीकृत ({getattr(self, "rejected_by", None) and (self.rejected_by.get_full_name() or self.rejected_by.username) or "अज्ञात"}) - {getattr(self, "rejected_at", None) and self.rejected_at.strftime("%d/%m/%Y %H:%M") or ""}'
+        }
+        return status_map.get(self.approval_status, self.approval_status)
+    
+    def get_approval_history(self):
+        """Get complete approval history"""
+        history = []
+        if self.district_approver and self.district_approved_at:
+            history.append(f"जिला: {self.district_approver.get_full_name() or self.district_approver.username} ({self.district_approved_at.strftime('%d/%m/%Y %H:%M')})")
+        if self.upzone_approver and self.upzone_approved_at:
+            history.append(f"उपजोन: {self.upzone_approver.get_full_name() or self.upzone_approver.username} ({self.upzone_approved_at.strftime('%d/%m/%Y %H:%M')})")
+        if self.final_approver and self.final_approved_at:
+            history.append(f"अंतिम: {self.final_approver.get_full_name() or self.final_approver.username} ({self.final_approved_at.strftime('%d/%m/%Y %H:%M')})")
+        if getattr(self, 'rejected_by', None) and getattr(self, 'rejected_at', None):
+            history.append(f"अस्वीकृत: {self.rejected_by.get_full_name() or self.rejected_by.username} ({self.rejected_at.strftime('%d/%m/%Y %H:%M')})")
+        return ' | '.join(history) if history else 'कोई अप्रूवल इतिहास नहीं'
     
     is_confirmed = models.BooleanField(default=False, verbose_name="पुष्ट")
     registration_date = models.DateTimeField(auto_now_add=True)
@@ -404,14 +430,37 @@ class EventRegistration(models.Model):
         return f"/profile/{profile_id}/"
 
     def save(self, *args, **kwargs):
+        from django.utils import timezone
+        
+        # Track approval status changes
+        if self.pk:
+            old_instance = EventRegistration.objects.get(pk=self.pk)
+            
+            # Auto-set rejection timestamp
+            if old_instance.approval_status != 'rejected' and self.approval_status == 'rejected':
+                if not getattr(self, 'rejected_at', None):
+                    if hasattr(self, 'rejected_at'):
+                        self.rejected_at = timezone.now()
+            
+            # Auto-set approval timestamps
+            if old_instance.approval_status != 'district_approved' and self.approval_status == 'district_approved':
+                if not self.district_approved_at:
+                    self.district_approved_at = timezone.now()
+            
+            if old_instance.approval_status != 'upzone_approved' and self.approval_status == 'upzone_approved':
+                if not self.upzone_approved_at:
+                    self.upzone_approved_at = timezone.now()
+            
+            if old_instance.approval_status != 'approved' and self.approval_status == 'approved':
+                if not self.final_approved_at:
+                    self.final_approved_at = timezone.now()
+        
         # Validate vibhag data integrity
         if self.selected_vibhags and isinstance(self.selected_vibhags, list):
-            # Ensure all vibhag IDs are valid
             try:
                 vibhag_ids = [int(vid) for vid in self.selected_vibhags if str(vid).isdigit()]
                 valid_vibhags = VibhagOption.objects.filter(id__in=vibhag_ids, is_active=True)
                 if len(vibhag_ids) != valid_vibhags.count():
-                    # Log invalid vibhag IDs but don't fail
                     invalid_ids = set(vibhag_ids) - set(valid_vibhags.values_list('id', flat=True))
                     print(f"Warning: Invalid vibhag IDs found: {invalid_ids}")
             except Exception as e:

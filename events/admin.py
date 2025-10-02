@@ -63,11 +63,11 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status', 'email_sent', 'registration_date', 'is_confirmed')
+    list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date', 'is_confirmed')
     list_filter = ('event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'approval_status', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
-    readonly_fields = ('registration_number', 'registration_date')
+    readonly_fields = ('registration_number', 'registration_date', 'approval_history_display')
     list_editable = ('is_confirmed',)
     date_hierarchy = 'registration_date'
     show_full_result_count = False
@@ -95,7 +95,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('previous_shivir', 'gayatri_diksha', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
         }),
         ('अप्रूवल स्थिति', {
-            'fields': ('approval_status', 'district_approver', 'district_approved_at', 'upzone_approver', 'upzone_approved_at', 'final_approver', 'final_approved_at', 'rejection_reason', 'email_sent')
+            'fields': ('approval_status', 'approval_history_display', 'district_approver', 'district_approved_at', 'upzone_approver', 'upzone_approved_at', 'final_approver', 'final_approved_at', 'rejected_by', 'rejected_at', 'rejection_reason', 'email_sent')
         }),
         ('स्थिति', {
             'fields': ('is_confirmed', 'payment_status')
@@ -127,7 +127,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(self.readonly_fields)
-        readonly.extend(['get_vibhag_names', 'get_campaign_names', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display'])
+        readonly.extend(['get_vibhag_names', 'get_campaign_names', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display', 'approval_history_display'])
         if obj:
             readonly.extend(['district_approved_at', 'upzone_approved_at', 'final_approved_at', 'email_sent'])
         
@@ -136,7 +136,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         # Non-superusers cannot edit final approval fields
         if not request.user.is_superuser:
-            readonly.extend(['final_approver', 'final_approved_at', 'registration_number', 'district_approver', 'upzone_approver', 'email_sent'])
+            readonly.extend(['final_approver', 'final_approved_at', 'registration_number', 'district_approver', 'upzone_approver', 'rejected_by', 'rejected_at', 'email_sent'])
             if obj and obj.approval_status in ['approved', 'upzone_approved', 'district_approved'] and not is_edit_mode:
                 readonly.extend(['approval_status'])
         else:
@@ -259,6 +259,13 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     if not request.user.is_superuser:
                         self.fields['final_approver'].widget.attrs['readonly'] = True
                         self.fields['final_approver'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
+                
+                # Auto-set rejected_by for non-superusers
+                if 'rejected_by' in self.fields:
+                    if not request.user.is_superuser:
+                        self.fields['rejected_by'].initial = request.user
+                        self.fields['rejected_by'].widget.attrs['readonly'] = True
+                        self.fields['rejected_by'].widget.attrs['style'] = 'pointer-events: none; background-color: #f8f9fa;'
                 
                 # Restrict approval status choices based on user type
                 if 'approval_status' in self.fields:
@@ -485,6 +492,14 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             )
     get_passport_photo_display.short_description = 'पासपोर्ट फोटो'
     
+    def approval_status_with_user(self, obj):
+        return obj.get_approval_status_display_with_user()
+    approval_status_with_user.short_description = 'अप्रूवल स्थिति (अप्रूवर के साथ)'
+    
+    def approval_history_display(self, obj):
+        return obj.get_approval_history()
+    approval_history_display.short_description = 'अप्रूवल इतिहास'
+    
 
     
     def get_responsibility_name(self, obj):
@@ -696,6 +711,12 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             if not obj.final_approved_at:
                 obj.final_approved_at = timezone.now()
         
+        # Auto-assign rejected_by when status changes to rejected
+        if obj.approval_status == 'rejected' and not getattr(obj, 'rejected_by', None):
+            obj.rejected_by = request.user
+            if not getattr(obj, 'rejected_at', None):
+                obj.rejected_at = timezone.now()
+        
         # For non-superusers, ensure they can only set themselves as approver
         if not request.user.is_superuser:
             if obj.approval_status == 'district_approved':
@@ -704,6 +725,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj.upzone_approver = request.user
             elif obj.approval_status == 'approved':
                 obj.final_approver = request.user
+            elif obj.approval_status == 'rejected':
+                obj.rejected_by = request.user
         
         super().save_model(request, obj, form, change)
         
