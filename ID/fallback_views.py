@@ -10,7 +10,8 @@ def generate_id_card_with_fallback(request, registration_id):
     # Check if wkhtmltoimage is available
     wkhtml_paths = [
         'wkhtmltoimage',
-        r'C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe'
+        '/usr/bin/wkhtmltoimage',
+        '/usr/local/bin/wkhtmltoimage'
     ]
     
     for wkhtml_path in wkhtml_paths:

@@ -61,9 +61,17 @@ def generate_id_card_wkhtmltopdf(request, registration_id):
     
     try:
         # Use wkhtmltoimage to convert HTML to image
+        # Try different wkhtmltoimage paths
+        wkhtml_paths = ['wkhtmltoimage', '/usr/bin/wkhtmltoimage', '/usr/local/bin/wkhtmltoimage']
         wkhtml_cmd = 'wkhtmltoimage'
-        if os.name == 'nt':  # Windows
-            wkhtml_cmd = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe'
+        
+        for path in wkhtml_paths:
+            try:
+                subprocess.run([path, '--version'], capture_output=True, timeout=2)
+                wkhtml_cmd = path
+                break
+            except:
+                continue
         
         cmd = [
             wkhtml_cmd,
