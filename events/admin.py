@@ -297,7 +297,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def get_actions(self, request):
         actions = super().get_actions(request)
         
-        # Remove export actions for non-superusers
+        # Keep export actions for superusers only
         if not request.user.is_superuser:
             for action in ['export_csv', 'export_excel', 'export_pdf']:
                 if action in actions:
@@ -305,23 +305,28 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
-            # Remove actions based on user level
+            # Keep actions based on user level - allow what they can do
             if approval_user.is_district_approver:
+                # District approvers can do district approval and rejection
                 if 'approve_upzone' in actions:
                     del actions['approve_upzone']
                 if 'approve_final' in actions:
                     del actions['approve_final']
             elif approval_user.is_upzone_approver:
+                # UpZone approvers can do upzone approval and rejection
                 if 'approve_district' in actions:
                     del actions['approve_district']
                 if 'approve_final' in actions:
                     del actions['approve_final']
-            elif not request.user.is_superuser:
+            elif approval_user.is_state_approver:
+                # State approvers can do final approval and rejection
                 if 'approve_district' in actions:
                     del actions['approve_district']
                 if 'approve_upzone' in actions:
                     del actions['approve_upzone']
+            # Keep reject_registration and send_email_to_approved for all approval users
         except ApprovalUser.DoesNotExist:
+            # Non-approval users (except superusers) get no bulk actions
             if not request.user.is_superuser:
                 for action in ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved']:
                     if action in actions:
@@ -331,25 +336,81 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def approve_district(self, request, queryset):
         from django.utils import timezone
         updated = 0
-        for registration in queryset.filter(approval_status='pending'):
-            registration.approval_status = 'district_approved'
-            registration.district_approver = request.user
-            registration.district_approved_at = timezone.now()
-            registration.save()
-            updated += 1
-        self.message_user(request, f'{updated} पंजीकरण जिला अप्रूव किए गए।')
+        skipped = 0
+        
+        # Check user permissions
+        try:
+            approval_user = ApprovalUser.objects.get(user=request.user)
+            if not (approval_user.is_district_approver or request.user.is_superuser):
+                self.message_user(request, 'आपको जिला अप्रूवल का अधिकार नहीं है।', level='error')
+                return
+        except ApprovalUser.DoesNotExist:
+            if not request.user.is_superuser:
+                self.message_user(request, 'आपको अप्रूवल का अधिकार नहीं है।', level='error')
+                return
+        
+        for registration in queryset:
+            if registration.approval_status == 'pending':
+                # Check if user can approve this registration
+                try:
+                    if not request.user.is_superuser and not registration.matches_approval_user(approval_user):
+                        skipped += 1
+                        continue
+                except:
+                    pass
+                
+                registration.approval_status = 'district_approved'
+                registration.district_approver = request.user
+                registration.district_approved_at = timezone.now()
+                registration.save()
+                updated += 1
+            else:
+                skipped += 1
+        
+        message = f'{updated} पंजीकरण जिला अप्रूव किए गए।'
+        if skipped > 0:
+            message += f' {skipped} छोड़े गए (गलत स्थिति या अधिकार नहीं)।'
+        self.message_user(request, message)
     approve_district.short_description = "जिला अप्रूव करें"
     
     def approve_upzone(self, request, queryset):
         from django.utils import timezone
         updated = 0
-        for registration in queryset.filter(approval_status='district_approved'):
-            registration.approval_status = 'upzone_approved'
-            registration.upzone_approver = request.user
-            registration.upzone_approved_at = timezone.now()
-            registration.save()
-            updated += 1
-        self.message_user(request, f'{updated} पंजीकरण उपजोन अप्रूव किए गए।')
+        skipped = 0
+        
+        # Check user permissions
+        try:
+            approval_user = ApprovalUser.objects.get(user=request.user)
+            if not (approval_user.is_upzone_approver or request.user.is_superuser):
+                self.message_user(request, 'आपको उपजोन अप्रूवल का अधिकार नहीं है।', level='error')
+                return
+        except ApprovalUser.DoesNotExist:
+            if not request.user.is_superuser:
+                self.message_user(request, 'आपको अप्रूवल का अधिकार नहीं है।', level='error')
+                return
+        
+        for registration in queryset:
+            if registration.approval_status == 'district_approved':
+                # Check if user can approve this registration
+                try:
+                    if not request.user.is_superuser and not registration.matches_approval_user(approval_user):
+                        skipped += 1
+                        continue
+                except:
+                    pass
+                
+                registration.approval_status = 'upzone_approved'
+                registration.upzone_approver = request.user
+                registration.upzone_approved_at = timezone.now()
+                registration.save()
+                updated += 1
+            else:
+                skipped += 1
+        
+        message = f'{updated} पंजीकरण उपजोन अप्रूव किए गए।'
+        if skipped > 0:
+            message += f' {skipped} छोड़े गए (गलत स्थिति या अधिकार नहीं)।'
+        self.message_user(request, message)
     approve_upzone.short_description = "उपजोन अप्रूव करें"
     
     def approve_final(self, request, queryset):
@@ -372,8 +433,42 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     approve_final.short_description = "अंतिम अप्रूव करें"
     
     def reject_registration(self, request, queryset):
-        updated = queryset.update(approval_status='rejected')
-        self.message_user(request, f'{updated} पंजीकरण अस्वीकृत किए गए।')
+        from django.utils import timezone
+        updated = 0
+        skipped = 0
+        
+        # Check user permissions
+        try:
+            approval_user = ApprovalUser.objects.get(user=request.user)
+        except ApprovalUser.DoesNotExist:
+            if not request.user.is_superuser:
+                self.message_user(request, 'आपको अस्वीकृत करने का अधिकार नहीं है।', level='error')
+                return
+            approval_user = None
+        
+        for registration in queryset:
+            if registration.approval_status not in ['approved', 'rejected']:
+                # Check if user can reject this registration
+                can_reject = request.user.is_superuser
+                if not can_reject and approval_user:
+                    can_reject = registration.matches_approval_user(approval_user)
+                
+                if can_reject:
+                    registration.approval_status = 'rejected'
+                    if hasattr(registration, 'rejected_by'):
+                        registration.rejected_by = request.user
+                        registration.rejected_at = timezone.now()
+                    registration.save()
+                    updated += 1
+                else:
+                    skipped += 1
+            else:
+                skipped += 1
+        
+        message = f'{updated} पंजीकरण अस्वीकृत किए गए।'
+        if skipped > 0:
+            message += f' {skipped} छोड़े गए (पहले से अप्रूव/अस्वीकृत या अधिकार नहीं)।'
+        self.message_user(request, message)
     reject_registration.short_description = "पंजीकरण अस्वीकृत करें"
     
     def send_email_to_approved(self, request, queryset):
