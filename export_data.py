@@ -174,9 +174,31 @@ def export_to_excel():
         ]
         unique_data.append((row_data, docs))
     
-    # Write all unique data at once
-    for row_data, docs in unique_data:
-        ws_unique.append(row_data)
+    # Write all unique data at once with hyperlinks
+    for row_num, (row_data, docs) in enumerate(unique_data, 2):
+        for col_num, value in enumerate(row_data, 1):
+            cell = ws_unique.cell(row=row_num, column=col_num, value=value)
+            
+            # Add hyperlinks for document columns
+            if col_num == 26 and docs['aadhar_full']:  # Aadhar Full URL column
+                cell.hyperlink = docs['aadhar_full']
+                cell.value = "View Full Aadhar"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num == 27 and docs['aadhar_front']:  # Aadhar Front URL column
+                cell.hyperlink = docs['aadhar_front']
+                cell.value = "View Front Aadhar"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num == 28 and docs['aadhar_back']:  # Aadhar Back URL column
+                cell.hyperlink = docs['aadhar_back']
+                cell.value = "View Back Aadhar"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num == 29 and docs['passport_photo']:  # Passport Photo URL column
+                cell.hyperlink = docs['passport_photo']
+                cell.value = "View Photo"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num in [26, 27, 28, 29] and not value:  # Empty document fields
+                cell.value = "No Document"
+                cell.font = Font(color="808080")
     
     unique_count = len(unique_data)
     
@@ -205,9 +227,31 @@ def export_to_excel():
             ]
             duplicate_data.append((row_data, docs))
     
-    # Write all duplicate data at once
-    for row_data, docs in duplicate_data:
-        ws_dup.append(row_data)
+    # Write all duplicate data at once with hyperlinks
+    for row_num, (row_data, docs) in enumerate(duplicate_data, 2):
+        for col_num, value in enumerate(row_data, 1):
+            cell = ws_dup.cell(row=row_num, column=col_num, value=value)
+            
+            # Add hyperlinks for document columns
+            if col_num == 26 and docs['aadhar_full']:  # Aadhar Full URL column
+                cell.hyperlink = docs['aadhar_full']
+                cell.value = "View Full Aadhar"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num == 27 and docs['aadhar_front']:  # Aadhar Front URL column
+                cell.hyperlink = docs['aadhar_front']
+                cell.value = "View Front Aadhar"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num == 28 and docs['aadhar_back']:  # Aadhar Back URL column
+                cell.hyperlink = docs['aadhar_back']
+                cell.value = "View Back Aadhar"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num == 29 and docs['passport_photo']:  # Passport Photo URL column
+                cell.hyperlink = docs['passport_photo']
+                cell.value = "View Photo"
+                cell.font = Font(color="0000FF", underline="single")
+            elif col_num in [26, 27, 28, 29] and not value:  # Empty document fields
+                cell.value = "No Document"
+                cell.font = Font(color="808080")
     
     duplicate_count = len(duplicate_data)
     
