@@ -63,6 +63,8 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('admin/js/bulk_approval_progress.js',)
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
     list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
@@ -439,9 +441,23 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         updated = 0
         email_sent = 0
+        skipped = 0
         batch_size = 25  # Smaller batches to prevent timeout
         
-        registrations = list(queryset.filter(approval_status='upzone_approved'))
+        # Check user permissions - only superusers and state approvers can do final approval
+        can_final_approve = request.user.is_superuser
+        if not can_final_approve:
+            try:
+                approval_user = ApprovalUser.objects.get(user=request.user)
+                can_final_approve = approval_user.is_state_approver
+            except ApprovalUser.DoesNotExist:
+                pass
+        
+        if not can_final_approve:
+            self.message_user(request, 'आपको अंतिम अप्रूवल का अधिकार नहीं है।', level='error')
+            return
+        
+        registrations = list(queryset.exclude(approval_status='approved'))  # Allow any non-approved status
         total = len(registrations)
         
         # Limit to prevent bad gateway
@@ -450,32 +466,51 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             return
         
         try:
-            # Process in smaller batches with delays
-            for i in range(0, len(registrations), batch_size):
-                batch = registrations[i:i+batch_size]
-                
-                with transaction.atomic():
-                    for registration in batch:
-                        registration.approval_status = 'approved'
-                        registration.final_approver = request.user
-                        registration.final_approved_at = timezone.now()
-                        
-                        # Save without triggering heavy email operations
-                        old_email_sent = registration.email_sent
-                        registration.save()
-                        updated += 1
-                        
-                        if registration.email_sent and not old_email_sent:
-                            email_sent += 1
-                
-                # Delay between batches to prevent server overload
-                if i + batch_size < len(registrations):
-                    time.sleep(1)  # Increased delay
+            import logging
+            logger = logging.getLogger(__name__)
             
-            if email_sent > 0:
-                self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए और {email_sent} ईमेल भेजे गए।')
-            else:
-                self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए।')
+            logger.info(f"Starting bulk final approval for {len(registrations)} registrations")
+            self.message_user(request, f"🔄 Processing {len(registrations)} registrations...")
+            
+            # Fast bulk update without individual saves
+            with transaction.atomic():
+                logger.info("Validating permissions and preparing data")
+                now = timezone.now()
+                reg_ids = [r.id for r in registrations]
+                
+                logger.info("Performing bulk database update")
+                # Bulk update all at once
+                updated = EventRegistration.objects.filter(
+                    id__in=reg_ids
+                ).exclude(approval_status='approved').update(
+                    approval_status='approved',
+                    final_approver=request.user,
+                    final_approved_at=now,
+                    is_confirmed=True
+                )
+                
+                logger.info(f"Updated {updated} registrations, generating registration numbers")
+                # Generate registration numbers for newly approved ones
+                approved_regs = EventRegistration.objects.filter(
+                    id__in=reg_ids,
+                    approval_status='approved',
+                    registration_number__isnull=True
+                )
+                
+                reg_count = 0
+                for reg in approved_regs:
+                    if not reg.registration_number:
+                        reg.registration_number = reg.generate_registration_number()
+                        reg.save(update_fields=['registration_number'])
+                        reg_count += 1
+                
+                logger.info(f"Generated {reg_count} registration numbers")
+            
+            skipped = len(registrations) - updated
+            message = f'{updated} पंजीकरण अंतिम अप्रूव किए गए।'
+            if skipped > 0:
+                message += f' {skipped} पहले से अप्रूव थे।'
+            self.message_user(request, message)
                 
         except Exception as e:
             self.message_user(request, f'प्रोसेसिंग में त्रुटि: {str(e)}', level='error')
