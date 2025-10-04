@@ -1,20 +1,78 @@
-// Bulk Approval Progress Tracker
+// Real-time Bulk Approval Progress Tracker
 document.addEventListener('DOMContentLoaded', function() {
-    const actionSelect = document.querySelector('select[name="action"]');
-    const goButton = document.querySelector('button[name="index"]');
+    const form = document.querySelector('#changelist-form');
     
-    if (actionSelect && goButton) {
-        goButton.addEventListener('click', function(e) {
-            const selectedAction = actionSelect.value;
-            if (selectedAction === 'approve_final' || selectedAction === 'approve_district' || selectedAction === 'approve_upzone') {
-                showProgressModal();
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const actionSelect = document.querySelector('select[name="action"]');
+            const selectedAction = actionSelect ? actionSelect.value : '';
+            
+            if (selectedAction === 'approve_final') {
+                e.preventDefault();
+                startRealTimeApproval();
             }
         });
     }
 });
 
+function startRealTimeApproval() {
+    const form = document.querySelector('#changelist-form');
+    const formData = new FormData(form);
+    
+    // Ensure action is set
+    formData.set('action', 'approve_final');
+    
+    // Show progress modal
+    showProgressModal();
+    
+    // Make AJAX request with streaming
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(response => {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        function readStream() {
+            return reader.read().then(({ done, value }) => {
+                if (done) {
+                    setTimeout(() => {
+                        const modal = document.getElementById('bulk-progress-modal');
+                        if (modal) modal.remove();
+                        location.reload();
+                    }, 2000);
+                    return;
+                }
+                
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            updateProgress(data.step, data.message, data.progress);
+                        } catch (e) {
+                            console.log('Parse error:', e);
+                        }
+                    }
+                });
+                
+                return readStream();
+            });
+        }
+        
+        return readStream();
+    }).catch(error => {
+        updateProgress('error', 'Connection error occurred', 0);
+        console.error('Streaming error:', error);
+    });
+}
+
 function showProgressModal() {
-    // Create progress modal
     const modal = document.createElement('div');
     modal.id = 'bulk-progress-modal';
     modal.innerHTML = `
@@ -34,43 +92,14 @@ function showProgressModal() {
         </div>
     `;
     document.body.appendChild(modal);
-    
-    // Start progress tracking
-    trackProgress();
 }
 
-function trackProgress() {
+function updateProgress(step, message, progress) {
     const statusEl = document.getElementById('progress-status');
     const barEl = document.getElementById('progress-bar');
     const detailsEl = document.getElementById('progress-details');
     
-    let step = 0;
-    const steps = [
-        'Validating permissions...',
-        'Preparing registrations...',
-        'Updating database records...',
-        'Generating registration numbers...',
-        'Finalizing changes...',
-        'Complete!'
-    ];
-    
-    const interval = setInterval(() => {
-        if (step < steps.length - 1) {
-            statusEl.textContent = steps[step];
-            barEl.style.width = ((step + 1) / steps.length * 100) + '%';
-            detailsEl.textContent = `Step ${step + 1} of ${steps.length}`;
-            step++;
-        } else {
-            statusEl.textContent = steps[step];
-            barEl.style.width = '100%';
-            detailsEl.textContent = 'Processing completed successfully!';
-            clearInterval(interval);
-            
-            // Auto-close after 2 seconds
-            setTimeout(() => {
-                const modal = document.getElementById('bulk-progress-modal');
-                if (modal) modal.remove();
-            }, 2000);
-        }
-    }, 800);
+    if (statusEl) statusEl.textContent = message;
+    if (barEl) barEl.style.width = progress + '%';
+    if (detailsEl) detailsEl.textContent = `${step} - ${progress}% complete`;
 }
