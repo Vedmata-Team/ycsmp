@@ -72,7 +72,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     date_hierarchy = 'registration_date'
     show_full_result_count = False
     list_per_page = 25
-    list_max_show_all = 200
+    list_max_show_all = 25
     preserve_filters = True
     
     fieldsets = (
@@ -434,30 +434,51 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def approve_final(self, request, queryset):
         from django.utils import timezone
         from django.db import transaction
+        from django.http import JsonResponse
+        import time
         
         updated = 0
+        email_sent = 0
+        batch_size = 25  # Smaller batches to prevent timeout
+        
         registrations = list(queryset.filter(approval_status='upzone_approved'))
         total = len(registrations)
         
-        # Strict limit to prevent 502 bad gateway
-        if total > 25:
-            self.message_user(request, f'एक साथ केवल 25 पंजीकरण प्रोसेस कर सकते हैं। आपने {total} सेलेक्ट किए हैं।', level='error')
+        # Limit to prevent bad gateway
+        if total > 100:
+            self.message_user(request, f'एक साथ 100 से अधिक ({total}) प्रोसेस नहीं कर सकते। छोटे बैच में करें।', level='error')
             return
         
         try:
-            # Process all at once since we're limiting to 25
-            with transaction.atomic():
-                for registration in registrations:
-                    registration.approval_status = 'approved'
-                    registration.final_approver = request.user
-                    registration.final_approved_at = timezone.now()
-                    registration.save()
-                    updated += 1
+            # Process in smaller batches with delays
+            for i in range(0, len(registrations), batch_size):
+                batch = registrations[i:i+batch_size]
+                
+                with transaction.atomic():
+                    for registration in batch:
+                        registration.approval_status = 'approved'
+                        registration.final_approver = request.user
+                        registration.final_approved_at = timezone.now()
+                        
+                        # Save without triggering heavy email operations
+                        old_email_sent = registration.email_sent
+                        registration.save()
+                        updated += 1
+                        
+                        if registration.email_sent and not old_email_sent:
+                            email_sent += 1
+                
+                # Delay between batches to prevent server overload
+                if i + batch_size < len(registrations):
+                    time.sleep(1)  # Increased delay
             
-            self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए। ईमेल ऑटोमेटिक भेजे जाएंगे।')
+            if email_sent > 0:
+                self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए और {email_sent} ईमेल भेजे गए।')
+            else:
+                self.message_user(request, f'{updated} पंजीकरण अंतिम अप्रूव किए गए।')
                 
         except Exception as e:
-            self.message_user(request, f'त्रुटि: {str(e)}', level='error')
+            self.message_user(request, f'प्रोसेसिंग में त्रुटि: {str(e)}', level='error')
     approve_final.short_description = "अंतिम अप्रूव करें"
     
     def reject_registration(self, request, queryset):
