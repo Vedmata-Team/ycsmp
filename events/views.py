@@ -109,140 +109,30 @@ def event_detail(request, pk):
     return render(request, 'events/detail.html', context)
 
 def event_organization_register(request, pk=None):
-    """Organization representative registration view"""
-    print(f"\n=== ORGANIZATION REGISTRATION DEBUG ===")
-    print(f"Method: {request.method}")
-    print(f"Event PK: {pk}")
-    
+    """Organization representative registration view - CLOSED"""
     event = None
     if pk:
         event = get_object_or_404(Event, pk=pk, is_published=True)
-        print(f"Event found: {event.title}")
-        
-        if timezone.now() >= event.registration_deadline:
-            print("Registration deadline passed")
-            messages.error(request, 'इस कार्यक्रम के लिए पंजीकरण बंद हो गया है।')
-            return redirect('events:detail', pk=pk)
-    
-    if request.method == 'POST':
-        print(f"POST data received: {dict(request.POST)}")
-        form = OrganizationRegistrationForm(request.POST)
-        print(f"Form created with data")
-        print(f"Form is_valid: {form.is_valid()}")
-        if not form.is_valid():
-            print(f"Form errors: {form.errors}")
-        if form.is_valid():
-            print("Form validation passed, starting registration process...")
-            try:
-                with transaction.atomic():
-                    print("Starting database transaction...")
-                    print("Allowing multiple registrations, proceeding with registration...")
-                    
-                    print("Creating registration object...")
-                    registration = form.save(commit=False)
-                    registration.registration_type = 'organization_representative'
-                    print(f"Registration type set to: {registration.registration_type}")
-                    
-                    if event:
-                        registration.event = event
-                        print(f"Event assigned: {event.title}")
-                    else:
-                        latest_event = Event.objects.filter(is_published=True).first()
-                        if latest_event:
-                            registration.event = latest_event
-                            print(f"Latest event assigned: {latest_event.title}")
-                        else:
-                            print("No active event found")
-                            messages.error(request, 'कोई सक्रिय कार्यक्रम उपलब्ध नहीं है।')
-                            return redirect('events:list')
-                    
-                    print(f"Saving registration for: {registration.full_name}")
-                    registration.save()
-                    print(f"Registration saved with ID: {registration.id}")
-                    
-                    messages.success(request, 'आपका संगठन प्रतिनिधि पंजीकरण सफलतापूर्वक जमा हो गया है! अप्रूवल के बाद आपको पंजीकरण नंबर मिलेगा।')
-                    print(f"Redirecting to pending approval page")
-                    return redirect('events:pending_approval', registration_id=registration.id)
-                    
-            except Exception as e:
-                logger.error(f"Organization registration failed: {str(e)}")
-                messages.error(request, 'पंजीकरण में त्रुटि हुई। कृपया पुन: प्रयास करें।')
-        else:
-            print("Form validation failed, showing errors")
-            messages.error(request, 'कृपया सभी फील्ड सही तरीके से भरें।')
-    else:
-        print("GET request - initializing form")
-        form = OrganizationRegistrationForm(initial={'registration_type': 'organization_representative'})
-        print("Form initialized for organization registration")
     
     context = {
-        'form': form,
+        'registration_type': 'organization',
         'event': event,
     }
-    print(f"Rendering template with context")
-    print(f"=== END ORGANIZATION REGISTRATION DEBUG ===\n")
-    return render(request, 'events/organization_register_form.html', context)
+    return render(request, 'events/registration_closed.html', context)
+
 
 def event_volunteer_register(request, pk=None):
-    """Volunteer registration view"""
+    """Volunteer registration view - CLOSED"""
     event = None
     if pk:
         event = get_object_or_404(Event, pk=pk, is_published=True)
-        
-        # Check if registration is closed
-        if timezone.now() >= event.registration_deadline:
-            messages.error(request, 'इस कार्यक्रम के लिए पंजीकरण बंद हो गया है।')
-            return redirect('events:detail', pk=pk)
-    
-    if request.method == 'POST':
-        form = VolunteerRegistrationForm(request.POST)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    print("Volunteer registration - allowing multiple registrations")
-                    registration = form.save(commit=False)
-                    registration.registration_type = 'volunteer'
-                    
-                    # Handle campaigns, special skills, and vibhags from POST data
-                    campaigns = request.POST.getlist('campaigns')
-                    special_skills = request.POST.getlist('special_skills')
-                    special_skills_other = request.POST.get('special_skills_other', '')
-                    vibhags = request.POST.getlist('vibhags')
-                    
-                    registration.selected_campaigns = campaigns
-                    registration.special_skills = special_skills
-                    registration.special_skills_other = special_skills_other
-                    registration.selected_vibhags = vibhags
-                    
-                    if event:
-                        registration.event = event
-                    else:
-                        latest_event = Event.objects.filter(is_published=True).first()
-                        if latest_event:
-                            registration.event = latest_event
-                        else:
-                            messages.error(request, 'कोई सक्रिय कार्यक्रम उपलब्ध नहीं है।')
-                            return redirect('events:list')
-                    
-                    registration.save()
-                    
-                    messages.info(request, 'आपका पंजीकरण जमा हो गया है और अप्रूवल की प्रक्रिया में है। कृपया नीचे दिए गए निर्देशों को ध्यान से पढ़ें।')
-                    return redirect('events:pending_approval', registration_id=registration.id)
-                    
-            except Exception as e:
-                logger.error(f"Volunteer registration failed: {str(e)}")
-                messages.error(request, 'पंजीकरण में त्रुटि हुई। कृपया पुन: प्रयास करें।')
-        else:
-            logger.error(f"Volunteer form validation failed: {form.errors}")
-            messages.error(request, 'कृपया सभी फील्ड सही तरीके से भरें।')
-    else:
-        form = VolunteerRegistrationForm()
     
     context = {
-        'form': form,
+        'registration_type': 'volunteer',
         'event': event,
     }
-    return render(request, 'events/volunteer_register_form.html', context)
+    return render(request, 'events/registration_closed.html', context)
+
 
 def event_register(request, pk=None):
     """Event registration view"""

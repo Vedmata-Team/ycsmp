@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}पंजीकरण बंद - YCS MP{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/registration_form.css' %}">
+<style>
+.closure-notice {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 40px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.closure-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+.closure-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.closure-message {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.alternative-section {
+    background: rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 10px;
+    margin: 30px 0;
+}
+
+.alternative-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #fff3cd;
+}
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary-alt {
+    background: #28a745;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.btn-primary-alt:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary-alt {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 12px 25px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.btn-secondary-alt:hover {
+    background: rgba(255,255,255,0.3);
+    color: white;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .closure-notice {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    .closure-title {
+        font-size: 1.5rem;
+    }
+    
+    .closure-message {
+        font-size: 1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="closure-notice">
+    <div class="closure-icon">🚫</div>
+    
+    <h1 class="closure-title">
+        {% if registration_type == 'volunteer' %}
+            समयदानी कार्यकर्ता पंजीकरण बंद
+        {% elif registration_type == 'organization' %}
+            संगठन प्रतिनिधि पंजीकरण बंद
+        {% else %}
+            पंजीकरण बंद
+        {% endif %}
+    </h1>
+    
+    <div class="closure-message">
+        {% if registration_type == 'volunteer' %}
+            <p><strong>समयदानी कार्यकर्ता पंजीकरण</strong> अस्थायी रूप से बंद कर दिया गया है।</p>
+            <p>वर्तमान में केवल <strong>प्रतिभागी पंजीकरण</strong> खुला है।</p>
+        {% elif registration_type == 'organization' %}
+            <p><strong>संगठन प्रतिनिधि पंजीकरण</strong> अस्थायी रूप से बंद कर दिया गया है।</p>
+            <p>वर्तमान में केवल <strong>प्रतिभागी पंजीकरण</strong> खुला है।</p>
+        {% endif %}
+    </div>
+    
+    <div class="alternative-section">
+        <div class="alternative-title">✨ वैकल्पिक विकल्प</div>
+        <p>आप प्रतिभागी के रूप में पंजीकरण कर सकते हैं या बाद में पुनः प्रयास कर सकते हैं।</p>
+        
+        <div class="btn-group">
+            {% if event %}
+                <a href="{% url 'events:register' event.pk %}" class="btn-primary-alt">
+                    📝 प्रतिभागी पंजीकरण करें
+                </a>
+            {% else %}
+                <a href="{% url 'events:register' %}" class="btn-primary-alt">
+                    📝 प्रतिभागी पंजीकरण करें
+                </a>
+            {% endif %}
+            
+            <a href="{% url 'events:list' %}" class="btn-secondary-alt">
+                🏠 कार्यक्रम सूची पर वापस जाएं
+            </a>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px; font-size: 0.9rem; opacity: 0.8;">
+        <p>📞 <a href="{% url 'events:contact' %}" style="color: #fff3cd; text-decoration: underline;">किसी भी सहायता के लिए संपर्क करें</a></p>
+    </div>
+</div>
+{% endblock %}
