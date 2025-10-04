@@ -63,7 +63,7 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date', 'is_confirmed')
+    list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
     list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
@@ -95,7 +95,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'fields': ('previous_shivir', 'gayatri_diksha', 'arrival_date', 'interested_in_volunteering', 'volunteering_details', 'get_campaign_names', 'get_vibhag_names')
         }),
         ('अप्रूवल स्थिति', {
-            'fields': ('approval_status', 'approval_history_display', 'district_approver', 'district_approved_at', 'upzone_approver', 'upzone_approved_at', 'final_approver', 'final_approved_at', 'rejected_by', 'rejected_at', 'rejection_reason', 'email_sent')
+            'fields': ('approval_status', 'approval_history_display', 'district_approver', 'district_approved_at_ist', 'upzone_approver', 'upzone_approved_at_ist', 'final_approver', 'final_approved_at_ist', 'rejected_by', 'rejected_at', 'rejection_reason', 'email_sent')
         }),
         ('स्थिति', {
             'fields': ('is_confirmed', 'payment_status')
@@ -127,7 +127,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(self.readonly_fields)
-        readonly.extend(['get_vibhag_names', 'get_campaign_names', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display', 'approval_history_display'])
+        readonly.extend(['get_vibhag_names', 'get_campaign_names', 'get_aadhar_full_display', 'get_aadhar_front_display', 'get_aadhar_back_display', 'get_passport_photo_display', 'approval_history_display', 'district_approved_at_ist', 'upzone_approved_at_ist', 'final_approved_at_ist', 'registration_date_ist'])
         if obj:
             readonly.extend(['district_approved_at', 'upzone_approved_at', 'final_approved_at', 'email_sent'])
         
@@ -594,6 +594,38 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def approval_history_display(self, obj):
         return obj.get_approval_history()
     approval_history_display.short_description = 'अप्रूवल इतिहास'
+    
+    def district_approved_at_ist(self, obj):
+        if obj.district_approved_at:
+            from django.utils import timezone
+            local_time = timezone.localtime(obj.district_approved_at)
+            return local_time.strftime('%d/%m/%Y %H:%M:%S IST')
+        return '-'
+    district_approved_at_ist.short_description = 'जिला अप्रूवल समय (IST)'
+    
+    def upzone_approved_at_ist(self, obj):
+        if obj.upzone_approved_at:
+            from django.utils import timezone
+            local_time = timezone.localtime(obj.upzone_approved_at)
+            return local_time.strftime('%d/%m/%Y %H:%M:%S IST')
+        return '-'
+    upzone_approved_at_ist.short_description = 'उपजोन अप्रूवल समय (IST)'
+    
+    def final_approved_at_ist(self, obj):
+        if obj.final_approved_at:
+            from django.utils import timezone
+            local_time = timezone.localtime(obj.final_approved_at)
+            return local_time.strftime('%d/%m/%Y %H:%M:%S IST')
+        return '-'
+    final_approved_at_ist.short_description = 'अंतिम अप्रूवल समय (IST)'
+    
+    def registration_date_ist(self, obj):
+        if obj.registration_date:
+            from django.utils import timezone
+            local_time = timezone.localtime(obj.registration_date)
+            return local_time.strftime('%d/%m/%Y %H:%M:%S IST')
+        return '-'
+    registration_date_ist.short_description = 'पंजीकरण तिथि (IST)'
     
 
     
