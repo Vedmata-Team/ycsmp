@@ -30,8 +30,8 @@ def generate_id_card_for_email(registration):
         print(f"Error generating ID card for email: {e}")
         return None
 
-def send_registration_approval_email(registration):
-    """Send email when registration is fully approved with ID card attachment"""
+def send_registration_approval_email(registration, sent_by_user=None):
+    """Send email when registration is approved or rejected"""
     if registration.registration_type == 'volunteer':
         reg_type = 'समयदानी कार्यकर्ता'
     elif registration.registration_type == 'organization_representative':
@@ -39,20 +39,35 @@ def send_registration_approval_email(registration):
     else:
         reg_type = 'प्रतिभागी'
     
-    subject = f'{reg_type} पंजीकरण अप्रूव - {registration.event.title}'
+    # Different subject and template based on status
+    if registration.approval_status == 'approved':
+        subject = f'{reg_type} पंजीकरण अप्रूव - {registration.event.title}'
+        template = 'events/emails/registration_approved.html'
+        email_type = 'approval'
+    elif registration.approval_status == 'rejected':
+        subject = f'{reg_type} पंजीकरण अस्वीकृत - {registration.event.title}'
+        template = 'events/emails/registration_rejected.html'
+        email_type = 'rejection'
+    else:
+        return False  # Only send for approved/rejected
     
     print(f"\n=== EMAIL SENDING DEBUG ===")
     print(f"Attempting to send email to: {registration.email}")
     print(f"Subject: {subject}")
+    print(f"Status: {registration.approval_status}")
     
     context = {
         'registration': registration,
         'event': registration.event,
         'profile_url': registration.get_profile_url(),
+        'rejection_reason': getattr(registration, 'rejection_reason', ''),
     }
     
-    html_message = render_to_string('events/emails/registration_approved.html', context)
+    html_message = render_to_string(template, context)
     plain_message = strip_tags(html_message)
+    
+    success = False
+    error_message = ''
     
     try:
         # Create email message
@@ -64,7 +79,7 @@ def send_registration_approval_email(registration):
         )
         email.content_subtype = 'html'
         
-        # Generate and attach ID card if approved
+        # Generate and attach ID card only if approved
         if registration.approval_status == 'approved':
             print("Generating ID card for email attachment...")
             id_card_data = generate_id_card_for_email(registration)
@@ -78,13 +93,28 @@ def send_registration_approval_email(registration):
         
         email.send(fail_silently=False)
         print(f"Email sent successfully to {registration.email}")
-        return True
+        success = True
         
     except Exception as e:
+        error_message = str(e)
         print(f"Email sending failed: {e}")
         import traceback
         print(f"Full traceback: {traceback.format_exc()}")
-        return False
+    
+    # Log email attempt
+    try:
+        from .models import EmailLog
+        EmailLog.objects.create(
+            registration=registration,
+            email_type=email_type,
+            sent_by=sent_by_user,
+            success=success,
+            error_message=error_message
+        )
+    except Exception as log_error:
+        print(f"Failed to log email: {log_error}")
+    
+    return success
 
 def send_registration_details_email(registration):
     """Send registration details email (for resend functionality)"""

@@ -523,19 +523,27 @@ class EventRegistration(models.Model):
                 else:
                     raise e
         
-        # Send email when registration is approved
-        if is_newly_approved and not self.email_sent:
+        # Send email when registration is approved or rejected
+        is_newly_rejected = False
+        if self.pk:
+            old_instance = EventRegistration.objects.get(pk=self.pk)
+            is_newly_rejected = (old_instance.approval_status != 'rejected' and self.approval_status == 'rejected')
+        
+        if (is_newly_approved or is_newly_rejected) and not self.email_sent:
             from .email_utils import send_registration_approval_email
             try:
                 if send_registration_approval_email(self):
                     self.email_sent = True
                     # Use update to avoid recursion
                     EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
-                    print(f"Approval email sent to {self.email}")
+                    status_text = "approval" if is_newly_approved else "rejection"
+                    print(f"Registration {status_text} email sent to {self.email}")
                 else:
-                    print(f"Failed to send approval email to {self.email}")
+                    status_text = "approval" if is_newly_approved else "rejection"
+                    print(f"Failed to send {status_text} email to {self.email}")
             except Exception as e:
-                print(f"Error sending approval email to {self.email}: {str(e)}")
+                status_text = "approval" if is_newly_approved else "rejection"
+                print(f"Error sending {status_text} email to {self.email}: {str(e)}")
 
     
     def get_approver_for_registration(self, level='district'):
@@ -671,4 +679,27 @@ class EventImage(models.Model):
     
     def __str__(self):
         return f"{self.event.title} - Image"
+
+class EmailLog(models.Model):
+    EMAIL_TYPE_CHOICES = [
+        ('approval', 'Approval Email'),
+        ('rejection', 'Rejection Email'),
+        ('resend', 'Resend Email'),
+    ]
+    
+    registration = models.ForeignKey(EventRegistration, on_delete=models.CASCADE, related_name='email_logs')
+    email_type = models.CharField(max_length=20, choices=EMAIL_TYPE_CHOICES)
+    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(default=False)
+    error_message = models.TextField(blank=True)
+    
+    class Meta:
+        verbose_name = "Email Log"
+        verbose_name_plural = "Email Logs"
+        ordering = ['-sent_at']
+    
+    def __str__(self):
+        status = "✓" if self.success else "✗"
+        return f"{status} {self.get_email_type_display()} - {self.registration.full_name} ({self.sent_at.strftime('%d/%m/%Y %H:%M')})"
 

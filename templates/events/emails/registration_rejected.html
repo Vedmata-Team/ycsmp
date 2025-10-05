@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पंजीकरण अस्वीकृत</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            border: 1px solid #dee2e6;
+        }
+        .info-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .rejection-reason {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚫 पंजीकरण अस्वीकृत</h1>
+        <p>{{ event.title }}</p>
+    </div>
+    
+    <div class="content">
+        <p>प्रिय <strong>{{ registration.full_name }}</strong>,</p>
+        
+        <p>खेद है कि आपका पंजीकरण अस्वीकृत कर दिया गया है।</p>
+        
+        <div class="info-box">
+            <h3>पंजीकरण विवरण:</h3>
+            <p><strong>नाम:</strong> {{ registration.full_name }}</p>
+            <p><strong>मोबाइल:</strong> {{ registration.phone }}</p>
+            <p><strong>ईमेल:</strong> {{ registration.email }}</p>
+            <p><strong>पंजीकरण प्रकार:</strong> {{ registration.get_registration_type_display }}</p>
+            <p><strong>राज्य:</strong> {{ registration.state }}</p>
+            <p><strong>जिला:</strong> {{ registration.city }}</p>
+        </div>
+        
+        {% if rejection_reason %}
+        <div class="rejection-reason">
+            <h4>अस्वीकृति का कारण:</h4>
+            <p>{{ rejection_reason }}</p>
+        </div>
+        {% endif %}
+        
+        <p><strong>आगे क्या करें:</strong></p>
+        <ul>
+            <li>कृपया अपनी जानकारी की जांच करें</li>
+            <li>यदि आवश्यक हो तो सही जानकारी के साथ पुनः पंजीकरण करें</li>
+            <li>किसी भी सहायता के लिए संपर्क करें</li>
+        </ul>
+        
+        <p style="text-align: center;">
+            <a href="https://ycsmp.in{{ profile_url }}" class="btn">अपना प्रोफाइल देखें</a>
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>संपर्क जानकारी:</strong></p>
+        <p>ईमेल: youthcell@awgp.org</p>
+        <p>वेबसाइट: https://ycsmp.in</p>
+        <p>यह एक स्वचालित ईमेल है। कृपया इसका उत्तर न दें।</p>
+    </div>
+</body>
+</html>

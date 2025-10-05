@@ -4,10 +4,11 @@ from django.db import models
 from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City
+from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City, EmailLog
 from .admin_filters import UpZoneFilter
 from .models_location import StateDistrict
 from .models_warning import SiteWarning
+
 from .admin_upzone import UpZoneAdmin
 from .export_utils import ExportManager, EVENT_FIELDS, REGISTRATION_FIELDS, APPROVAL_USER_FIELDS
 
@@ -67,7 +68,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         js = ('admin/js/bulk_approval_progress.js',)
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
     list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
-    actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
+    actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'send_email_to_rejected', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date', 'approval_history_display')
     list_editable = ('is_confirmed',)
@@ -326,11 +327,11 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     del actions['approve_district']
                 if 'approve_upzone' in actions:
                     del actions['approve_upzone']
-            # Keep reject_registration and send_email_to_approved for all approval users
+            # Keep reject_registration, send_email_to_approved, and send_email_to_rejected for all approval users
         except ApprovalUser.DoesNotExist:
             # Non-approval users (except superusers) get no bulk actions
             if not request.user.is_superuser:
-                for action in ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved']:
+                for action in ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'send_email_to_rejected']:
                     if action in actions:
                         del actions[action]
         return actions
@@ -557,25 +558,79 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
     def send_email_to_approved(self, request, queryset):
         from .email_utils import send_registration_approval_email
+        import time
+        
+        approved_regs = list(queryset.filter(approval_status='approved'))
+        total = len(approved_regs)
+        
+        # Limit bulk emails to prevent spam
+        if total > 100:
+            self.message_user(request, f'एक साथ 100 से अधिक ({total}) ईमेल नहीं भेज सकते। छोटे बैच में करें।', level='error')
+            return
+        
         sent_count = 0
         failed_count = 0
-        for registration in queryset.filter(approval_status='approved'):
+        
+        for i, registration in enumerate(approved_regs):
             try:
-                if send_registration_approval_email(registration):
+                if send_registration_approval_email(registration, request.user):
                     registration.email_sent = True
                     registration.save(update_fields=['email_sent'])
                     sent_count += 1
                 else:
                     failed_count += 1
+                
+                # Add delay every 10 emails to prevent spam
+                if (i + 1) % 10 == 0:
+                    time.sleep(2)
+                    
             except Exception as e:
-                pass
                 failed_count += 1
+                time.sleep(1)  # Extra delay on error
         
         if failed_count > 0:
             self.message_user(request, f'{sent_count} ईमेल भेजे गए, {failed_count} असफल।')
         else:
             self.message_user(request, f'{sent_count} पंजीकरण विवरण ईमेल भेजे गए।')
     send_email_to_approved.short_description = "अप्रूव पंजीकरण को ईमेल भेजें"
+    
+    def send_email_to_rejected(self, request, queryset):
+        from .email_utils import send_registration_approval_email
+        import time
+        
+        rejected_regs = list(queryset.filter(approval_status='rejected'))
+        total = len(rejected_regs)
+        
+        # Limit bulk emails to prevent spam
+        if total > 100:
+            self.message_user(request, f'एक साथ 100 से अधिक ({total}) ईमेल नहीं भेज सकते। छोटे बैच में करें।', level='error')
+            return
+        
+        sent_count = 0
+        failed_count = 0
+        
+        for i, registration in enumerate(rejected_regs):
+            try:
+                if send_registration_approval_email(registration, request.user):
+                    registration.email_sent = True
+                    registration.save(update_fields=['email_sent'])
+                    sent_count += 1
+                else:
+                    failed_count += 1
+                
+                # Add delay every 10 emails to prevent spam
+                if (i + 1) % 10 == 0:
+                    time.sleep(2)
+                    
+            except Exception as e:
+                failed_count += 1
+                time.sleep(1)  # Extra delay on error
+        
+        if failed_count > 0:
+            self.message_user(request, f'{sent_count} अस्वीकृति ईमेल भेजे गए, {failed_count} असफल।')
+        else:
+            self.message_user(request, f'{sent_count} अस्वीकृति ईमेल भेजे गए।')
+    send_email_to_rejected.short_description = "अस्वीकृत पंजीकरण को ईमेल भेजें"
     
     def registration_number_with_buttons(self, obj):
         from django.urls import reverse
@@ -1176,3 +1231,22 @@ class CityAdmin(admin.ModelAdmin):
     list_filter = ('state__country', 'state')
     search_fields = ('name', 'state__name')
     ordering = ('state', 'name')
+
+@admin.register(EmailLog)
+class EmailLogAdmin(admin.ModelAdmin):
+    list_display = ('registration_name', 'email_type', 'success', 'sent_by', 'sent_at')
+    list_filter = ('email_type', 'success', 'sent_at', 'sent_by')
+    search_fields = ('registration__full_name', 'registration__email', 'registration__phone')
+    readonly_fields = ('registration', 'email_type', 'sent_by', 'sent_at', 'success', 'error_message')
+    date_hierarchy = 'sent_at'
+    ordering = ['-sent_at']
+    
+    def registration_name(self, obj):
+        return f"{obj.registration.full_name} ({obj.registration.email})"
+    registration_name.short_description = 'Registration'
+    
+    def has_add_permission(self, request):
+        return False  # Prevent manual creation
+    
+    def has_change_permission(self, request, obj=None):
+        return False  # Read-only
