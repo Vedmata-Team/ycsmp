@@ -22,6 +22,7 @@ from django.views.generic import TemplateView
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from events.sitemap_views import sitemap_view
+from vehicle_pass.views import vehicle_verify
 
 def robots_txt(request):
     content = render_to_string('robots.txt')
@@ -34,7 +35,7 @@ urlpatterns = [
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots'),
     path('id/', include('ID.urls')),
     path('vehicle-pass/', include('vehicle_pass.urls')),
-    path('vehicle-verify/', include('vehicle_pass.urls')),
+    path('vehicle-verify/<int:registration_id>/<str:vehicle_number>/', vehicle_verify, name='vehicle_verify_direct'),
     path('', include('events.urls')),
 ]
 

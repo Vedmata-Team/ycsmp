@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vehicle Pass</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         @page {
             size: 1181px 591px;
@@ -106,6 +107,8 @@
             font-weight: 700;
             color: #ffe600;
             margin-left: 35px;
+            z-index: 10;
+            position: relative;
         }
         
         .vehicle-number {
@@ -143,20 +146,33 @@
             left: 47px;
             top: 24px;
             width: 150px;
-            height: 150px;
+            height: 170px;
             background: white;
             border-radius: 15px;
             padding: 10px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             border: 3px solid #f0f0f0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 8px;
+        }
+        
+        .scan-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            line-height: 1.2;
         }
         
         .qr-code {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             object-fit: contain;
             border-radius: 8px;
         }
@@ -189,14 +205,16 @@
         }
         
         .info-label {
-            color: #6c757d;
+            color: #2c3e50; /* Dark blue-gray */
             font-weight: 600;
             margin-right: 10px;
             min-width: 120px;
+            z-index: 10;
+            position: relative;
         }
         
         .info-value {
-            color: #212529;
+            color: #1a1a1a; /* Very dark gray */
             font-weight: 700;
         }
         
@@ -209,11 +227,13 @@
             border-radius: 8px;
             margin-top: 15px;
             text-align: center;
+            z-index: 10;
+            position: relative;
         }
         
         .user-type {
             position: absolute;
-            top: 110px; /* Even higher position */
+            top: 107px; /* 3% higher */
             left: 230px; /* Same left as text-details */
             right: 307px; /* Same right as text-details */
             text-align: center;
@@ -240,7 +260,7 @@
         <div class="content-area">
             <!-- Pass Title Line -->
             <div class="pass-title-line">
-                <span class="pass-text">वाहन पास</span>
+                <span class="pass-text"><i class="bi bi-car-front"></i> वाहन पास</span>
                 <span class="vehicle-number">{{ registration.vehicle_number|default:"N/A" }}</span>
             </div>
             
@@ -260,19 +280,20 @@
                 <!-- QR Code Area -->
                 <div class="qr-section">
                     <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="qr-code">
+                    <div class="scan-text"><i class="bi bi-qr-code-scan"></i> Scan for Authentication</div>
                 </div>
                 
                 <!-- Text Details -->
                 <div class="text-details">
                     <div class="info-line">
-                        <span class="info-label">Name:</span>
+                        <span class="info-label"><i class="bi bi-person"></i> Name:</span>
                         <span class="info-value">{{ registration.full_name }}</span>
                     </div>
                     <div class="info-line">
-                        <span class="info-label">Mobile:</span>
+                        <span class="info-label"><i class="bi bi-phone"></i> Mobile:</span>
                         <span class="info-value">{{ registration.phone }}</span>
                     </div>
-                    <div class="validity">Valid Till: 29-10-2025</div>
+                    <div class="validity"><i class="bi bi-clock"></i> Valid Till: 29-10-2025</div>
                 </div>
             </div>
         </div>

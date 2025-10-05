@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 <style>
     .preview-container {
         max-width: 1200px;
@@ -95,9 +96,9 @@
         top: 0.9cm;
         left: 0;
         right: 0;
-        bottom: 0.5cm;
+        bottom: 1cm;
         width: 10cm;
-        height: calc(5cm - 1.4cm);
+        height: calc(5cm - 1.9cm);
         z-index: 2;
     }
     
@@ -116,16 +117,20 @@
         font-family: 'Kalam', cursive;
         font-size: 18px;
         font-weight: 700;
-        color: #008000;
+        color: #ffe600;
+        z-index: 10;
+        position: relative;
     }
     
     .vehicle-number {
         font-family: 'Poppins', sans-serif;
         font-size: 16px;
         font-weight: 700;
-        color: #E40000;
+        color: #ffe600;
         letter-spacing: 1px;
-        margin-right: 1cm;
+        position: absolute;
+        right: 0.8cm;
+        z-index: 10;
     }
     
     .info-section {
@@ -140,43 +145,104 @@
     .qr-section {
         position: absolute;
         left: 0.4cm;
-        top: 0;
+        top: -7%;
         width: 1.9cm;
-        height: 1.5cm;
+        height: 140%;
+        background: white;
+        border-radius: 8px;
+        padding: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border: 1px solid #f0f0f0;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 3px;
     }
     
     .qr-code {
         width: 100%;
         height: 100%;
         object-fit: contain;
+        border-radius: 4px;
+    }
+    
+    .scan-text {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+        line-height: 1.1;
     }
     
     .text-details {
         position: absolute;
         left: 2.5cm;
         top: 0;
-        right: 0.5cm;
-        height: 1.5cm;
+        right: 3cm;
+        height: auto;
+        min-height: 1.8cm;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         font-family: 'Poppins', sans-serif;
-        font-weight: 700;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-left: 2px solid #dc3545;
     }
     
     .info-line {
-        font-size: 12px;
-        color: #000000;
-        margin-bottom: 4px;
-        line-height: 1.2;
+        font-size: 0.7rem !important;
+        color: #2c3e50;
+        margin-bottom: 2px;
+        line-height: 1.1;
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-label {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-right: 6px;
+        min-width: 60px;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .info-value {
+        color: #1a1a1a;
+        font-weight: 700;
     }
     
     .validity {
-        font-size: 13px;
+        font-size: 9px;
         font-weight: 700;
+        color: #dc3545;
+        background: rgba(220, 53, 69, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-top: 0;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .user-type {
+        position: absolute;
+        top: 22%;
+        left: 2.5cm;
+        right: 2.6cm;
+        text-align: center;
+        font-family: 'Kalam', cursive;
+        font-size: 14px;
+        font-weight: 700;
+        color: #8B0000;
+        z-index: 3;
     }
     
     .download-section {
@@ -223,37 +289,155 @@
     .info-label {
         font-weight: 700;
         color: #2c3e50;
-        font-size: 0.9rem;
+        font-size: 0.7rem;
         margin-bottom: 0.5rem;
     }
     
     .info-value {
         color: #34495e;
-        font-size: 1rem;
+        font-size: 0.7rem !important;
+    }
+    
+    .mobile-only {
+        display: none;
     }
     
     @media (max-width: 768px) {
         .vehicle-pass-preview {
-            transform: scale(0.8);
+            width: 90vw;
+            height: 45vw;
+            max-width: none;
+            transform: none;
+            left: 0;
         }
         
         .preview-container {
-            margin: 1rem;
-            padding: 1rem;
+            margin: 0.5rem;
+            padding: 0.5rem;
+        }
+        
+        .vehicle-pass-container {
+            padding: 0.5rem;
+            margin: 0;
+        }
+        
+        .pass-text {
+            font-size: 13.5px;
+            margin-top: -5%;
+        }
+        
+        .vehicle-number {
+            font-size: 12px;
+            margin-top: -5%;
+            right: 2.2cm;
+        }
+        
+        .user-type {
+            font-size: 12.5px;
+            top: 20%;
+            right: 4cm;
+        }
+        
+        .qr-section {
+            top: -43%;
+        }
+        
+        .text-details {
+            left: 2.4cm;
+            height: 100%;
+            right: auto;
+            min-height: 0;
+            margin-top: -1%;
+            width: 35%;
+        }
+        
+        .info-value {
+            font-size: 0.6rem !important;
+            margin-top: -6%;
+        }
+        
+        .validity {
+            font-size: 8.75px;
+            padding: 1.5px 5px;
+            margin-top: -5%;
+        }
+        
+        .info-line {
+            font-size: 0.525rem !important;
+        }
+        
+        .info-label {
+            font-size: 0.525rem;
+            min-width: 45px;
+        }
+        
+        .scan-text {
+            font-size: 0.525rem;
+        }
+        
+        .header-placeholder {
+            font-size: 10.5px;
+        }
+        
+        .desktop-inline,
+        .desktop-bullet {
+            display: none;
+        }
+        
+        .mobile-only {
+            display: block;
+        }
+        
+        .user-details-summary .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-details-summary .detail-row span {
+            flex: 1;
+            text-align: center;
         }
     }
 </style>
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // Pass user DOB to JavaScript for verification
+    window.USER_DOB = '{{ registration.date_of_birth|date:"Y-m-d" }}';
+</script>
 <script src="{% static 'js/vehicle_pass_download.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="preview-container">
     <div class="preview-header">
-        <h1 class="preview-title">🚗 वाहन पास प्रीव्यू</h1>
-        <p class="preview-subtitle">Vehicle Pass Preview</p>
+        <h1 class="preview-title"><i class="bi bi-eye"></i> Vehicle Pass Preview</h1>
+        <p class="preview-subtitle"><i class="bi bi-car-front"></i> वाहन पास प्रीव्यू</p>
+    </div>
+    
+    <!-- User Details Summary -->
+    <div class="user-details-summary" style="text-align: center; margin: 1rem 0; padding: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; font-size: 0.9rem; font-weight: 600;">
+        <span class="desktop-inline" style="color: #dc3545;"><i class="bi bi-person"></i> {{ registration.full_name }}</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #28a745;"><i class="bi bi-phone"></i> {{ registration.phone }}</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #007bff;"><i class="bi bi-car-front"></i> {{ registration.vehicle_number }}</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #fd7e14;"><i class="bi bi-tag"></i> {{ registration.get_registration_type_display }}</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #6f42c1;"><i class="bi bi-calendar-check"></i> Valid till 29 Oct 2025</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #20c997;"><i class="bi bi-check-circle"></i> {{ registration.get_approval_status_display }}</span>
+        
+        <div class="detail-row mobile-only">
+            <span style="color: #dc3545;"><i class="bi bi-person"></i> {{ registration.full_name }}</span>
+            <span style="color: #28a745;"><i class="bi bi-phone"></i> {{ registration.phone }}</span>
+        </div>
+        <div class="detail-row mobile-only">
+            <span style="color: #007bff;"><i class="bi bi-car-front"></i> {{ registration.vehicle_number }}</span>
+            <span style="color: #fd7e14;"><i class="bi bi-tag"></i> {{ registration.get_registration_type_display }}</span>
+        </div>
+        <div class="detail-row mobile-only">
+            <span style="color: #6f42c1;"><i class="bi bi-calendar-check"></i> Valid till 29 Oct 2025</span>
+            <span style="color: #20c997;"><i class="bi bi-check-circle"></i> {{ registration.get_approval_status_display }}</span>
+        </div>
     </div>
     
     <!-- Vehicle Pass Preview -->
@@ -273,22 +457,40 @@
                 <div class="content-area">
                     <!-- Pass Title Line -->
                     <div class="pass-title-line">
-                        <span class="pass-text">वाहन पास</span>
+                        <span class="pass-text"><i class="bi bi-car-front"></i> वाहन पास</span>
                         <span class="vehicle-number">{{ registration.vehicle_number|default:"N/A" }}</span>
+                    </div>
+                    
+                    <!-- User Type -->
+                    <div class="user-type">
+                        {% if registration.registration_type == 'volunteer' %}
+                            समयदानी कार्यकर्ता
+                        {% elif registration.registration_type == 'organization_representative' %}
+                            संगठन प्रतिनिधि
+                        {% else %}
+                            प्रतिभागी
+                        {% endif %}
                     </div>
                     
                     <!-- Information Section -->
                     <div class="info-section">
                         <!-- QR Code Area -->
-                        <div class="qr-section">
+                        <a href="{{ qr_url }}" target="_blank" class="qr-section" style="text-decoration: none; cursor: pointer;">
                             <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="qr-code">
-                        </div>
+                            <div class="scan-text"><i class="bi bi-qr-code-scan"></i> Scan</div>
+                        </a>
                         
                         <!-- Text Details -->
                         <div class="text-details">
-                            <div class="info-line">Name: {{ registration.full_name }}</div>
-                            <div class="info-line">Mob. No: {{ registration.phone }}</div>
-                            <div class="info-line validity">Valid Till: 29-10-2025</div>
+                            <div class="info-line">
+                                <span class="info-label"><i class="bi bi-person"></i> Name:</span>
+                                <span class="info-value">{{ registration.full_name }}</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="info-label"><i class="bi bi-phone"></i> Mobile:</span>
+                                <span class="info-value">{{ registration.phone }}</span>
+                            </div>
+                            <div class="validity"><i class="bi bi-clock"></i> Valid Till: 29-10-2025</div>
                         </div>
                     </div>
                 </div>
@@ -298,46 +500,15 @@
     
     <!-- Download Section -->
     <div class="download-section">
-        <a href="{{ download_url }}" class="download-btn">
-            <i class="bi bi-download"></i> वाहन पास डाउनलोड करें
+        <a href="{{ download_url }}" class="download-btn download-protected" data-download-url="{{ download_url }}">
+            <i class="bi bi-download"></i> Download Vehicle Pass
         </a>
         <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
-            PNG फॉर्मेट में डाउनलोड होगा • प्रिंट के लिए तैयार
+            <i class="bi bi-file-earmark-image"></i> PNG Format <i class="bi bi-dot"></i> <i class="bi bi-printer"></i> Print Ready
         </p>
     </div>
     
-    <!-- Registration Info -->
-    <div class="info-cards">
-        <div class="info-card">
-            <div class="info-label">👤 नाम</div>
-            <div class="info-value">{{ registration.full_name }}</div>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-label">📱 मोबाइल नंबर</div>
-            <div class="info-value">{{ registration.phone }}</div>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-label">🚗 वाहन नंबर</div>
-            <div class="info-value">{{ registration.vehicle_number }}</div>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-label">👥 पंजीकरण प्रकार</div>
-            <div class="info-value">{{ registration.get_registration_type_display }}</div>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-label">📅 वैधता</div>
-            <div class="info-value">29 अक्टूबर 2025 तक</div>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-label">✅ स्थिति</div>
-            <div class="info-value">{{ registration.get_approval_status_display }}</div>
-        </div>
-    </div>
+
 </div>
 
 <script src="{% static 'js/vehicle_pass_download.js' %}"></script>

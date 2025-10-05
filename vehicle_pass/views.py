@@ -91,7 +91,7 @@ def generate_vehicle_pass(request, registration_id, vehicle_number):
         )
     
     # Generate QR code for vehicle verification with vehicle number
-    vehicle_verify_url = f"https://ycsmp.in/vehicle-verify/{registration.id}/{vehicle_number}/"
+    vehicle_verify_url = f"https://ycsmp.in/vehicle-pass/verify/{registration.id}/{vehicle_number}/"
     qr = qrcode.QRCode(version=1, box_size=12, border=3)  # Scaled up 3x
     qr.add_data(vehicle_verify_url)
     qr.make(fit=True)
@@ -288,7 +288,7 @@ def vehicle_pass_preview(request, registration_id, vehicle_number):
         )
     
     # Generate QR code for vehicle verification
-    vehicle_verify_url = f"https://ycsmp.in/vehicle-verify/{registration.id}/{vehicle_number}/"
+    vehicle_verify_url = f"https://ycsmp.in/vehicle-pass/verify/{registration.id}/{vehicle_number}/"
     qr = qrcode.QRCode(version=1, box_size=12, border=3)  # Scaled up 3x
     qr.add_data(vehicle_verify_url)
     qr.make(fit=True)
@@ -339,6 +339,7 @@ def vehicle_pass_preview(request, registration_id, vehicle_number):
         'bg_image_base64': bg_image_base64,
         'validity_date': '29 अक्टूबर 2025',
         'download_url': f'/vehicle-pass/generate/{registration.id}/{vehicle_number}/',
+        'qr_url': vehicle_verify_url,
     }
     
     return render(request, 'vehicle_pass/vehicle_pass_preview.html', context)

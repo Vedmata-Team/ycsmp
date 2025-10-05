@@ -41,9 +41,16 @@
     <div class="message">
         <h2>ID Card Generation</h2>
         <p>ID cards are now generated as downloadable images with proper Hindi font support.</p>
-        <a href="/id/card/{{ registration.id }}/?format=PNG" class="btn">📥 Download PNG</a>
-        <a href="/id/card/{{ registration.id }}/?format=JPG" class="btn">📥 Download JPG</a>
+        <a href="/id/card/{{ registration.id }}/?format=PNG" class="btn download-btn">📥 Download PNG</a>
+        <a href="/id/card/{{ registration.id }}/?format=JPG" class="btn download-btn">📥 Download JPG</a>
         <a href="/id/preview/{{ registration.id }}/" class="btn">👁️ Preview</a>
     </div>
+    
+    <script>
+        // Pass user DOB to JavaScript for verification
+        window.USER_DOB = '{{ registration.date_of_birth|date:"Y-m-d" }}';
+        console.log('ID Card page USER_DOB set to:', window.USER_DOB);
+    </script>
+    <script src="/static/js/vehicle_pass_download.js"></script>
 </body>
 </html>

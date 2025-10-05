@@ -9,11 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             const originalText = this.textContent;
-            this.textContent = 'Generating...';
-            this.style.pointerEvents = 'none';
-            this.style.opacity = '0.6';
             
-            // Create mini loading indicator
+            // Minimal loading indicator for instant feedback
             const loadingDiv = document.createElement('div');
             loadingDiv.innerHTML = `
                 <div style="
@@ -22,68 +19,50 @@ document.addEventListener('DOMContentLoaded', function() {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     background: white;
-                    padding: 20px;
+                    padding: 15px 25px;
                     border-radius: 8px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                     z-index: 9999;
                     text-align: center;
+                    font-size: 14px;
                 ">
-                    <div style="
-                        width: 30px;
-                        height: 30px;
-                        border: 3px solid #f3f3f3;
-                        border-top: 3px solid #007cba;
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                        margin: 0 auto 10px;
-                    "></div>
-                    <div>Generating Vehicle Pass...</div>
+                    <div>Downloading...</div>
                 </div>
-                <style>
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                </style>
             `;
             document.body.appendChild(loadingDiv);
             
-            // Simulate processing time then download
+            // Instant download without delays
+            const downloadLink = document.createElement('a');
+            downloadLink.href = this.href;
+            downloadLink.download = '';
+            downloadLink.click();
+            
+            // Cleanup immediately
+            document.body.removeChild(loadingDiv);
+            this.textContent = originalText;
+            this.style.pointerEvents = 'auto';
+            this.style.opacity = '1';
+            
+            // Show success message
+            const successDiv = document.createElement('div');
+            successDiv.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    z-index: 10000;
+                ">
+                    Vehicle Pass Downloaded!
+                </div>
+            `;
+            document.body.appendChild(successDiv);
+            
             setTimeout(() => {
-                // Create download link
-                const downloadLink = document.createElement('a');
-                downloadLink.href = this.href;
-                downloadLink.download = '';
-                downloadLink.click();
-                
-                // Cleanup
-                document.body.removeChild(loadingDiv);
-                this.textContent = originalText;
-                this.style.pointerEvents = 'auto';
-                this.style.opacity = '1';
-                
-                // Show success message
-                const successDiv = document.createElement('div');
-                successDiv.innerHTML = `
-                    <div style="
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: #28a745;
-                        color: white;
-                        padding: 10px 15px;
-                        border-radius: 5px;
-                        z-index: 10000;
-                    ">
-                        Vehicle Pass Downloaded!
-                    </div>
-                `;
-                document.body.appendChild(successDiv);
-                
-                setTimeout(() => {
-                    document.body.removeChild(successDiv);
-                }, 3000);
-                
+                document.body.removeChild(successDiv);
             }, 2000);
         });
     });

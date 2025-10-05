@@ -1,223 +1,137 @@
 // Vehicle Pass Download Handler with Loading States
+if (typeof VehiclePassDownloader === 'undefined') {
 class VehiclePassDownloader {
     constructor() {
         this.isDownloading = false;
+        this.isVerified = false;
+        this.userDOB = window.USER_DOB || '1995-12-04';
         this.init();
     }
 
     init() {
-        // Find all vehicle pass download links
-        document.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.attachDownloadHandlers();
+            });
+        } else {
             this.attachDownloadHandlers();
-        });
+        }
     }
 
     attachDownloadHandlers() {
-        // Select all vehicle pass download links
-        const vehiclePassLinks = document.querySelectorAll('a[href*="/vehicle-pass/generate/"]');
+        // Select all protected links (download, preview, review)
+        const protectedLinks = document.querySelectorAll('a[href*="/vehicle-pass/generate/"], a[href*="/id/card/"], a[href*="/vehicle-pass/preview/"], a[href*="/id-card/preview/"], a[href*="/id/preview/"], a[href*="/review/"], .download-btn, .btn-success, .preview-btn, .review-btn, .id-card-btn, .download-protected');
         
-        vehiclePassLinks.forEach(link => {
+        protectedLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.handleDownload(link);
+                this.handleAccess(link);
             });
         });
     }
 
-    async handleDownload(link) {
+    async handleAccess(link) {
         if (this.isDownloading) {
             return;
         }
 
-        this.isDownloading = true;
-        const originalContent = link.innerHTML;
-        const downloadUrl = link.href;
+        // Check DOB verification first
+        if (!this.isVerified) {
+            this.showDOBVerification(link);
+            return;
+        }
 
-        try {
-            // Show loading state
-            this.showLoadingState(link);
+        this.proceedWithAccess(link);
+    }
+    
+    proceedWithAccess(link) {
+        const url = link.href || link.dataset.downloadUrl;
+        
+        // Check if it's DOB viewing
+        if (url === '#view-dob') {
+            this.showDOB(link);
+        } else if (url.includes('/generate/') || link.classList.contains('download-btn')) {
+            this.instantDownload(link);
+        } else {
+            // Navigate to preview/review page
+            window.location.href = url;
+        }
+    }
+    
+    showDOB(link) {
+        // Find the DOB field and unblur it
+        const dobField = document.querySelector('.dob-field');
+        if (dobField) {
+            dobField.innerHTML = dobField.querySelector('span').textContent.replace(/•/g, '');
+            dobField.style.cursor = 'default';
+            dobField.title = 'Verified';
+            dobField.style.color = '#28a745';
+            dobField.style.fontWeight = '600';
+            dobField.style.background = '#d4edda';
+            dobField.style.border = '1px solid #28a745';
             
-            // Create loading overlay
-            this.createLoadingOverlay();
-            
-            // Start download and progress together
-            const downloadPromise = this.downloadFile(downloadUrl, link);
-            await this.simulateDownloadProcess(downloadPromise);
-            
-        } catch (error) {
-            this.showError('वाहन पास जेनरेट करने में त्रुटि हुई। कृपया पुनः प्रयास करें।');
-        } finally {
-            // Restore original state
-            link.innerHTML = originalContent;
-            this.removeLoadingOverlay();
-            this.isDownloading = false;
+            this.showSuccess('Date of birth verified successfully!');
         }
     }
 
-    showLoadingState(link) {
-        link.innerHTML = '<i class="bi bi-hourglass-split"></i> जेनरेट हो रहा है...';
-        link.style.pointerEvents = 'none';
-        link.style.opacity = '0.7';
-    }
-
-    createLoadingOverlay() {
-        const overlay = document.createElement('div');
-        overlay.id = 'vehiclePassLoadingOverlay';
-        overlay.innerHTML = `
-            <div class="loading-overlay" style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 9999;
-                font-family: 'Kalam', cursive;
-            ">
-                <div class="loading-content" style="
-                    background: white;
-                    padding: 2rem;
-                    border-radius: 15px;
-                    text-align: center;
-                    max-width: 400px;
-                    width: 90%;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                ">
-                    <div class="spinner" style="
-                        border: 4px solid #f3f3f3;
-                        border-top: 4px solid #dc3545;
-                        border-radius: 50%;
-                        width: 50px;
-                        height: 50px;
-                        animation: spin 1s linear infinite;
-                        margin: 0 auto 1rem;
-                    "></div>
-                    <h5 style="color: #333; margin-bottom: 1rem;">🚗 वाहन पास तैयार हो रहा है</h5>
-                    <div class="progress-bar" style="
-                        width: 100%;
-                        height: 8px;
-                        background: #f0f0f0;
-                        border-radius: 4px;
-                        overflow: hidden;
-                        margin: 1rem 0;
-                    ">
-                        <div class="progress-fill" id="vehiclePassProgress" style="
-                            height: 100%;
-                            background: linear-gradient(90deg, #dc3545, #c82333);
-                            border-radius: 4px;
-                            width: 0%;
-                            transition: width 0.3s ease;
-                        "></div>
-                    </div>
-                    <div id="vehiclePassStatus" style="color: #666; font-size: 0.9rem;">
-                        टेम्प्लेट लोड हो रहा है...
-                    </div>
-                    <div id="vehiclePassPercent" style="color: #dc3545; font-weight: bold; margin-top: 0.5rem;">
-                        0%
-                    </div>
-                </div>
-            </div>
-            <style>
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            </style>
-        `;
-        document.body.appendChild(overlay);
-    }
-
-    async simulateDownloadProcess(downloadPromise) {
-        const statusMessages = [
-            'टेम्प्लेट लोड हो रहा है...',
-            'वाहन जानकारी प्राप्त कर रहे हैं...',
-            'QR कोड जेनरेट हो रहा है...',
-            'बैकग्राउंड इमेज लोड हो रहा है...',
-            'HTML रेंडर हो रहा है...',
-            'इमेज में कन्वर्ट हो रहा है...',
-            'फाइनल प्रोसेसिंग...'
-        ];
-
-        let progress = 0;
-        let downloadComplete = false;
-        const progressElement = document.getElementById('vehiclePassProgress');
-        const statusElement = document.getElementById('vehiclePassStatus');
-        const percentElement = document.getElementById('vehiclePassPercent');
-
-        // Monitor download completion
-        downloadPromise.then(() => {
-            downloadComplete = true;
-            // Immediately show 100% when server responds
-            if (progressElement) progressElement.style.width = '100%';
-            if (percentElement) percentElement.textContent = '100%';
-            if (statusElement) statusElement.textContent = 'डाउनलोड शुरू हो रहा है...';
-        });
-
-        // Animate progress up to 95% while waiting for server
-        for (let i = 0; i < statusMessages.length && !downloadComplete; i++) {
-            if (statusElement) statusElement.textContent = statusMessages[i];
-            
-            const targetProgress = ((i + 1) / statusMessages.length) * 95; // Only go to 95%
-            
-            while (progress < targetProgress && !downloadComplete) {
-                progress += 15;
-                if (progress > targetProgress) progress = targetProgress;
-                
-                if (progressElement) progressElement.style.width = progress + '%';
-                if (percentElement) percentElement.textContent = Math.round(progress) + '%';
-                
-                await this.delay(30);
+    validateDOB(inputDOB) {
+        if (!this.userDOB) {
+            console.log('No USER_DOB set - using test date 1995-12-04');
+            this.userDOB = '1995-12-04'; // Set test DOB
+        }
+        
+        const inputFormatted = inputDOB;
+        let userFormatted = this.userDOB;
+        
+        if (this.userDOB.includes('/')) {
+            const parts = this.userDOB.split('/');
+            if (parts.length === 3) {
+                userFormatted = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
             }
-            
-            if (!downloadComplete) await this.delay(80);
+        } else if (!this.userDOB.includes('-')) {
+            try {
+                userFormatted = new Date(this.userDOB).toISOString().split('T')[0];
+            } catch (e) {
+                console.error('Date parsing error:', e);
+            }
         }
-
-        // Wait for download to complete
-        await downloadPromise;
-    }
-
-    async downloadFile(url, linkElement) {
-        return new Promise((resolve, reject) => {
-            fetch(url)
-                .then(response => {
-                    if (response.ok) {
-                        // Server responded - show 100% immediately
-                        const progressElement = document.getElementById('vehiclePassProgress');
-                        const percentElement = document.getElementById('vehiclePassPercent');
-                        const statusElement = document.getElementById('vehiclePassStatus');
-                        
-                        if (progressElement) progressElement.style.width = '100%';
-                        if (percentElement) percentElement.textContent = '100%';
-                        if (statusElement) statusElement.textContent = 'डाउनलोड शुरू हो रहा है...';
-                        
-                        // Trigger download
-                        const tempLink = document.createElement('a');
-                        tempLink.href = url;
-                        tempLink.style.display = 'none';
-                        tempLink.download = `vehicle_pass_${Date.now()}.png`;
-                        
-                        document.body.appendChild(tempLink);
-                        tempLink.click();
-                        document.body.removeChild(tempLink);
-                        
-                        this.showSuccess('वाहन पास सफलतापूर्वक डाउनलोड हो गया!');
-                        resolve();
-                    } else {
-                        reject(new Error('Download failed'));
-                    }
-                })
-                .catch(error => reject(error));
-        });
-    }
-
-    removeLoadingOverlay() {
-        const overlay = document.getElementById('vehiclePassLoadingOverlay');
-        if (overlay) {
-            overlay.remove();
+        
+        if (inputFormatted === userFormatted) return true;
+        
+        try {
+            const inputDate = new Date(inputFormatted);
+            const userDate = new Date(userFormatted);
+            if (inputDate.getTime() === userDate.getTime()) return true;
+        } catch (e) {}
+        
+        const inputParts = inputFormatted.split('-');
+        const userParts = userFormatted ? userFormatted.split('-') : [];
+        if (inputParts.length === 3 && userParts.length === 3) {
+            return inputParts[0] === userParts[0] && 
+                   inputParts[1] === userParts[1] && 
+                   inputParts[2] === userParts[2];
         }
+        
+        return false;
+    }
+    
+    instantDownload(link) {
+        console.log('Starting instant download');
+        const downloadUrl = link.href;
+        console.log('Download URL:', downloadUrl);
+        
+        // Direct download without any loading states
+        const tempLink = document.createElement('a');
+        tempLink.href = downloadUrl;
+        tempLink.style.display = 'none';
+        tempLink.download = `vehicle_pass_${Date.now()}.png`;
+        
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+        
+        console.log('Download triggered');
+        this.showSuccess('वाहन पास सफलतापूर्वक डाउनलोड हो गया!');
     }
 
     showSuccess(message) {
@@ -277,10 +191,198 @@ class VehiclePassDownloader {
         }, 3000);
     }
 
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    showDOBVerification(link) {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                font-family: 'Inter', sans-serif;
+            ">
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 400px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                    animation: modalSlide 0.3s ease-out;
+                ">
+                    <div style="
+                        padding: 1.5rem;
+                        border-bottom: 1px solid #e9ecef;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        position: relative;
+                    ">
+                        <i class="bi bi-shield-check" style="color: #28a745; font-size: 1.2rem;"></i>
+                        <h3 style="margin: 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">Identity Verification</h3>
+                        <button onclick="window.location.reload()" style="
+                            position: absolute;
+                            right: 1rem;
+                            background: none;
+                            border: none;
+                            font-size: 1.5rem;
+                            color: #6c757d;
+                            cursor: pointer;
+                            padding: 0;
+                            width: 30px;
+                            height: 30px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">&times;</button>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <p style="margin: 0 0 1rem 0; color: #495057; font-size: 0.9rem;">
+                            Please enter your Date of Birth to proceed with download
+                        </p>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; color: #495057; font-weight: 500; font-size: 0.9rem;">
+                                Date of Birth
+                            </label>
+                            <input type="date" id="dobInput" style="
+                                width: 100%;
+                                padding: 0.75rem;
+                                border: 2px solid #e9ecef;
+                                border-radius: 6px;
+                                font-size: 1rem;
+                                transition: border-color 0.2s ease;
+                            " required>
+                            <small style="display: block; margin-top: 0.5rem; color: #6c757d; font-size: 0.8rem;">
+                                Enter the date of birth used during registration
+                            </small>
+                        </div>
+                        <div id="dobError" style="
+                            background: #f8d7da;
+                            color: #721c24;
+                            padding: 0.75rem;
+                            border-radius: 6px;
+                            margin-top: 1rem;
+                            font-size: 0.9rem;
+                            display: none;
+                            align-items: center;
+                            gap: 0.5rem;
+                        ">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span>Incorrect date of birth. Please try again.</span>
+                        </div>
+                    </div>
+                    <div style="
+                        padding: 1rem 1.5rem;
+                        border-top: 1px solid #e9ecef;
+                        display: flex;
+                        gap: 0.5rem;
+                        justify-content: flex-end;
+                    ">
+                        <button onclick="window.location.reload()" style="
+                            padding: 0.6rem 1.2rem;
+                            border: none;
+                            border-radius: 6px;
+                            font-size: 0.9rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            background: #6c757d;
+                            color: white;
+                        ">Cancel</button>
+                        <button id="verifyDOB" type="button" style="
+                            padding: 0.6rem 1.2rem;
+                            border: none;
+                            border-radius: 6px;
+                            font-size: 0.9rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            background: #007bff;
+                            color: white;
+                            user-select: none;
+                        " onmousedown="this.style.background='#0056b3'" onmouseup="this.style.background='#007bff'">Verify & Download</button>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes modalSlide {
+                    from { transform: translateY(-50px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const dobInput = modal.querySelector('#dobInput');
+        const verifyBtn = modal.querySelector('#verifyDOB');
+        const errorDiv = modal.querySelector('#dobError');
+        
+        dobInput.focus();
+        
+        // Removed auto-verification - only verify on button click
+        
+        const verifyDOB = () => {
+            console.log('Verify button clicked');
+            const inputDOB = dobInput.value;
+            console.log('Input DOB:', inputDOB);
+            console.log('User DOB:', this.userDOB);
+            
+            if (!inputDOB) {
+                console.log('No DOB entered');
+                this.showDOBError(errorDiv, 'Please enter your date of birth');
+                return;
+            }
+            
+            const isValid = this.validateDOB(inputDOB);
+            console.log('DOB validation result:', isValid);
+            
+            if (isValid) {
+                console.log('DOB valid - proceeding with download');
+                this.isVerified = true;
+                modal.remove();
+                this.proceedWithAccess(link);
+            } else {
+                console.log('DOB invalid - showing error');
+                this.showDOBError(errorDiv, 'Incorrect date of birth. Please try again.');
+                dobInput.value = '';
+                dobInput.focus();
+            }
+        };
+        
+        verifyBtn.addEventListener('click', (e) => {
+            console.log('Verify button event triggered');
+            e.preventDefault();
+            e.stopPropagation();
+            verifyDOB();
+        });
+        
+        dobInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyDOB();
+            }
+        });
     }
+    
+    showDOBError(errorDiv, message) {
+        errorDiv.querySelector('span').textContent = message;
+        errorDiv.style.display = 'flex';
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 3000);
+    }
+
+
 }
 
 // Initialize the downloader
-new VehiclePassDownloader();
+if (typeof window.vehiclePassDownloader === 'undefined') {
+    window.vehiclePassDownloader = new VehiclePassDownloader();
+}
+}

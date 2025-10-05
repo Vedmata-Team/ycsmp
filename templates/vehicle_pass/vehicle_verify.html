@@ -1,120 +1,243 @@
-{% extends 'events/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}वाहन सत्यापन - {{ registration.full_name }}{% endblock %}
+{% block title %}Vehicle Verification - {{ registration.full_name }}{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 <style>
     .verify-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        font-family: 'Kalam', cursive;
+        max-width: 700px;
+        margin: 1.5rem auto;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        font-family: 'Inter', sans-serif;
+        border: 1px solid #e9ecef;
     }
     
     .verify-header {
-        text-align: center;
-        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 3px solid #27ae60;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .verify-icon {
+        width: 70px;
+        height: 70px;
+        background-image: url('/static/images/green_tick.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        animation: checkmark 2s ease-in-out infinite;
+        position: relative;
+    }
+    
+    @keyframes checkmark {
+        0% {
+            transform: scale(0.9);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(0.9);
+        }
+    }
+    
+    .verify-text {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
     .verify-title {
-        color: #27ae60;
-        font-size: 2rem;
+        color: #2c3e50;
+        font-size: 1.6rem;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .verify-subtitle {
-        color: #7f8c8d;
-        font-size: 1.1rem;
+        color: #28a745;
+        font-size: 1rem;
+        font-weight: 500;
     }
     
     .vehicle-info {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
     
     .vehicle-number {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 700;
-        text-align: center;
-        background: rgba(255,255,255,0.2);
-        padding: 1rem;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        color: #dc3545;
+        padding: 0.8rem 1.2rem;
         border-radius: 8px;
-        letter-spacing: 3px;
-        margin-bottom: 1rem;
+        letter-spacing: 1.5px;
+        border: 3px solid #dc3545;
+        flex: 1;
+        min-width: 220px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+    }
+    
+    .status-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
     
     .owner-info {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
     
     .info-card {
-        background: #f8f9fa;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
         padding: 1rem;
         border-radius: 8px;
-        border-left: 4px solid #3498db;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
     .info-label {
-        font-weight: 700;
-        color: #2c3e50;
-        font-size: 0.9rem;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
         margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .info-label i {
+        color: #007bff;
+        font-size: 1rem;
     }
     
     .info-value {
-        color: #34495e;
+        color: #2c3e50;
         font-size: 1.1rem;
+        font-weight: 600;
+        line-height: 1.3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .mobile-actions {
+        display: flex;
+        gap: 0.3rem;
+    }
+    
+    .mobile-action-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 0.7rem;
+        transition: all 0.2s ease;
+        background: #007bff;
+        color: white;
+    }
+    
+    .mobile-action-btn:hover {
+        transform: scale(1.1);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .mobile-action-btn.whatsapp {
+        background: #25d366;
+    }
+    
+    .mobile-action-btn.whatsapp:hover {
+        background: #128c7e;
+        color: white;
+    }
+    
+    .mobile-actions {
+        display: flex;
     }
     
     .status-badge {
         display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 700;
+        padding: 0.4rem 1rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.8rem;
         text-transform: uppercase;
-        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
     .status-approved {
-        background: #d4edda;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
         color: #155724;
+        border: 1px solid #c3e6cb;
     }
     
     .status-pending {
-        background: #fff3cd;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
         color: #856404;
+        border: 1px solid #ffeaa7;
     }
     
     .quick-actions {
         display: flex;
-        gap: 1rem;
+        gap: 0.8rem;
         justify-content: center;
         flex-wrap: wrap;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
     }
     
     .action-btn {
-        padding: 0.8rem 1.5rem;
+        padding: 0.6rem 1.2rem;
         border: none;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 6px;
+        font-weight: 500;
         text-decoration: none;
-        transition: all 0.3s ease;
-        font-family: 'Kalam', cursive;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
     }
     
     .btn-primary {
@@ -140,104 +263,188 @@
     }
     
     .validity-info {
-        background: #d1ecf1;
-        border: 1px solid #bee5eb;
-        padding: 1rem;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 2px solid #28a745;
+        padding: 0.8rem 1.2rem;
         border-radius: 8px;
-        text-align: center;
         margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 3px 12px rgba(40, 167, 69, 0.2);
     }
     
     .validity-text {
-        color: #0c5460;
-        font-weight: 700;
+        color: #155724;
+        font-weight: 600;
+        font-size: 1rem;
+        margin: 0;
+    }
+    
+    .validity-text i {
+        color: #28a745;
         font-size: 1.1rem;
     }
+    
+    @media (max-width: 768px) {
+        .verify-container {
+            margin: 1rem;
+            padding: 1rem;
+        }
+        
+        .verify-header {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .verify-text {
+            text-align: center;
+        }
+        
+        .verify-title {
+            font-size: 1.3rem;
+        }
+        
+        .vehicle-info {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .vehicle-number {
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            min-width: auto;
+        }
+        
+        .status-container {
+            justify-content: center;
+        }
+        
+        .owner-info {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .quick-actions {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        
+        .action-btn {
+            width: 100%;
+            max-width: 280px;
+        }
+    }
+    
+
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Pass user DOB to JavaScript for verification
+    window.USER_DOB = '{{ registration.date_of_birth|date:"Y-m-d" }}';
+</script>
+<script src="{% static 'js/vehicle_pass_download.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="verify-container">
     <div class="verify-header">
-        <h1 class="verify-title">🚗 वाहन सत्यापन</h1>
-        <p class="verify-subtitle">Vehicle Pass Verification</p>
+        <div class="verify-icon"></div>
+        <div class="verify-text">
+            <h1 class="verify-title">Vehicle Verified</h1>
+            <p class="verify-subtitle">Pass verification successful</p>
+        </div>
     </div>
     
     <div class="validity-info">
-        <div class="validity-text">✅ वैधता: 29 अक्टूबर 2025 तक</div>
+        <div class="validity-text"><i class="bi bi-calendar-check"></i> Valid until 29 October 2025</div>
     </div>
     
     <div class="vehicle-info">
-        <div class="vehicle-number">{{ registration.vehicle_number|default:"वाहन नंबर उपलब्ध नहीं" }}</div>
-        <div style="text-align: center;">
+        <div class="vehicle-number">{{ registration.vehicle_number|default:"N/A" }}</div>
+        <div class="status-container">
             <span class="status-badge {% if registration.approval_status == 'approved' %}status-approved{% else %}status-pending{% endif %}">
                 {% if registration.approval_status == 'approved' %}
-                    ✅ अप्रूव्ड
+                    <i class="bi bi-check-circle"></i> Approved
                 {% else %}
-                    ⏳ {{ registration.get_approval_status_display }}
+                    <i class="bi bi-clock"></i> {{ registration.get_approval_status_display }}
                 {% endif %}
             </span>
             {% if is_primary_user %}
-            <span class="badge bg-success ms-2">
-                <i class="bi bi-star-fill"></i> प्राथमिक उपयोगकर्ता
-            </span>
+            <div style="display: inline-block; background: #28a745; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.75rem;">
+                <i class="bi bi-star-fill"></i> Primary
+            </div>
             {% elif primary_user %}
-            <span class="badge bg-warning text-dark ms-2">
-                <i class="bi bi-exclamation-triangle"></i> द्वितीयक उपयोगकर्ता
-            </span>
+            <div style="display: inline-block; background: #ffc107; color: #212529; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.75rem;">
+                <i class="bi bi-exclamation-triangle"></i> Secondary
+            </div>
             {% endif %}
         </div>
     </div>
     
     <div class="owner-info">
         <div class="info-card">
-            <div class="info-label">👤 वाहन स्वामी का नाम</div>
+            <div class="info-label"><i class="bi bi-person"></i> Owner Name</div>
             <div class="info-value">{{ registration.full_name }}</div>
         </div>
         
         <div class="info-card">
-            <div class="info-label">📱 मोबाइल नंबर</div>
-            <div class="info-value">{{ registration.phone }}</div>
+            <div class="info-label"><i class="bi bi-phone"></i> Mobile</div>
+            <div class="info-value">
+                {{ registration.phone }}
+                <div class="mobile-actions">
+                    <a href="tel:{{ registration.phone }}" class="mobile-action-btn">
+                        <i class="bi bi-telephone"></i>
+                    </a>
+                    <a href="https://wa.me/91{{ registration.phone }}" target="_blank" class="mobile-action-btn whatsapp">
+                        <i class="bi bi-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
         </div>
         
         <div class="info-card">
-            <div class="info-label">🚗 वाहन प्रकार</div>
+            <div class="info-label"><i class="bi bi-car-front"></i> Vehicle Type</div>
             <div class="info-value">{{ registration.get_transport_mode_display }}</div>
         </div>
         
         <div class="info-card">
-            <div class="info-label">👥 पंजीकरण प्रकार</div>
+            <div class="info-label"><i class="bi bi-tag"></i> Registration Type</div>
             <div class="info-value">{{ registration.get_registration_type_display }}</div>
         </div>
         
         <div class="info-card">
-            <div class="info-label">📍 शहर/जिला</div>
+            <div class="info-label"><i class="bi bi-geo-alt"></i> Location</div>
             <div class="info-value">{{ registration.city }}, {{ registration.state }}</div>
         </div>
         
         <div class="info-card">
-            <div class="info-label">📅 पंजीकरण तिथि</div>
+            <div class="info-label"><i class="bi bi-calendar"></i> Registration Date</div>
             <div class="info-value">{{ registration.registration_date|date:"d M Y" }}</div>
         </div>
     </div>
     
     <div class="quick-actions">
         <a href="{{ profile_url }}" class="action-btn btn-primary">
-            👤 पूर्ण प्रोफाइल देखें
+            <i class="bi bi-person-circle"></i> View Profile
         </a>
         
-        <a href="{% url 'events:contact' %}" class="action-btn btn-info">
-            📞 सहायता संपर्क
+        <a href="https://ycsmp.in/contact/" class="action-btn btn-info">
+            <i class="bi bi-envelope"></i> Contact
         </a>
         
         {% if registration.approval_status == 'approved' and registration.vehicle_number %}
             {% if is_primary_user %}
-            <a href="{% url 'vehicle_pass:generate' registration.id registration.vehicle_number %}" class="action-btn btn-success">
-                🎫 वाहन पास डाउनलोड
+            <a href="/vehicle-pass/generate/{{ registration.id }}/{{ registration.vehicle_number }}/" class="action-btn btn-success download-protected" data-download-url="/vehicle-pass/generate/{{ registration.id }}/{{ registration.vehicle_number }}/">
+                <i class="bi bi-download"></i> Download Pass
             </a>
             {% else %}
-            <div class="alert alert-warning mt-3">
-                <i class="bi bi-info-circle"></i> वाहन पास केवल प्राथमिक उपयोगकर्ता के लिए उपलब्ध है: <strong>{{ primary_user.full_name }}</strong>
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 8px; margin-top: 1rem; color: #856404;">
+                <i class="bi bi-info-circle"></i> Vehicle pass is only available for primary user: <strong>{{ primary_user.full_name }}</strong>
             </div>
             {% endif %}
         {% endif %}

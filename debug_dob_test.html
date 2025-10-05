@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DOB Verification Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .download-btn { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>DOB Verification Test Page</h1>
+    
+    <div class="test-section">
+        <h3>Registration Info</h3>
+        <p><strong>Name:</strong> Shivraj Namdev</p>
+        <p><strong>DOB:</strong> 2006-11-28</p>
+        <p><strong>Vehicle:</strong> MP04CK0688</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Download Button</h3>
+        <a href="/vehicle-pass/generate/4228/MP04CK0688/" class="download-btn">Test Vehicle Pass Download</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Debug Info</h3>
+        <button onclick="console.log('USER_DOB:', window.USER_DOB); alert('USER_DOB: ' + window.USER_DOB);">Check USER_DOB</button>
+        <button onclick="console.log('VehiclePassDownloader:', typeof VehiclePassDownloader); alert('VehiclePassDownloader: ' + typeof VehiclePassDownloader);">Check Class</button>
+    </div>
+    
+    <script>
+        // Pass user DOB to JavaScript for verification
+        window.USER_DOB = '2006-11-28';
+        console.log('Test page USER_DOB set to:', window.USER_DOB);
+    </script>
+    <script src="/static/js/vehicle_pass_download.js"></script>
+    
+    <script>
+        // Additional debugging
+        window.addEventListener('load', function() {
+            console.log('Page loaded');
+            console.log('USER_DOB:', window.USER_DOB);
+            console.log('VehiclePassDownloader available:', typeof VehiclePassDownloader !== 'undefined');
+        });
+    </script>
+</body>
+</html>
+        
