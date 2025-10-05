@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Pass</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: 1181px 591px;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            margin: 0;
+            padding: 0;
+            width: 1181px;
+            height: 591px;
+            min-height: 591px;
+            overflow: visible;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1181px;
+            height: 591px;
+            min-height: 591px;
+            font-family: 'Kalam', cursive;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .vehicle-pass {
+            width: 1181px;
+            height: 591px;
+            position: relative;
+            {% if bg_image_base64 %}
+            background-image: url('data:image/png;base64,{{ bg_image_base64 }}');
+            background-size: 1181px 591px;
+            background-position: top left;
+            background-repeat: no-repeat;
+            {% else %}
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 6px solid #dee2e6;
+            {% endif %}
+        }
+        
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        .header-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 106px; /* 0.9cm scaled */
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 42px; /* Scaled up */
+            z-index: 1;
+        }
+        
+        .content-area {
+            position: absolute;
+            top: 106px; /* 0.9cm scaled */
+            left: 0;
+            right: 0;
+            bottom: 59px; /* 0.5cm scaled */
+            width: 1181px;
+            height: 426px; /* calc(591px - 165px) */
+            z-index: 2;
+        }
+        
+        .pass-title-line {
+            position: absolute;
+            top: 0;
+            left: 35px; /* 0.3cm scaled */
+            right: 0;
+            height: 94px; /* 0.8cm scaled */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .pass-text {
+            font-family: 'Kalam', cursive;
+            font-size: 54px;
+            font-weight: 700;
+            color: #ffe600;
+            margin-left: 35px;
+        }
+        
+        .vehicle-number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #ffe600;
+            letter-spacing: 3px;
+            position: absolute;
+            right: 59px;
+        }
+        
+        .info-section {
+            position: absolute;
+            top: 142px;
+            left: 0;
+            right: 0;
+            height: 177px;
+            display: flex;
+        }
+        
+        .horizontal-line {
+            position: absolute;
+            top: 118px; /* Below title line */
+            left: 35px;
+            right: 59px;
+            height: 6px;
+            background: linear-gradient(90deg, #dc3545 0%, #ffffff 50%, #dc3545 100%);
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .qr-section {
+            position: absolute;
+            left: 47px;
+            top: 24px;
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: 3px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qr-code {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .text-details {
+            position: absolute;
+            left: 230px;
+            top: 24px;
+            right: 307px; /* 2.6cm from right side */
+            height: auto;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #dc3545;
+        }
+        
+        .info-line {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-label {
+            color: #6c757d;
+            font-weight: 600;
+            margin-right: 10px;
+            min-width: 120px;
+        }
+        
+        .info-value {
+            color: #212529;
+            font-weight: 700;
+        }
+        
+        .validity {
+            font-size: 34px;
+            font-weight: 700;
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .user-type {
+            position: absolute;
+            top: 110px; /* Even higher position */
+            left: 230px; /* Same left as text-details */
+            right: 307px; /* Same right as text-details */
+            text-align: center;
+            font-family: 'Kalam', cursive;
+            font-size: 38px;
+            font-weight: 700;
+            color: #8B0000;
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="vehicle-pass">
+        <!-- Background Image -->
+        {% if bg_image_base64 %}
+        <img src="data:image/png;base64,{{ bg_image_base64 }}" alt="Vehicle Pass Background" class="background-image">
+        {% else %}
+        <!-- Header Placeholder -->
+        <div class="header-placeholder">
+            प्रान्तीय युवा चिंतन शिविर भोपाल 2025
+        </div>
+        {% endif %}
+        
+        <div class="content-area">
+            <!-- Pass Title Line -->
+            <div class="pass-title-line">
+                <span class="pass-text">वाहन पास</span>
+                <span class="vehicle-number">{{ registration.vehicle_number|default:"N/A" }}</span>
+            </div>
+            
+            <!-- User Type -->
+            <div class="user-type">
+                {% if registration.registration_type == 'volunteer' %}
+                    समयदानी कार्यकर्ता
+                {% elif registration.registration_type == 'organization_representative' %}
+                    संगठन प्रतिनिधि
+                {% else %}
+                    प्रतिभागी
+                {% endif %}
+            </div>
+            
+            <!-- Information Section -->
+            <div class="info-section">
+                <!-- QR Code Area -->
+                <div class="qr-section">
+                    <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="qr-code">
+                </div>
+                
+                <!-- Text Details -->
+                <div class="text-details">
+                    <div class="info-line">
+                        <span class="info-label">Name:</span>
+                        <span class="info-value">{{ registration.full_name }}</span>
+                    </div>
+                    <div class="info-line">
+                        <span class="info-label">Mobile:</span>
+                        <span class="info-value">{{ registration.phone }}</span>
+                    </div>
+                    <div class="validity">Valid Till: 29-10-2025</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,246 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}वाहन सत्यापन - {{ registration.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    .verify-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        font-family: 'Kalam', cursive;
+    }
+    
+    .verify-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #27ae60;
+    }
+    
+    .verify-title {
+        color: #27ae60;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .verify-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+    
+    .vehicle-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .vehicle-number {
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        background: rgba(255,255,255,0.2);
+        padding: 1rem;
+        border-radius: 8px;
+        letter-spacing: 3px;
+        margin-bottom: 1rem;
+    }
+    
+    .owner-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .info-label {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-value {
+        color: #34495e;
+        font-size: 1.1rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+    
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .action-btn {
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-family: 'Kalam', cursive;
+    }
+    
+    .btn-primary {
+        background: #3498db;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .validity-info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .validity-text {
+        color: #0c5460;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-container">
+    <div class="verify-header">
+        <h1 class="verify-title">🚗 वाहन सत्यापन</h1>
+        <p class="verify-subtitle">Vehicle Pass Verification</p>
+    </div>
+    
+    <div class="validity-info">
+        <div class="validity-text">✅ वैधता: 29 अक्टूबर 2025 तक</div>
+    </div>
+    
+    <div class="vehicle-info">
+        <div class="vehicle-number">{{ registration.vehicle_number|default:"वाहन नंबर उपलब्ध नहीं" }}</div>
+        <div style="text-align: center;">
+            <span class="status-badge {% if registration.approval_status == 'approved' %}status-approved{% else %}status-pending{% endif %}">
+                {% if registration.approval_status == 'approved' %}
+                    ✅ अप्रूव्ड
+                {% else %}
+                    ⏳ {{ registration.get_approval_status_display }}
+                {% endif %}
+            </span>
+            {% if is_primary_user %}
+            <span class="badge bg-success ms-2">
+                <i class="bi bi-star-fill"></i> प्राथमिक उपयोगकर्ता
+            </span>
+            {% elif primary_user %}
+            <span class="badge bg-warning text-dark ms-2">
+                <i class="bi bi-exclamation-triangle"></i> द्वितीयक उपयोगकर्ता
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="owner-info">
+        <div class="info-card">
+            <div class="info-label">👤 वाहन स्वामी का नाम</div>
+            <div class="info-value">{{ registration.full_name }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">📱 मोबाइल नंबर</div>
+            <div class="info-value">{{ registration.phone }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">🚗 वाहन प्रकार</div>
+            <div class="info-value">{{ registration.get_transport_mode_display }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">👥 पंजीकरण प्रकार</div>
+            <div class="info-value">{{ registration.get_registration_type_display }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">📍 शहर/जिला</div>
+            <div class="info-value">{{ registration.city }}, {{ registration.state }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">📅 पंजीकरण तिथि</div>
+            <div class="info-value">{{ registration.registration_date|date:"d M Y" }}</div>
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <a href="{{ profile_url }}" class="action-btn btn-primary">
+            👤 पूर्ण प्रोफाइल देखें
+        </a>
+        
+        <a href="{% url 'events:contact' %}" class="action-btn btn-info">
+            📞 सहायता संपर्क
+        </a>
+        
+        {% if registration.approval_status == 'approved' and registration.vehicle_number %}
+            {% if is_primary_user %}
+            <a href="{% url 'vehicle_pass:generate' registration.id registration.vehicle_number %}" class="action-btn btn-success">
+                🎫 वाहन पास डाउनलोड
+            </a>
+            {% else %}
+            <div class="alert alert-warning mt-3">
+                <i class="bi bi-info-circle"></i> वाहन पास केवल प्राथमिक उपयोगकर्ता के लिए उपलब्ध है: <strong>{{ primary_user.full_name }}</strong>
+            </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

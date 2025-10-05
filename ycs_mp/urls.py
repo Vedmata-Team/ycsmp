@@ -33,6 +33,8 @@ urlpatterns = [
     path('sitemap.xml', sitemap_view, name='sitemap'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots'),
     path('id/', include('ID.urls')),
+    path('vehicle-pass/', include('vehicle_pass.urls')),
+    path('vehicle-verify/', include('vehicle_pass.urls')),
     path('', include('events.urls')),
 ]
 

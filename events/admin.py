@@ -595,7 +595,13 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         # Email button for approved registrations
         if obj.approval_status == 'approved' and obj.registration_number:
             email_url = reverse('events:resend_email', args=[obj.pk])
-            buttons.append(f'<a href="{email_url}" class="button" style="padding: 3px 8px; background: #ffc107; color: black; text-decoration: none; border-radius: 3px; font-size: 11px;">Send Email</a>')
+            buttons.append(f'<a href="{email_url}" class="button" style="padding: 3px 8px; background: #ffc107; color: black; text-decoration: none; border-radius: 3px; font-size: 11px; margin-right: 5px;">Send Email</a>')
+        
+        # Vehicle pass button for approved registrations with vehicle info
+        if obj.approval_status == 'approved' and obj.vehicle_number:
+            from django.urls import reverse
+            vehicle_pass_url = reverse('vehicle_pass:generate', args=[obj.pk, obj.vehicle_number])
+            buttons.append(f'<a href="{vehicle_pass_url}" class="button" style="padding: 3px 8px; background: #17a2b8; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;">Vehicle Pass</a>')
         
         return format_html(f'{reg_num}<br>{"".join(buttons)}')
     

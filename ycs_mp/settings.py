@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'events',
     'ID',
+    'vehicle_pass',
     'crispy_bootstrap5',
 ]
 

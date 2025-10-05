@@ -124,6 +124,8 @@
             समयदानी कार्यकर्ता पंजीकरण बंद
         {% elif registration_type == 'organization' %}
             संगठन प्रतिनिधि पंजीकरण बंद
+        {% elif registration_type == 'participant' %}
+            प्रतिभागी पंजीकरण बंद
         {% else %}
             पंजीकरण बंद
         {% endif %}
@@ -131,28 +133,24 @@
     
     <div class="closure-message">
         {% if registration_type == 'volunteer' %}
-            <p><strong>समयदानी कार्यकर्ता पंजीकरण</strong> अस्थायी रूप से बंद कर दिया गया है।</p>
-            <p>वर्तमान में केवल <strong>प्रतिभागी पंजीकरण</strong> खुला है।</p>
+            <p><strong>समयदानी कार्यकर्ता पंजीकरण</strong> बंद कर दिया गया है।</p>
         {% elif registration_type == 'organization' %}
-            <p><strong>संगठन प्रतिनिधि पंजीकरण</strong> अस्थायी रूप से बंद कर दिया गया है।</p>
-            <p>वर्तमान में केवल <strong>प्रतिभागी पंजीकरण</strong> खुला है।</p>
+            <p><strong>संगठन प्रतिनिधि पंजीकरण</strong> बंद कर दिया गया है।</p>
+        {% elif registration_type == 'participant' %}
+            <p><strong>प्रतिभागी पंजीकरण</strong> बंद कर दिया गया है।</p>
         {% endif %}
+        <p><strong>सभी प्रकार के पंजीकरण अब बंद हैं।</strong></p>
+        <p>धन्यवाद! आपकी रुचि के लिए।</p>
     </div>
     
     <div class="alternative-section">
-        <div class="alternative-title">✨ वैकल्पिक विकल्प</div>
-        <p>आप प्रतिभागी के रूप में पंजीकरण कर सकते हैं या बाद में पुनः प्रयास कर सकते हैं।</p>
+        <div class="alternative-title">📋 अपना पंजीकरण स्थिति जांचें</div>
+        <p>यदि आपने पहले पंजीकरण कराया है, तो आप अपनी स्थिति जांच सकते हैं।</p>
         
         <div class="btn-group">
-            {% if event %}
-                <a href="{% url 'events:register' event.pk %}" class="btn-primary-alt">
-                    📝 प्रतिभागी पंजीकरण करें
-                </a>
-            {% else %}
-                <a href="{% url 'events:register' %}" class="btn-primary-alt">
-                    📝 प्रतिभागी पंजीकरण करें
-                </a>
-            {% endif %}
+            <a href="{% url 'events:check_status' %}" class="btn-primary-alt">
+                🔍 पंजीकरण स्थिति जांचें
+            </a>
             
             <a href="{% url 'events:list' %}" class="btn-secondary-alt">
                 🏠 कार्यक्रम सूची पर वापस जाएं
