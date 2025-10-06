@@ -374,11 +374,100 @@ def resend_registration_email(request, registration_id):
     
     registration = get_object_or_404(EventRegistration, id=registration_id, approval_status='approved')
     
-    from .email_utils import send_registration_details_email
-    if send_registration_details_email(registration):
+    # Check if this is called from JavaScript workflow (skip attachments)
+    skip_attachments = request.GET.get('skip_attachments') == '1'
+    print(f"\n=== RESEND EMAIL VIEW DEBUG ===")
+    print(f"Skip attachments parameter: {skip_attachments}")
+    print(f"Request GET params: {dict(request.GET)}")
+    
+    if send_registration_approval_email(registration, request.user, skip_attachments=skip_attachments):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from django.http import JsonResponse
+            return JsonResponse({'success': True, 'message': 'Email sent successfully'})
         messages.success(request, f'{registration.full_name} को पंजीकरण विवरण ईमेल भेज दिया गया।')
     else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from django.http import JsonResponse
+            return JsonResponse({'success': False, 'message': 'Email sending failed'})
         messages.error(request, 'ईमेल भेजने में त्रुटि हुई। कृपया पुन: प्रयास करें।')
+    
+    return redirect('admin:events_eventregistration_changelist')
+
+def send_quick_approval_email(request, registration_id):
+    """Quick email sending for JavaScript workflow - no attachments"""
+    if not request.user.is_staff:
+        from django.http import JsonResponse
+        return JsonResponse({'success': False, 'message': 'Unauthorized'})
+    
+    registration = get_object_or_404(EventRegistration, id=registration_id, approval_status='approved')
+    
+    print(f"\n=== QUICK EMAIL DEBUG ===")
+    print(f"Sending quick email to: {registration.email}")
+    print(f"Using quick email endpoint - NO ATTACHMENTS")
+    
+    # Send simple email without any attachments
+    from django.core.mail import send_mail
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
+    
+    try:
+        reg_type = 'प्रतिभागी' if registration.registration_type == 'participant' else 'समयदानी कार्यकर्ता' if registration.registration_type == 'volunteer' else 'संगठन प्रतिनिधि'
+        subject = f'{reg_type} पंजीकरण अप्रूव - {registration.event.title}'
+        
+        context = {
+            'registration': registration,
+            'event': registration.event,
+            'profile_url': registration.get_profile_url(),
+        }
+        
+        html_message = render_to_string('events/emails/registration_approved.html', context)
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[registration.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        print(f"Quick email sent successfully to {registration.email} (NO ATTACHMENTS)")
+        
+        # Log email attempt
+        try:
+            from .models import EmailLog
+            EmailLog.objects.create(
+                registration=registration,
+                email_type='approval',
+                sent_by=request.user,
+                success=True,
+                error_message=''
+            )
+        except Exception as log_error:
+            print(f"Failed to log email: {log_error}")
+        
+        from django.http import JsonResponse
+        return JsonResponse({'success': True, 'message': 'Email sent successfully'})
+        
+    except Exception as e:
+        print(f"Quick email failed: {e}")
+        
+        # Log failed email attempt
+        try:
+            from .models import EmailLog
+            EmailLog.objects.create(
+                registration=registration,
+                email_type='approval',
+                sent_by=request.user,
+                success=False,
+                error_message=str(e)
+            )
+        except Exception as log_error:
+            print(f"Failed to log email: {log_error}")
+        
+        from django.http import JsonResponse
+        return JsonResponse({'success': False, 'message': f'Email failed: {str(e)}'})
     
 
 

@@ -4,7 +4,7 @@ from django.db import models
 from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City, EmailLog
+from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City
 from .admin_filters import UpZoneFilter
 from .models_location import StateDistrict
 from .models_warning import SiteWarning
@@ -65,10 +65,10 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
     class Media:
-        js = ('admin/js/bulk_approval_progress.js',)
+        js = ('admin/js/bulk_approval_progress.js', 'admin/js/final_approval_with_idcard.js')
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
     list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
-    actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'send_email_to_rejected', 'export_csv', 'export_excel', 'export_pdf']
+    actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date', 'approval_history_display')
     list_editable = ('is_confirmed',)
@@ -487,15 +487,20 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def approve_final(self, request, queryset):
         from django.utils import timezone
         from django.db import transaction
-        from django.http import JsonResponse
+        from .email_utils import send_registration_approval_email
+        from django.http import StreamingHttpResponse
+        import json
         import time
+        
+        # Check if AJAX request for streaming
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return self._stream_bulk_approval(request, queryset)
         
         updated = 0
         email_sent = 0
-        skipped = 0
-        batch_size = 25  # Smaller batches to prevent timeout
+        batch_size = 25
         
-        # Check user permissions - only superusers, state approvers, and super approvers can do final approval
+        # Check user permissions
         can_final_approve = request.user.is_superuser
         if not can_final_approve:
             try:
@@ -508,63 +513,119 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             self.message_user(request, 'आपको अंतिम अप्रूवल का अधिकार नहीं है।', level='error')
             return
         
-        registrations = list(queryset.exclude(approval_status='approved'))  # Allow any non-approved status
+        registrations = list(queryset.exclude(approval_status='approved'))
         total = len(registrations)
         
-        # Limit to prevent bad gateway
         if total > 100:
             self.message_user(request, f'एक साथ 100 से अधिक ({total}) प्रोसेस नहीं कर सकते। छोटे बैच में करें।', level='error')
             return
         
         try:
-            import logging
-            logger = logging.getLogger(__name__)
+            # Process in batches with combined email sending
+            for i in range(0, len(registrations), batch_size):
+                batch = registrations[i:i+batch_size]
+                
+                with transaction.atomic():
+                    now = timezone.now()
+                    
+                    for registration in batch:
+                        # Update approval status
+                        registration.approval_status = 'approved'
+                        registration.final_approver = request.user
+                        registration.final_approved_at = now
+                        registration.is_confirmed = True
+                        
+                        # Generate registration number if needed
+                        if not registration.registration_number:
+                            registration.registration_number = registration.generate_registration_number()
+                        
+                        # Skip auto email to prevent duplicate
+                        registration._skip_auto_email = True
+                        registration.save()
+                        updated += 1
+                        
+                        # Send combined email with attachments
+                        try:
+                            if send_registration_approval_email(registration, request.user):
+                                registration.email_sent = True
+                                registration.save(update_fields=['email_sent'])
+                                email_sent += 1
+                        except Exception as e:
+                            print(f"Email failed for {registration.email}: {e}")
+                        
+                        # Small delay between emails
+                        time.sleep(0.5)
             
-            logger.info(f"Starting bulk final approval for {len(registrations)} registrations")
-            self.message_user(request, f"🔄 Processing {len(registrations)} registrations...")
-            
-            # Fast bulk update without individual saves
-            with transaction.atomic():
-                logger.info("Validating permissions and preparing data")
-                now = timezone.now()
-                reg_ids = [r.id for r in registrations]
-                
-                logger.info("Performing bulk database update")
-                # Bulk update all at once
-                updated = EventRegistration.objects.filter(
-                    id__in=reg_ids
-                ).exclude(approval_status='approved').update(
-                    approval_status='approved',
-                    final_approver=request.user,
-                    final_approved_at=now,
-                    is_confirmed=True
-                )
-                
-                logger.info(f"Updated {updated} registrations, generating registration numbers")
-                # Generate registration numbers for newly approved ones
-                approved_regs = EventRegistration.objects.filter(
-                    id__in=reg_ids,
-                    approval_status='approved',
-                    registration_number__isnull=True
-                )
-                
-                reg_count = 0
-                for reg in approved_regs:
-                    if not reg.registration_number:
-                        reg.registration_number = reg.generate_registration_number()
-                        reg.save(update_fields=['registration_number'])
-                        reg_count += 1
-                
-                logger.info(f"Generated {reg_count} registration numbers")
-            
-            skipped = len(registrations) - updated
-            message = f'{updated} पंजीकरण अंतिम अप्रूव किए गए।'
-            if skipped > 0:
-                message += f' {skipped} पहले से अप्रूव थे।'
+            message = f'{updated} पंजीकरण अप्रूव किए गए, {email_sent} ईमेल भेजे गए।'
             self.message_user(request, message)
                 
         except Exception as e:
             self.message_user(request, f'प्रोसेसिंग में त्रुटि: {str(e)}', level='error')
+    
+    def _stream_bulk_approval(self, request, queryset):
+        from django.utils import timezone
+        from django.db import transaction
+        from .email_utils import send_registration_approval_email
+        from django.http import StreamingHttpResponse
+        import json
+        import time
+        
+        def generate_progress():
+            registrations = list(queryset.exclude(approval_status='approved'))
+            total = len(registrations)
+            updated = 0
+            email_sent = 0
+            
+            yield f"data: {json.dumps({'progress': 0, 'message': 'प्रारंभ हो रहा है...', 'step': 'starting'})}\n\n"
+            
+            for i, registration in enumerate(registrations):
+                try:
+                    with transaction.atomic():
+                        now = timezone.now()
+                        
+                        # Update approval status
+                        registration.approval_status = 'approved'
+                        registration.final_approver = request.user
+                        registration.final_approved_at = now
+                        registration.is_confirmed = True
+                        
+                        # Generate registration number if needed
+                        if not registration.registration_number:
+                            registration.registration_number = registration.generate_registration_number()
+                        
+                        # Skip auto email to prevent duplicate
+                        registration._skip_auto_email = True
+                        registration.save()
+                        updated += 1
+                        
+                        # Send combined email with attachments
+                        try:
+                            if send_registration_approval_email(registration, request.user):
+                                registration.email_sent = True
+                                registration.save(update_fields=['email_sent'])
+                                email_sent += 1
+                        except Exception as e:
+                            print(f"Email failed for {registration.email}: {e}")
+                        
+                        # Calculate progress
+                        progress = int(((i + 1) / total) * 100)
+                        message = f'{i + 1}/{total} पंजीकरण प्रोसेस हुए'
+                        
+                        yield f"data: {json.dumps({'progress': progress, 'message': message, 'step': 'processing'})}\n\n"
+                        
+                        # Small delay
+                        time.sleep(0.3)
+                        
+                except Exception as e:
+                    yield f"data: {json.dumps({'progress': 0, 'message': f'त्रुटि: {str(e)}', 'step': 'error'})}\n\n"
+            
+            # Final completion message
+            final_message = f'{updated} पंजीकरण अप्रूव, {email_sent} ईमेल भेजे गए'
+            yield f"data: {json.dumps({'progress': 100, 'message': final_message, 'step': 'completed'})}\n\n"
+        
+        response = StreamingHttpResponse(generate_progress(), content_type='text/plain')
+        response['Cache-Control'] = 'no-cache'
+        return response
     approve_final.short_description = "अंतिम अप्रूव करें"
     
     def reject_registration(self, request, queryset):
@@ -644,43 +705,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             self.message_user(request, f'{sent_count} पंजीकरण विवरण ईमेल भेजे गए।')
     send_email_to_approved.short_description = "अप्रूव पंजीकरण को ईमेल भेजें"
     
-    def send_email_to_rejected(self, request, queryset):
-        from .email_utils import send_registration_approval_email
-        import time
-        
-        rejected_regs = list(queryset.filter(approval_status='rejected'))
-        total = len(rejected_regs)
-        
-        # Limit bulk emails to prevent spam
-        if total > 100:
-            self.message_user(request, f'एक साथ 100 से अधिक ({total}) ईमेल नहीं भेज सकते। छोटे बैच में करें।', level='error')
-            return
-        
-        sent_count = 0
-        failed_count = 0
-        
-        for i, registration in enumerate(rejected_regs):
-            try:
-                if send_registration_approval_email(registration, request.user):
-                    registration.email_sent = True
-                    registration.save(update_fields=['email_sent'])
-                    sent_count += 1
-                else:
-                    failed_count += 1
-                
-                # Add delay every 10 emails to prevent spam
-                if (i + 1) % 10 == 0:
-                    time.sleep(2)
-                    
-            except Exception as e:
-                failed_count += 1
-                time.sleep(1)  # Extra delay on error
-        
-        if failed_count > 0:
-            self.message_user(request, f'{sent_count} अस्वीकृति ईमेल भेजे गए, {failed_count} असफल।')
-        else:
-            self.message_user(request, f'{sent_count} अस्वीकृति ईमेल भेजे गए।')
-    send_email_to_rejected.short_description = "अस्वीकृत पंजीकरण को ईमेल भेजें"
+
     
     def registration_number_with_buttons(self, obj):
         from django.urls import reverse
@@ -1034,6 +1059,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             if not obj.final_approved_at:
                 obj.final_approved_at = timezone.now()
         
+        # Check if JavaScript requested to skip auto email
+        if request.POST.get('_skip_auto_email'):
+            obj._skip_auto_email = True
+        
         # Auto-assign rejected_by when status changes to rejected
         if obj.approval_status == 'rejected' and not getattr(obj, 'rejected_by', None):
             obj.rejected_by = request.user
@@ -1283,21 +1312,4 @@ class CityAdmin(admin.ModelAdmin):
     search_fields = ('name', 'state__name')
     ordering = ('state', 'name')
 
-@admin.register(EmailLog)
-class EmailLogAdmin(admin.ModelAdmin):
-    list_display = ('registration_name', 'email_type', 'success', 'sent_by', 'sent_at')
-    list_filter = ('email_type', 'success', 'sent_at', 'sent_by')
-    search_fields = ('registration__full_name', 'registration__email', 'registration__phone')
-    readonly_fields = ('registration', 'email_type', 'sent_by', 'sent_at', 'success', 'error_message')
-    date_hierarchy = 'sent_at'
-    ordering = ['-sent_at']
-    
-    def registration_name(self, obj):
-        return f"{obj.registration.full_name} ({obj.registration.email})"
-    registration_name.short_description = 'Registration'
-    
-    def has_add_permission(self, request):
-        return False  # Prevent manual creation
-    
-    def has_change_permission(self, request, obj=None):
-        return False  # Read-only
+

@@ -525,7 +525,8 @@ class EventRegistration(models.Model):
                     raise e
         
         # Send email when registration is approved or rejected (after save)
-        if self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected'))):
+        # Skip if _skip_auto_email flag is set (for JavaScript workflow)
+        if self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected'))) and not getattr(self, '_skip_auto_email', False):
             from .email_utils import send_registration_approval_email
             try:
                 if not self.email_sent:
@@ -542,6 +543,8 @@ class EventRegistration(models.Model):
                 EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
                 status_text = "approval" if is_newly_approved else "rejection"
                 print(f"Error sending {status_text} email to {self.email}: {str(e)} - marked as sent")
+        elif getattr(self, '_skip_auto_email', False):
+            print(f"Skipping auto email for {self.email} due to _skip_auto_email flag")
 
     
     def get_approver_for_registration(self, level='district'):

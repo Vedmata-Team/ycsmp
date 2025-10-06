@@ -4,7 +4,7 @@ class VehiclePassDownloader {
     constructor() {
         this.isDownloading = false;
         this.isVerified = false;
-        this.userDOB = window.USER_DOB || '1995-12-04';
+        this.userDOB = window.USER_DOB || '2002-02-26';
         this.init();
     }
 

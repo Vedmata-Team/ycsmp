@@ -1,4 +1,4 @@
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
@@ -30,8 +30,34 @@ def generate_id_card_for_email(registration):
         print(f"Error generating ID card for email: {e}")
         return None
 
-def send_registration_approval_email(registration, sent_by_user=None):
-    """Send email when registration is approved or rejected"""
+def generate_vehicle_pass_for_email(registration):
+    """Generate vehicle pass image for email attachment"""
+    try:
+        from vehicle_pass.views import generate_vehicle_pass
+        from django.test import RequestFactory
+        from urllib.parse import quote
+        
+        # Create fake request for vehicle pass generation
+        factory = RequestFactory()
+        encoded_vehicle = quote(registration.vehicle_number, safe='')
+        request = factory.get(f'/vehicle-pass/generate/{registration.id}/{encoded_vehicle}/')
+        
+        # Generate vehicle pass
+        response = generate_vehicle_pass(request, registration.id, registration.vehicle_number)
+        
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"Vehicle pass generation failed with status {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"Error generating vehicle pass for email: {e}")
+        return None
+
+def send_registration_approval_email(registration, sent_by_user=None, skip_attachments=False):
+    """Send approval email with attachments in single email"""
+    
     if registration.registration_type == 'volunteer':
         reg_type = 'समयदानी कार्यकर्ता'
     elif registration.registration_type == 'organization_representative':
@@ -49,12 +75,12 @@ def send_registration_approval_email(registration, sent_by_user=None):
         template = 'events/emails/registration_rejected.html'
         email_type = 'rejection'
     else:
-        return False  # Only send for approved/rejected
+        return False
     
-    print(f"\n=== EMAIL SENDING DEBUG ===")
-    print(f"Attempting to send email to: {registration.email}")
-    print(f"Subject: {subject}")
+    print(f"\n=== COMBINED EMAIL SENDING ===")
+    print(f"Email: {registration.email}")
     print(f"Status: {registration.approval_status}")
+    print(f"Has vehicle: {bool(registration.vehicle_number and registration.transport_mode == 'car')}")
     
     context = {
         'registration': registration,
@@ -64,53 +90,53 @@ def send_registration_approval_email(registration, sent_by_user=None):
     }
     
     html_message = render_to_string(template, context)
-    plain_message = strip_tags(html_message)
-    
     success = False
     error_message = ''
     
-    # Retry logic for email sending
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            # Create email message
-            email = EmailMessage(
-                subject=subject,
-                body=html_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[registration.email],
-            )
-            email.content_subtype = 'html'
+    try:
+        # Create email with HTML content
+        email = EmailMessage(
+            subject=subject,
+            body=html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[registration.email],
+        )
+        email.content_subtype = 'html'
+        
+        # Generate and attach documents for approved users
+        if registration.approval_status == 'approved' and not skip_attachments:
+            print(f"🔄 Generating attachments for {registration.email}...")
             
-            # Generate and attach ID card only if approved
-            if registration.approval_status == 'approved':
-                print("Generating ID card for email attachment...")
-                id_card_data = generate_id_card_for_email(registration)
-                
-                if id_card_data:
-                    filename = f"id_card_{registration.registration_number or registration.id}.png"
-                    email.attach(filename, id_card_data, 'image/png')
-                    print(f"ID card attached to email: {filename}")
-                else:
-                    print("Failed to generate ID card for attachment")
+            # Always generate ID card
+            id_card_data = generate_id_card_for_email(registration)
+            if id_card_data:
+                email.attach(
+                    f"id_card_{registration.registration_number or registration.id}.png",
+                    id_card_data,
+                    'image/png'
+                )
+                print(f"✅ ID card attached")
             
-            email.send(fail_silently=False)
-            print(f"Email sent successfully to {registration.email}")
-            success = True
-            break  # Success, exit retry loop
-            
-        except Exception as e:
-            error_message = str(e)
-            print(f"Email sending attempt {attempt + 1} failed: {e}")
-            
-            if attempt == max_retries - 1:  # Last attempt
-                import traceback
-                print(f"All email attempts failed. Full traceback: {traceback.format_exc()}")
-            else:
-                print(f"Retrying in 2 seconds... ({attempt + 1}/{max_retries})")
-                import time
-                time.sleep(2)
-
+            # Generate vehicle pass only if user has vehicle
+            if registration.vehicle_number and registration.transport_mode == 'car':
+                vehicle_pass_data = generate_vehicle_pass_for_email(registration)
+                if vehicle_pass_data:
+                    email.attach(
+                        f"vehicle_pass_{registration.registration_number or registration.id}.png",
+                        vehicle_pass_data,
+                        'image/png'
+                    )
+                    print(f"✅ Vehicle pass attached")
+        
+        # Send single email with all content and attachments
+        email.send(fail_silently=False)
+        print(f"✅ Combined email sent to {registration.email}")
+        success = True
+        
+    except Exception as e:
+        error_message = str(e)
+        print(f"❌ Email sending failed: {e}")
+        success = False
     
     # Log email attempt
     try:

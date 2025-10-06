@@ -177,7 +177,7 @@ def generate_vehicle_pass(request, registration_id, vehicle_number):
             temp_image_path
         ]
         
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True)
         
         if result.returncode != 0:
             raise Exception(f"wkhtmltoimage failed: {result.stderr}")
@@ -206,9 +206,6 @@ def generate_vehicle_pass(request, registration_id, vehicle_number):
         
     except FileNotFoundError:
         raise Exception("wkhtmltoimage not installed. Please install wkhtmltopdf package.")
-    except subprocess.TimeoutExpired:
-        raise Exception("Vehicle pass generation timed out")
-        
     except Exception as e:
         logger.error(f"Error generating vehicle pass for registration {registration_id}: {str(e)}")
         return HttpResponse(f"Vehicle pass generation failed: {str(e)}", status=500)
