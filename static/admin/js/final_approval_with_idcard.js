@@ -109,16 +109,16 @@
             .done(function() {
                 updateProgress('✅ Approval status updated successfully');
                 
-                // Step 4: Send email
-                updateProgress('📧 Sending combined email with attachments...');
+                // Step 4: Send ultra-fast email
+                updateProgress('⚡ Sending ultra-fast email...');
                 
                 $.get(`/resend-email/${registrationId}/`)
                     .done(function() {
-                        updateProgress('✅ Email sent successfully! Redirecting...');
+                        updateProgress('✅ Ultra-fast email sent! Redirecting...');
                         
                         setTimeout(function() {
                             hideProgress();
-                            alert('🎉 Process completed successfully!\n\n✅ ID card generated\n✅ Vehicle pass handled\n✅ Approval processed\n✅ Email sent with attachments');
+                            alert('🎉 Process completed successfully!\n\n✅ ID card generated\n✅ Vehicle pass handled\n✅ Approval processed\n⚡ Ultra-fast email sent');
                             
                             const url = window.location.href;
                             if (url.includes('_continue=1')) {
@@ -128,10 +128,10 @@
                             } else {
                                 window.location.href = window.location.pathname.replace(/\/\d+\/change\//, '/');
                             }
-                        }, 1500);
+                        }, 1000);
                     })
                     .fail(function() {
-                        updateProgress('❌ Email sending failed');
+                        updateProgress('❌ Ultra-fast email failed');
                         setTimeout(hideProgress, 3000);
                     });
             })

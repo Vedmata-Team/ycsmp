@@ -4,7 +4,7 @@ class VehiclePassDownloader {
     constructor() {
         this.isDownloading = false;
         this.isVerified = false;
-        this.userDOB = window.USER_DOB || '2002-02-26';
+        this.userDOB = window.USER_DOB;
         this.init();
     }
 
@@ -76,8 +76,8 @@ class VehiclePassDownloader {
 
     validateDOB(inputDOB) {
         if (!this.userDOB) {
-            console.log('No USER_DOB set - using test date 1995-12-04');
-            this.userDOB = '1995-12-04'; // Set test DOB
+            console.error('USER_DOB not set properly - validation failed');
+            return false;
         }
         
         const inputFormatted = inputDOB;
@@ -149,9 +149,20 @@ class VehiclePassDownloader {
             this.updateProgress(progressModal, 'Starting download...', 95);
             await this.delay(300);
             
-            // Create download link
+            // Create download link with DOB validation
+            const dobParam = encodeURIComponent(this.userDOB);
+            const separator = downloadUrl.includes('?') ? '&' : '?';
+            const secureUrl = `${downloadUrl}${separator}dob=${dobParam}`;
+            
+            // Fetch with DOB validation
+            const secureResponse = await fetch(secureUrl);
+            if (!secureResponse.ok) {
+                throw new Error(`Download failed: ${secureResponse.status}`);
+            }
+            
+            const secureBlob = await secureResponse.blob();
             const tempLink = document.createElement('a');
-            const objectUrl = URL.createObjectURL(blob);
+            const objectUrl = URL.createObjectURL(secureBlob);
             tempLink.href = objectUrl;
             tempLink.download = `vehicle_pass_${Date.now()}.png`;
             tempLink.style.display = 'none';

@@ -65,6 +65,30 @@ def generate_vehicle_pass(request, registration_id, vehicle_number):
     """Generate Vehicle Pass using HTML-to-image conversion for perfect Hindi rendering"""
     registration = get_object_or_404(EventRegistration, id=registration_id)
     
+    # Validate DOB for security
+    provided_dob = request.GET.get('dob')
+    if provided_dob:
+        try:
+            from datetime import datetime
+            if '/' in provided_dob:
+                day, month, year = provided_dob.split('/')
+                provided_date = datetime(int(year), int(month), int(day)).date()
+            else:
+                provided_date = datetime.strptime(provided_dob, '%Y-%m-%d').date()
+            
+            if provided_date != registration.date_of_birth:
+                return HttpResponse(
+                    "Invalid date of birth verification. Access denied.",
+                    status=403,
+                    content_type='text/plain'
+                )
+        except (ValueError, AttributeError):
+            return HttpResponse(
+                "Invalid date format for verification.",
+                status=400,
+                content_type='text/plain'
+            )
+    
     # Validate vehicle number matches registration
     if registration.vehicle_number != vehicle_number:
         return HttpResponse(

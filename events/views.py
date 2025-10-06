@@ -367,7 +367,7 @@ def check_status(request):
     return render(request, 'events/check_status.html', context)
 
 def resend_registration_email(request, registration_id):
-    """Resend registration email with combined logic (attachments included)"""
+    """Resend registration email - ULTRA FAST VERSION"""
     if not request.user.is_staff:
         from django.http import JsonResponse
         return JsonResponse({'success': False, 'message': 'Unauthorized'})
@@ -381,131 +381,76 @@ def resend_registration_email(request, registration_id):
         from django.http import JsonResponse
         return JsonResponse({'success': False, 'message': 'Registration not found'})
     
-    print(f"\n=== RESEND EMAIL VIEW DEBUG ===")
-    print(f"Using combined email logic with attachments")
+    print(f"\n=== ULTRA-FAST RESEND EMAIL ===")
     print(f"Registration: {registration.full_name} ({registration.email})")
     
-    # Use EXACT same call as test script
+    # Use ultra-fast email system
     if send_registration_approval_email(registration):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             from django.http import JsonResponse
-            return JsonResponse({'success': True, 'message': 'Combined email sent successfully'})
-        messages.success(request, f'{registration.full_name} को पंजीकरण ईमेल (अटैचमेंट के साथ) भेज दिया गया।')
+            return JsonResponse({'success': True, 'message': 'Ultra-fast email sent successfully'})
+        messages.success(request, f'{registration.full_name} को तुरंत ईमेल भेज दिया गया।')
     else:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             from django.http import JsonResponse
-            return JsonResponse({'success': False, 'message': 'Combined email sending failed'})
+            return JsonResponse({'success': False, 'message': 'Ultra-fast email failed'})
         messages.error(request, 'ईमेल भेजने में त्रुटि हुई। कृपया पुन: प्रयास करें।')
     
     return redirect('admin:events_eventregistration_changelist')
 
 def send_quick_approval_email(request, registration_id):
-    """Quick email sending for JavaScript workflow - no attachments"""
+    """Ultra-quick email sending - no attachments"""
     if not request.user.is_staff:
         from django.http import JsonResponse
         return JsonResponse({'success': False, 'message': 'Unauthorized'})
     
     registration = get_object_or_404(EventRegistration, id=registration_id, approval_status='approved')
     
-    print(f"\n=== QUICK EMAIL DEBUG ===")
-    print(f"Sending quick email to: {registration.email}")
-    print(f"Using quick email endpoint - NO ATTACHMENTS")
+    print(f"\n=== ULTRA-QUICK EMAIL ===")
+    print(f"Sending ultra-quick email to: {registration.email}")
     
-    # Send simple email without any attachments
-    from django.core.mail import send_mail
-    from django.template.loader import render_to_string
-    from django.utils.html import strip_tags
+    # Use ultra-fast system without attachments
+    success = send_registration_approval_email(registration, skip_attachments=True)
     
-    try:
-        reg_type = 'प्रतिभागी' if registration.registration_type == 'participant' else 'समयदानी कार्यकर्ता' if registration.registration_type == 'volunteer' else 'संगठन प्रतिनिधि'
-        subject = f'{reg_type} पंजीकरण अप्रूव - {registration.event.title}'
-        
-        context = {
-            'registration': registration,
-            'event': registration.event,
-            'profile_url': registration.get_profile_url(),
-        }
-        
-        html_message = render_to_string('events/emails/registration_approved.html', context)
-        plain_message = strip_tags(html_message)
-        
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[registration.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        
-        print(f"Quick email sent successfully to {registration.email} (NO ATTACHMENTS)")
-        
-        # Log email attempt
-        try:
-            from .models import EmailLog
-            EmailLog.objects.create(
-                registration=registration,
-                email_type='approval',
-                sent_by=request.user,
-                success=True,
-                error_message=''
-            )
-        except Exception as log_error:
-            print(f"Failed to log email: {log_error}")
-        
+    if success:
+        print(f"Ultra-quick email sent successfully to {registration.email}")
         from django.http import JsonResponse
-        return JsonResponse({'success': True, 'message': 'Email sent successfully'})
-        
-    except Exception as e:
-        print(f"Quick email failed: {e}")
-        
-        # Log failed email attempt
-        try:
-            from .models import EmailLog
-            EmailLog.objects.create(
-                registration=registration,
-                email_type='approval',
-                sent_by=request.user,
-                success=False,
-                error_message=str(e)
-            )
-        except Exception as log_error:
-            print(f"Failed to log email: {log_error}")
-        
+        return JsonResponse({'success': True, 'message': 'Ultra-quick email sent'})
+    else:
+        print(f"Ultra-quick email failed for {registration.email}")
         from django.http import JsonResponse
-        return JsonResponse({'success': False, 'message': f'Email failed: {str(e)}'})
+        return JsonResponse({'success': False, 'message': 'Ultra-quick email failed'})
     
 
 
 def test_email(request):
-    """Test email configuration"""
+    """Test ultra-fast email system"""
     if not request.user.is_staff:
         return HttpResponse('Unauthorized', status=401)
     
-    from django.core.mail import send_mail
-    from django.conf import settings
-    
     try:
-        print("\n=== EMAIL TEST DEBUG ===")
-        print(f"SMTP Host: {settings.EMAIL_HOST}")
-        print(f"SMTP Port: {settings.EMAIL_PORT}")
-        print(f"Use TLS: {settings.EMAIL_USE_TLS}")
-        print(f"From email: {settings.DEFAULT_FROM_EMAIL}")
-        print(f"Host user: {settings.EMAIL_HOST_USER}")
+        print("\n=== ULTRA-FAST EMAIL TEST ===")
         
-        send_mail(
-            subject='Test Email - YCS MP',
-            message='This is a test email to verify SMTP configuration.',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['test@example.com'],  # Change this to your email for testing
-            fail_silently=False,
-        )
-        return HttpResponse('Test email sent successfully! Check console for debug info.')
+        # Get a test registration
+        test_registration = EventRegistration.objects.filter(approval_status='approved').first()
+        if not test_registration:
+            return HttpResponse('No approved registration found for testing')
+        
+        print(f"Testing with registration: {test_registration.full_name}")
+        
+        # Test the ultra-fast system
+        success = send_registration_approval_email(test_registration, skip_attachments=True)
+        
+        if success:
+            return HttpResponse('Ultra-fast email test successful! Check console for timing info.')
+        else:
+            return HttpResponse('Ultra-fast email test failed! Check console for errors.')
+            
     except Exception as e:
-        print(f"Test email failed: {e}")
+        print(f"Ultra-fast email test failed: {e}")
         import traceback
         print(f"Full traceback: {traceback.format_exc()}")
-        return HttpResponse(f'Test email failed: {str(e)}')
+        return HttpResponse(f'Ultra-fast email test failed: {str(e)}')
 
 def contact_page(request):
     return render(request, 'contact.html')

@@ -13,6 +13,11 @@ class DOBVerification {
     init() {
         // Get DOB from data attribute or global variable
         this.userDOB = window.USER_DOB || document.body.dataset.userDob;
+        if (!this.userDOB) {
+            console.error('USER_DOB not found - DOB verification will fail');
+        } else {
+            console.log('DOB verification initialized with:', this.userDOB);
+        }
         this.setupEventListeners();
         this.blurDOBElements();
     }
@@ -208,8 +213,13 @@ class DOBVerification {
     }
     
     instantDownload(downloadUrl) {
+        // Add DOB parameter to URL for server-side validation
+        const dobParam = encodeURIComponent(this.userDOB);
+        const separator = downloadUrl.includes('?') ? '&' : '?';
+        const secureUrl = `${downloadUrl}${separator}dob=${dobParam}`;
+        
         const tempLink = document.createElement('a');
-        tempLink.href = downloadUrl;
+        tempLink.href = secureUrl;
         tempLink.style.display = 'none';
         tempLink.download = '';
         
