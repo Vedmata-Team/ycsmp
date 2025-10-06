@@ -524,27 +524,11 @@ class EventRegistration(models.Model):
                 else:
                     raise e
         
-        # Send email when registration is approved or rejected (after save)
-        # Skip if _skip_auto_email flag is set (for JavaScript workflow)
-        if self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected'))) and not getattr(self, '_skip_auto_email', False):
-            from .email_utils import send_registration_approval_email
-            try:
-                if not self.email_sent:
-                    email_success = send_registration_approval_email(self)
-                    # Mark as sent regardless of success to prevent infinite retries
-                    EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
-                    status_text = "approval" if is_newly_approved else "rejection"
-                    if email_success:
-                        print(f"Registration {status_text} email sent to {self.email}")
-                    else:
-                        print(f"Registration {status_text} email failed but marked as sent to prevent retries")
-            except Exception as e:
-                # Mark as sent even on exception to prevent infinite retries
-                EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
-                status_text = "approval" if is_newly_approved else "rejection"
-                print(f"Error sending {status_text} email to {self.email}: {str(e)} - marked as sent")
-        elif getattr(self, '_skip_auto_email', False):
-            print(f"Skipping auto email for {self.email} due to _skip_auto_email flag")
+        # AUTO EMAIL DISABLED - Only use manual combined email logic
+        if (self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected')))):
+            status_text = "approval" if is_newly_approved else "rejection"
+            print(f"🚫 Auto email disabled for {self.email} - use Send Email button for combined email with attachments")
+            print(f"Status changed to: {self.approval_status} ({status_text})")
 
     
     def get_approver_for_registration(self, level='district'):

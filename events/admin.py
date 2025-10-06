@@ -554,7 +554,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                             print(f"Email failed for {registration.email}: {e}")
                         
                         # Small delay between emails
-                        time.sleep(0.5)
+                        time.sleep(0.3)
             
             message = f'{updated} पंजीकरण अप्रूव किए गए, {email_sent} ईमेल भेजे गए।'
             self.message_user(request, message)
@@ -727,8 +727,12 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             email_url = reverse('events:resend_email', args=[obj.pk])
             buttons.append(f'<a href="{email_url}" class="button" style="padding: 3px 8px; background: #ffc107; color: black; text-decoration: none; border-radius: 3px; font-size: 11px; margin-right: 5px;">Send Email</a>')
         
-        # Vehicle pass button for approved registrations with vehicle info
-        if obj.approval_status == 'approved' and obj.vehicle_number:
+        # Vehicle pass button for approved registrations with valid vehicle info
+        if (obj.approval_status == 'approved' and 
+            obj.vehicle_number and 
+            obj.vehicle_number.strip() and 
+            obj.vehicle_number != '-' and 
+            obj.transport_mode == 'car'):
             from django.urls import reverse
             from urllib.parse import quote
             vehicle_pass_url = reverse('vehicle_pass:generate', args=[obj.pk, quote(obj.vehicle_number, safe='')])
@@ -1016,8 +1020,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj.approval_status = 'approved'
                 obj.final_approver = request.user
                 obj.final_approved_at = timezone.now()
-                obj.save()  # This will generate registration number and send email
-                messages.success(request, f'Registration {obj.registration_number} has been finally approved and email sent.')
+                obj._skip_auto_email = True  # Skip auto email
+                obj.save()  # This will generate registration number but skip email
+                messages.success(request, f'Registration {obj.registration_number} has been finally approved. Use Send Email button for combined email with attachments.')
             return HttpResponseRedirect(request.path)
         
         elif '_reject' in request.POST:
@@ -1059,8 +1064,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             if not obj.final_approved_at:
                 obj.final_approved_at = timezone.now()
         
-        # Check if JavaScript requested to skip auto email
-        if request.POST.get('_skip_auto_email'):
+        # Check if JavaScript requested to skip auto email or if email already sent
+        if request.POST.get('_skip_auto_email') or obj.email_sent:
             obj._skip_auto_email = True
         
         # Auto-assign rejected_by when status changes to rejected
@@ -1082,18 +1087,11 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         super().save_model(request, obj, form, change)
         
-        # Send email when is_confirmed is set to True
-        if send_confirmation_email:
-            from .email_utils import send_registration_approval_email
-            try:
-                if send_registration_approval_email(obj):
-                    obj.email_sent = True
-                    EventRegistration.objects.filter(pk=obj.pk).update(email_sent=True)
-                    messages.success(request, f'Registration confirmed and email sent to {obj.email}')
-                else:
-                    messages.warning(request, f'Registration confirmed but failed to send email to {obj.email}')
-            except Exception as e:
-                messages.error(request, f'Registration confirmed but email error: {str(e)}')
+        # AUTO EMAIL DISABLED - Use Send Email button for combined email with attachments
+        if send_confirmation_email and not obj.email_sent:
+            messages.info(request, f'🚫 Auto email disabled for {obj.email} - use Send Email button for combined email with attachments')
+        elif obj.email_sent:
+            messages.info(request, f'Email already sent to {obj.email}')
     
     def export_csv(self, request, queryset):
         return ExportManager.export_to_csv(queryset, 'registrations_export', REGISTRATION_FIELDS)

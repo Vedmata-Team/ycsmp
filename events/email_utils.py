@@ -80,7 +80,12 @@ def send_registration_approval_email(registration, sent_by_user=None, skip_attac
     print(f"\n=== COMBINED EMAIL SENDING ===")
     print(f"Email: {registration.email}")
     print(f"Status: {registration.approval_status}")
-    print(f"Has vehicle: {bool(registration.vehicle_number and registration.transport_mode == 'car')}")
+    has_valid_vehicle = (registration.vehicle_number and 
+                         registration.vehicle_number.strip() and 
+                         registration.vehicle_number != '-' and 
+                         registration.transport_mode == 'car')
+    print(f"Has vehicle: {has_valid_vehicle}")
+    print(f"Vehicle number: '{registration.vehicle_number}', Transport: {registration.transport_mode}")
     
     context = {
         'registration': registration,
@@ -118,7 +123,10 @@ def send_registration_approval_email(registration, sent_by_user=None, skip_attac
                 print(f"✅ ID card attached")
             
             # Generate vehicle pass only if user has vehicle
-            if registration.vehicle_number and registration.transport_mode == 'car':
+            if (registration.vehicle_number and 
+                registration.vehicle_number.strip() and 
+                registration.vehicle_number != '-' and 
+                registration.transport_mode == 'car'):
                 vehicle_pass_data = generate_vehicle_pass_for_email(registration)
                 if vehicle_pass_data:
                     email.attach(
@@ -127,6 +135,8 @@ def send_registration_approval_email(registration, sent_by_user=None, skip_attac
                         'image/png'
                     )
                     print(f"✅ Vehicle pass attached")
+            else:
+                print(f"⚠️ Vehicle pass skipped - no valid vehicle info")
         
         # Send single email with all content and attachments
         email.send(fail_silently=False)

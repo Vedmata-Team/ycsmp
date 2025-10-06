@@ -367,28 +367,27 @@ def check_status(request):
     return render(request, 'events/check_status.html', context)
 
 def resend_registration_email(request, registration_id):
-    """Resend registration details email"""
+    """Resend registration email with combined logic (attachments included)"""
     if not request.user.is_staff:
         messages.error(request, 'आपको इस कार्य की अनुमति नहीं है।')
         return redirect('admin:events_eventregistration_changelist')
     
     registration = get_object_or_404(EventRegistration, id=registration_id, approval_status='approved')
     
-    # Check if this is called from JavaScript workflow (skip attachments)
-    skip_attachments = request.GET.get('skip_attachments') == '1'
     print(f"\n=== RESEND EMAIL VIEW DEBUG ===")
-    print(f"Skip attachments parameter: {skip_attachments}")
-    print(f"Request GET params: {dict(request.GET)}")
+    print(f"Using combined email logic with attachments")
+    print(f"Registration: {registration.full_name} ({registration.email})")
     
-    if send_registration_approval_email(registration, request.user, skip_attachments=skip_attachments):
+    # Always use combined email logic (with attachments)
+    if send_registration_approval_email(registration, request.user, skip_attachments=False):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             from django.http import JsonResponse
-            return JsonResponse({'success': True, 'message': 'Email sent successfully'})
-        messages.success(request, f'{registration.full_name} को पंजीकरण विवरण ईमेल भेज दिया गया।')
+            return JsonResponse({'success': True, 'message': 'Combined email sent successfully'})
+        messages.success(request, f'{registration.full_name} को पंजीकरण ईमेल (अटैचमेंट के साथ) भेज दिया गया।')
     else:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             from django.http import JsonResponse
-            return JsonResponse({'success': False, 'message': 'Email sending failed'})
+            return JsonResponse({'success': False, 'message': 'Combined email sending failed'})
         messages.error(request, 'ईमेल भेजने में त्रुटि हुई। कृपया पुन: प्रयास करें।')
     
     return redirect('admin:events_eventregistration_changelist')
