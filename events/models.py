@@ -433,6 +433,7 @@ class EventRegistration(models.Model):
         from django.utils import timezone
         
         # Track approval status changes
+        old_instance = None
         if self.pk:
             old_instance = EventRegistration.objects.get(pk=self.pk)
             
@@ -441,6 +442,7 @@ class EventRegistration(models.Model):
                 if not getattr(self, 'rejected_at', None):
                     if hasattr(self, 'rejected_at'):
                         self.rejected_at = timezone.now()
+                self._newly_rejected = True
             
             # Auto-set approval timestamps
             if old_instance.approval_status != 'district_approved' and self.approval_status == 'district_approved':
@@ -474,8 +476,7 @@ class EventRegistration(models.Model):
                 print(f"Warning: Invalid campaign codes found: {invalid_campaigns}")
         
         is_newly_approved = False
-        if self.pk:
-            old_instance = EventRegistration.objects.get(pk=self.pk)
+        if old_instance:
             is_newly_approved = (old_instance.approval_status != 'approved' and self.approval_status == 'approved')
             
             if is_newly_approved and not self.registration_number:
@@ -523,27 +524,24 @@ class EventRegistration(models.Model):
                 else:
                     raise e
         
-        # Send email when registration is approved or rejected
-        is_newly_rejected = False
-        if self.pk:
-            old_instance = EventRegistration.objects.get(pk=self.pk)
-            is_newly_rejected = (old_instance.approval_status != 'rejected' and self.approval_status == 'rejected')
-        
-        if (is_newly_approved or is_newly_rejected) and not self.email_sent:
+        # Send email when registration is approved or rejected (after save)
+        if self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected'))):
             from .email_utils import send_registration_approval_email
             try:
-                if send_registration_approval_email(self):
-                    self.email_sent = True
-                    # Use update to avoid recursion
+                if not self.email_sent:
+                    email_success = send_registration_approval_email(self)
+                    # Mark as sent regardless of success to prevent infinite retries
                     EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
                     status_text = "approval" if is_newly_approved else "rejection"
-                    print(f"Registration {status_text} email sent to {self.email}")
-                else:
-                    status_text = "approval" if is_newly_approved else "rejection"
-                    print(f"Failed to send {status_text} email to {self.email}")
+                    if email_success:
+                        print(f"Registration {status_text} email sent to {self.email}")
+                    else:
+                        print(f"Registration {status_text} email failed but marked as sent to prevent retries")
             except Exception as e:
+                # Mark as sent even on exception to prevent infinite retries
+                EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
                 status_text = "approval" if is_newly_approved else "rejection"
-                print(f"Error sending {status_text} email to {self.email}: {str(e)}")
+                print(f"Error sending {status_text} email to {self.email}: {str(e)} - marked as sent")
 
     
     def get_approver_for_registration(self, level='district'):

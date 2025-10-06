@@ -69,37 +69,48 @@ def send_registration_approval_email(registration, sent_by_user=None):
     success = False
     error_message = ''
     
-    try:
-        # Create email message
-        email = EmailMessage(
-            subject=subject,
-            body=html_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[registration.email],
-        )
-        email.content_subtype = 'html'
-        
-        # Generate and attach ID card only if approved
-        if registration.approval_status == 'approved':
-            print("Generating ID card for email attachment...")
-            id_card_data = generate_id_card_for_email(registration)
+    # Retry logic for email sending
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            # Create email message
+            email = EmailMessage(
+                subject=subject,
+                body=html_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[registration.email],
+            )
+            email.content_subtype = 'html'
             
-            if id_card_data:
-                filename = f"id_card_{registration.registration_number or registration.id}.png"
-                email.attach(filename, id_card_data, 'image/png')
-                print(f"ID card attached to email: {filename}")
+            # Generate and attach ID card only if approved
+            if registration.approval_status == 'approved':
+                print("Generating ID card for email attachment...")
+                id_card_data = generate_id_card_for_email(registration)
+                
+                if id_card_data:
+                    filename = f"id_card_{registration.registration_number or registration.id}.png"
+                    email.attach(filename, id_card_data, 'image/png')
+                    print(f"ID card attached to email: {filename}")
+                else:
+                    print("Failed to generate ID card for attachment")
+            
+            email.send(fail_silently=False)
+            print(f"Email sent successfully to {registration.email}")
+            success = True
+            break  # Success, exit retry loop
+            
+        except Exception as e:
+            error_message = str(e)
+            print(f"Email sending attempt {attempt + 1} failed: {e}")
+            
+            if attempt == max_retries - 1:  # Last attempt
+                import traceback
+                print(f"All email attempts failed. Full traceback: {traceback.format_exc()}")
             else:
-                print("Failed to generate ID card for attachment")
-        
-        email.send(fail_silently=False)
-        print(f"Email sent successfully to {registration.email}")
-        success = True
-        
-    except Exception as e:
-        error_message = str(e)
-        print(f"Email sending failed: {e}")
-        import traceback
-        print(f"Full traceback: {traceback.format_exc()}")
+                print(f"Retrying in 2 seconds... ({attempt + 1}/{max_retries})")
+                import time
+                time.sleep(2)
+
     
     # Log email attempt
     try:

@@ -140,7 +140,14 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         # Non-superusers cannot edit final approval fields
         if not request.user.is_superuser:
             readonly.extend(['final_approver', 'final_approved_at', 'registration_number', 'district_approver', 'upzone_approver', 'rejected_by', 'rejected_at', 'email_sent'])
-            if obj and obj.approval_status in ['approved', 'upzone_approved', 'district_approved'] and not is_edit_mode:
+            # Only make approval_status readonly if user has no approval permissions or registration is fully approved
+            try:
+                approval_user = ApprovalUser.objects.get(user=request.user)
+                # Don't make approval_status readonly for approval users unless already fully approved
+                if obj and obj.approval_status == 'approved' and not is_edit_mode:
+                    readonly.extend(['approval_status'])
+            except ApprovalUser.DoesNotExist:
+                # Non-approval users can't change approval status
                 readonly.extend(['approval_status'])
         else:
             # Even superusers can't edit approver fields if already set (unless in edit mode)
@@ -181,6 +188,36 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             if approval_user.allowed_registration_types and obj.registration_type not in approval_user.allowed_registration_types:
                 return buttons
             
+            # Super Approver can approve at ALL levels
+            if approval_user.is_super_approver:
+                if obj.approval_status == 'pending':
+                    buttons.append({
+                        'name': '_approve_district',
+                        'label': 'जिला अप्रूव करें',
+                        'class': 'btn-success'
+                    })
+                elif obj.approval_status == 'district_approved':
+                    buttons.append({
+                        'name': '_approve_upzone',
+                        'label': 'उपजोन अप्रूव करें',
+                        'class': 'btn-primary'
+                    })
+                elif obj.approval_status == 'upzone_approved':
+                    buttons.append({
+                        'name': '_approve_final',
+                        'label': 'अंतिम अप्रूव करें',
+                        'class': 'btn-warning'
+                    })
+                
+                # Reject button for super approvers
+                if obj.approval_status != 'approved' and obj.approval_status != 'rejected':
+                    buttons.append({
+                        'name': '_reject',
+                        'label': 'अस्वीकृत करें',
+                        'class': 'btn-danger'
+                    })
+                return buttons
+            
             # District level approval
             if (approval_user.is_district_approver and 
                 obj.approval_status == 'pending' and 
@@ -202,7 +239,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 })
             
             # State level approval
-            if ((approval_user.is_state_approver or request.user.is_superuser) and 
+            if (approval_user.is_state_approver and 
                 obj.approval_status == 'upzone_approved'):
                 buttons.append({
                     'name': '_approve_final',
@@ -274,7 +311,16 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 if 'approval_status' in self.fields:
                     try:
                         approval_user = ApprovalUser.objects.get(user=request.user)
-                        if approval_user.is_district_approver:
+                        if approval_user.is_super_approver:
+                            # Super approvers can set any status
+                            self.fields['approval_status'].choices = [
+                                ('pending', 'प्रतीक्षारत'),
+                                ('district_approved', 'जिला अप्रूव'),
+                                ('upzone_approved', 'उपजोन अप्रूव'),
+                                ('approved', 'अप्रूव'),
+                                ('rejected', 'अस्वीकृत')
+                            ]
+                        elif approval_user.is_district_approver:
                             self.fields['approval_status'].choices = [
                                 ('pending', 'प्रतीक्षारत'),
                                 ('district_approved', 'जिला अप्रूव'),
@@ -286,7 +332,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                                 ('upzone_approved', 'उपजोन अप्रूव'),
                                 ('rejected', 'अस्वीकृत')
                             ]
-                        elif not request.user.is_superuser:
+                        elif approval_user.is_state_approver:
                             self.fields['approval_status'].choices = [
                                 ('upzone_approved', 'उपजोन अप्रूव'),
                                 ('approved', 'अप्रूव'),
@@ -308,8 +354,12 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
+            # Super approvers get ALL actions
+            if approval_user.is_super_approver:
+                # Keep all actions for super approvers
+                pass
             # Keep actions based on user level - allow what they can do
-            if approval_user.is_district_approver:
+            elif approval_user.is_district_approver:
                 # District approvers can do district approval and rejection
                 if 'approve_upzone' in actions:
                     del actions['approve_upzone']
@@ -346,7 +396,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         # Check user permissions
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
-            if not (approval_user.is_district_approver or request.user.is_superuser):
+            if not (approval_user.is_district_approver or approval_user.is_super_approver or request.user.is_superuser):
                 self.message_user(request, 'आपको जिला अप्रूवल का अधिकार नहीं है।', level='error')
                 return
         except ApprovalUser.DoesNotExist:
@@ -365,7 +415,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     if registration.approval_status == 'pending':
                         # Check if user can approve this registration
                         try:
-                            if not request.user.is_superuser and not registration.matches_approval_user(approval_user):
+                            if not request.user.is_superuser and not approval_user.is_super_approver and not registration.matches_approval_user(approval_user):
                                 skipped += 1
                                 continue
                         except:
@@ -395,7 +445,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         # Check user permissions
         try:
             approval_user = ApprovalUser.objects.get(user=request.user)
-            if not (approval_user.is_upzone_approver or request.user.is_superuser):
+            if not (approval_user.is_upzone_approver or approval_user.is_super_approver or request.user.is_superuser):
                 self.message_user(request, 'आपको उपजोन अप्रूवल का अधिकार नहीं है।', level='error')
                 return
         except ApprovalUser.DoesNotExist:
@@ -414,7 +464,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                     if registration.approval_status == 'district_approved':
                         # Check if user can approve this registration
                         try:
-                            if not request.user.is_superuser and not registration.matches_approval_user(approval_user):
+                            if not request.user.is_superuser and not approval_user.is_super_approver and not registration.matches_approval_user(approval_user):
                                 skipped += 1
                                 continue
                         except:
@@ -445,12 +495,12 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         skipped = 0
         batch_size = 25  # Smaller batches to prevent timeout
         
-        # Check user permissions - only superusers and state approvers can do final approval
+        # Check user permissions - only superusers, state approvers, and super approvers can do final approval
         can_final_approve = request.user.is_superuser
         if not can_final_approve:
             try:
                 approval_user = ApprovalUser.objects.get(user=request.user)
-                can_final_approve = approval_user.is_state_approver
+                can_final_approve = approval_user.is_state_approver or approval_user.is_super_approver
             except ApprovalUser.DoesNotExist:
                 pass
         
@@ -536,7 +586,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 # Check if user can reject this registration
                 can_reject = request.user.is_superuser
                 if not can_reject and approval_user:
-                    can_reject = registration.matches_approval_user(approval_user)
+                    can_reject = approval_user.is_super_approver or registration.matches_approval_user(approval_user)
                 
                 if can_reject:
                     registration.approval_status = 'rejected'
@@ -655,7 +705,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         # Vehicle pass button for approved registrations with vehicle info
         if obj.approval_status == 'approved' and obj.vehicle_number:
             from django.urls import reverse
-            vehicle_pass_url = reverse('vehicle_pass:generate', args=[obj.pk, obj.vehicle_number])
+            from urllib.parse import quote
+            vehicle_pass_url = reverse('vehicle_pass:generate', args=[obj.pk, quote(obj.vehicle_number, safe='')])
             buttons.append(f'<a href="{vehicle_pass_url}" class="button" style="padding: 3px 8px; background: #17a2b8; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;">Vehicle Pass</a>')
         
         return format_html(f'{reg_num}<br>{"".join(buttons)}')
@@ -935,7 +986,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been upzone approved.')
             return HttpResponseRedirect(request.path)
         
-        elif '_approve_final' in request.POST and request.user.is_superuser:
+        elif '_approve_final' in request.POST:
             if obj.approval_status == 'upzone_approved':
                 obj.approval_status = 'approved'
                 obj.final_approver = request.user
