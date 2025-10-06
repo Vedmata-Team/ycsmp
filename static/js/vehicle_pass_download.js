@@ -115,23 +115,69 @@ class VehiclePassDownloader {
         return false;
     }
     
-    instantDownload(link) {
-        console.log('Starting instant download');
+    async instantDownload(link) {
+        console.log('Starting download process');
         const downloadUrl = link.href;
         console.log('Download URL:', downloadUrl);
         
-        // Direct download without any loading states
-        const tempLink = document.createElement('a');
-        tempLink.href = downloadUrl;
-        tempLink.style.display = 'none';
-        tempLink.download = `vehicle_pass_${Date.now()}.png`;
+        // Show progress modal
+        const progressModal = this.showProgressModal();
         
-        document.body.appendChild(tempLink);
-        tempLink.click();
-        document.body.removeChild(tempLink);
-        
-        console.log('Download triggered');
-        this.showSuccess('वाहन पास सफलतापूर्वक डाउनलोड हो गया!');
+        try {
+            // Step 1: Preparing download
+            this.updateProgress(progressModal, 'Preparing download...', 20);
+            await this.delay(500);
+            
+            // Step 2: Generating vehicle pass
+            this.updateProgress(progressModal, 'Generating vehicle pass...', 50);
+            
+            // Fetch the file to validate it exists and is valid
+            const response = await fetch(downloadUrl);
+            if (!response.ok) {
+                throw new Error(`Download failed: ${response.status}`);
+            }
+            
+            // Step 3: Processing file
+            this.updateProgress(progressModal, 'Processing file...', 80);
+            const blob = await response.blob();
+            
+            if (blob.size === 0) {
+                throw new Error('Generated file is empty');
+            }
+            
+            // Step 4: Starting download
+            this.updateProgress(progressModal, 'Starting download...', 95);
+            await this.delay(300);
+            
+            // Create download link
+            const tempLink = document.createElement('a');
+            const objectUrl = URL.createObjectURL(blob);
+            tempLink.href = objectUrl;
+            tempLink.download = `vehicle_pass_${Date.now()}.png`;
+            tempLink.style.display = 'none';
+            
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+            
+            // Cleanup object URL
+            URL.revokeObjectURL(objectUrl);
+            
+            // Step 5: Download complete
+            this.updateProgress(progressModal, 'Download completed!', 100);
+            await this.delay(500);
+            
+            // Close progress modal
+            progressModal.remove();
+            
+            // Show success notification
+            this.showSuccess('वाहन पास सफलतापूर्वक डाउनलोड हो गया!');
+            
+        } catch (error) {
+            console.error('Download failed:', error);
+            progressModal.remove();
+            this.showError('Download failed: ' + error.message);
+        }
     }
 
     showSuccess(message) {
@@ -189,6 +235,96 @@ class VehiclePassDownloader {
         setTimeout(() => {
             toast.remove();
         }, 3000);
+    }
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    showProgressModal() {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                font-family: 'Inter', sans-serif;
+            ">
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 400px;
+                    padding: 2rem;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    text-align: center;
+                ">
+                    <div style="
+                        width: 60px;
+                        height: 60px;
+                        border: 4px solid #e9ecef;
+                        border-top: 4px solid #007bff;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                        margin: 0 auto 1.5rem;
+                    "></div>
+                    <h3 style="
+                        margin: 0 0 1rem 0;
+                        color: #2c3e50;
+                        font-size: 1.2rem;
+                        font-weight: 600;
+                    ">Downloading Vehicle Pass</h3>
+                    <div style="
+                        background: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 0.5rem;
+                        margin-bottom: 1rem;
+                    ">
+                        <div id="progressBar" style="
+                            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+                            height: 8px;
+                            border-radius: 4px;
+                            width: 0%;
+                            transition: width 0.3s ease;
+                        "></div>
+                    </div>
+                    <p id="progressText" style="
+                        margin: 0;
+                        color: #6c757d;
+                        font-size: 0.9rem;
+                    ">Initializing...</p>
+                </div>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(modal);
+        return modal;
+    }
+    
+    updateProgress(modal, text, percentage) {
+        const progressBar = modal.querySelector('#progressBar');
+        const progressText = modal.querySelector('#progressText');
+        
+        if (progressBar) {
+            progressBar.style.width = percentage + '%';
+        }
+        
+        if (progressText) {
+            progressText.textContent = text;
+        }
     }
 
     showDOBVerification(link) {
@@ -377,8 +513,6 @@ class VehiclePassDownloader {
             errorDiv.style.display = 'none';
         }, 3000);
     }
-
-
 }
 
 // Initialize the downloader

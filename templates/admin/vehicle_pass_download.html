@@ -5,72 +5,10 @@
 </script>
 <script src="{% static 'js/vehicle_pass_download.js' %}"></script>
 <script>
+// Admin context - use the main VehiclePassDownloader class for consistent behavior
 document.addEventListener('DOMContentLoaded', function() {
-    // Find all vehicle pass links in admin
-    const vehiclePassLinks = document.querySelectorAll('a[href*="/vehicle-pass/generate/"], .download-btn, .download-protected');
-    
-    vehiclePassLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const originalText = this.textContent;
-            
-            // Minimal loading indicator for instant feedback
-            const loadingDiv = document.createElement('div');
-            loadingDiv.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: white;
-                    padding: 15px 25px;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    z-index: 9999;
-                    text-align: center;
-                    font-size: 14px;
-                ">
-                    <div>Downloading...</div>
-                </div>
-            `;
-            document.body.appendChild(loadingDiv);
-            
-            // Instant download without delays
-            const downloadLink = document.createElement('a');
-            downloadLink.href = this.href;
-            downloadLink.download = '';
-            downloadLink.click();
-            
-            // Cleanup immediately
-            document.body.removeChild(loadingDiv);
-            this.textContent = originalText;
-            this.style.pointerEvents = 'auto';
-            this.style.opacity = '1';
-            
-            // Show success message
-            const successDiv = document.createElement('div');
-            successDiv.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #28a745;
-                    color: white;
-                    padding: 10px 15px;
-                    border-radius: 5px;
-                    z-index: 10000;
-                ">
-                    Vehicle Pass Downloaded!
-                </div>
-            `;
-            document.body.appendChild(successDiv);
-            
-            setTimeout(() => {
-                document.body.removeChild(successDiv);
-            }, 2000);
-        });
-    });
+    // The VehiclePassDownloader class will handle all download logic with proper progress tracking
+    // No need for separate admin logic - it will use the same progress flow
+    console.log('Admin vehicle pass download handler loaded - using main VehiclePassDownloader class');
 });
 </script>
-{% load static %}
