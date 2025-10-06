@@ -1021,8 +1021,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj.final_approver = request.user
                 obj.final_approved_at = timezone.now()
                 obj._skip_auto_email = True  # Skip auto email
-                obj.save()  # This will generate registration number but skip email
-                messages.success(request, f'Registration {obj.registration_number} has been finally approved. Use Send Email button for combined email with attachments.')
+                obj.save()  # This will generate registration number and send email
+                messages.success(request, f'Registration {obj.registration_number} has been finally approved and email sent.')
             return HttpResponseRedirect(request.path)
         
         elif '_reject' in request.POST:
@@ -1087,9 +1087,18 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         
         super().save_model(request, obj, form, change)
         
-        # AUTO EMAIL DISABLED - Use Send Email button for combined email with attachments
+        # Send email when is_confirmed is set to True (only if not already sent)
         if send_confirmation_email and not obj.email_sent:
-            messages.info(request, f'🚫 Auto email disabled for {obj.email} - use Send Email button for combined email with attachments')
+            from .email_utils import send_registration_approval_email
+            try:
+                if send_registration_approval_email(obj):
+                    obj.email_sent = True
+                    EventRegistration.objects.filter(pk=obj.pk).update(email_sent=True)
+                    messages.success(request, f'Registration confirmed and email sent to {obj.email}')
+                else:
+                    messages.warning(request, f'Registration confirmed but failed to send email to {obj.email}')
+            except Exception as e:
+                messages.error(request, f'Registration confirmed but email error: {str(e)}')
         elif obj.email_sent:
             messages.info(request, f'Email already sent to {obj.email}')
     

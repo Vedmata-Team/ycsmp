@@ -1,61 +1,49 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Simple email test script to verify SMTP configuration
-Run this script to test email sending without Django overhead
+Test Email Sending with Attachments
 """
 
 import os
+import sys
 import django
-from pathlib import Path
 
 # Setup Django
-BASE_DIR = Path(__file__).resolve().parent
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ycs_mp.settings')
 django.setup()
 
-from django.core.mail import send_mail
-from django.conf import settings
+from events.models import EventRegistration
+from events.email_utils import send_registration_approval_email
 
-def test_smtp_connection():
-    """Test SMTP connection and email sending"""
-    print("=== EMAIL CONFIGURATION TEST ===")
-    print(f"SMTP Host: {settings.EMAIL_HOST}")
-    print(f"SMTP Port: {settings.EMAIL_PORT}")
-    print(f"Use TLS: {settings.EMAIL_USE_TLS}")
-    print(f"From email: {settings.DEFAULT_FROM_EMAIL}")
-    print(f"Host user: {settings.EMAIL_HOST_USER}")
-    print(f"Host password: {'*' * len(settings.EMAIL_HOST_PASSWORD) if settings.EMAIL_HOST_PASSWORD else 'Not set'}")
+def test_email_with_attachments():
+    print("🔍 TESTING EMAIL WITH ATTACHMENTS")
+    print("=" * 50)
     
-    # Test basic SMTP connection
     try:
-        import smtplib
-        print("\n=== TESTING SMTP CONNECTION ===")
-        server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-        server.starttls()
-        server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-        print("✓ SMTP connection successful")
-        server.quit()
+        # Get registration 4307 from logs
+        registration = EventRegistration.objects.get(id=4307)
+        print(f"📋 Registration: {registration.full_name} ({registration.email})")
+        print(f"📧 Status: {registration.approval_status}")
+        print(f"🚗 Vehicle: '{registration.vehicle_number}' | Transport: {registration.transport_mode}")
+        print()
+        
+        # Test email sending
+        print("📧 Sending email with attachments...")
+        result = send_registration_approval_email(registration)
+        
+        if result:
+            print("✅ Email sent successfully!")
+        else:
+            print("❌ Email sending failed!")
+            
+    except EventRegistration.DoesNotExist:
+        print("❌ Registration 4307 not found")
     except Exception as e:
-        print(f"✗ SMTP connection failed: {e}")
-        return False
-    
-    # Test Django email sending
-    try:
-        print("\n=== TESTING DJANGO EMAIL SENDING ===")
-        send_mail(
-            subject='Test Email - YCS MP Registration System',
-            message='This is a test email to verify the email configuration is working properly.',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['youthcell@awgp.org'],  # Using the same email as sender for testing
-            fail_silently=False,
-        )
-        print("✓ Django email sending successful")
-        return True
-    except Exception as e:
-        print(f"✗ Django email sending failed: {e}")
+        print(f"❌ Error: {e}")
         import traceback
-        print(f"Full traceback: {traceback.format_exc()}")
-        return False
+        print("Full traceback:")
+        traceback.print_exc()
 
 if __name__ == "__main__":
-    test_smtp_connection()
+    test_email_with_attachments()

@@ -173,7 +173,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'youthcell@awgp.org'
 EMAIL_HOST_PASSWORD = 'PpgPvm@24'
-DEFAULT_FROM_EMAIL = 'youthcell@awgp.org'
+DEFAULT_FROM_EMAIL = 'युवा प्रकोष्ठ <youthcell@awgp.org>'
 EMAIL_TIMEOUT = 10
 
 # Cache Configuration

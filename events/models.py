@@ -478,26 +478,28 @@ class EventRegistration(models.Model):
         is_newly_approved = False
         if old_instance:
             is_newly_approved = (old_instance.approval_status != 'approved' and self.approval_status == 'approved')
+        elif self.approval_status == 'approved':
+            is_newly_approved = True
             
-            if is_newly_approved and not self.registration_number:
-                # Generate registration number with retry logic
-                max_retries = 5
-                for retry in range(max_retries):
-                    try:
-                        self.registration_number = self.generate_registration_number()
+        if is_newly_approved and not self.registration_number:
+            # Generate registration number with retry logic
+            max_retries = 5
+            for retry in range(max_retries):
+                try:
+                    self.registration_number = self.generate_registration_number()
+                    self.is_confirmed = True
+                    break
+                except Exception as e:
+                    print(f"Registration number generation retry {retry + 1}: {e}")
+                    if retry == max_retries - 1:
+                        # Final fallback - use timestamp
+                        import datetime
+                        timestamp = int(datetime.datetime.now().timestamp() * 1000) % 100000
+                        state_code = self.state_code or 'XX'
+                        city_prefix = self.city[:3].upper() if self.city else 'XXX'
+                        base_prefix = 'YCSO' if self.registration_type == 'organization_representative' else ('YCSV' if self.registration_type == 'volunteer' else 'YCS')
+                        self.registration_number = f"{base_prefix}-{state_code}-{city_prefix}-{timestamp}"
                         self.is_confirmed = True
-                        break
-                    except Exception as e:
-                        print(f"Registration number generation retry {retry + 1}: {e}")
-                        if retry == max_retries - 1:
-                            # Final fallback - use timestamp
-                            import datetime
-                            timestamp = int(datetime.datetime.now().timestamp() * 1000) % 100000
-                            state_code = self.state_code or 'XX'
-                            city_prefix = self.city[:3].upper() if self.city else 'XXX'
-                            base_prefix = 'YCSO' if self.registration_type == 'organization_representative' else ('YCSV' if self.registration_type == 'volunteer' else 'YCS')
-                            self.registration_number = f"{base_prefix}-{state_code}-{city_prefix}-{timestamp}"
-                            self.is_confirmed = True
         
         # Handle IntegrityError for duplicate registration numbers
         max_save_retries = 3
@@ -524,11 +526,28 @@ class EventRegistration(models.Model):
                 else:
                     raise e
         
-        # AUTO EMAIL DISABLED - Only use manual combined email logic
-        if (self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected')))):
-            status_text = "approval" if is_newly_approved else "rejection"
-            print(f"🚫 Auto email disabled for {self.email} - use Send Email button for combined email with attachments")
-            print(f"Status changed to: {self.approval_status} ({status_text})")
+        # Send email when status changes to approved or rejected
+        if (self.pk and (is_newly_approved or (self.pk and hasattr(self, '_newly_rejected'))) and not getattr(self, '_skip_auto_email', False)):
+            from .email_utils import send_registration_approval_email
+            from django.db import connection
+            try:
+                # Ensure database connection is alive
+                connection.ensure_connection()
+                
+                if send_registration_approval_email(self):
+                    # Use separate transaction for email status update
+                    try:
+                        EventRegistration.objects.filter(pk=self.pk).update(email_sent=True)
+                        status_text = "approval" if is_newly_approved else "rejection"
+                        print(f"✅ Auto email sent for {self.email} ({status_text})")
+                    except Exception as update_error:
+                        print(f"⚠️ Email sent but status update failed: {update_error}")
+                        # Set flag for later update
+                        self.email_sent = True
+                else:
+                    print(f"❌ Auto email failed for {self.email}")
+            except Exception as e:
+                print(f"❌ Auto email error for {self.email}: {e}")
 
     
     def get_approver_for_registration(self, level='district'):

@@ -369,17 +369,24 @@ def check_status(request):
 def resend_registration_email(request, registration_id):
     """Resend registration email with combined logic (attachments included)"""
     if not request.user.is_staff:
-        messages.error(request, 'आपको इस कार्य की अनुमति नहीं है।')
-        return redirect('admin:events_eventregistration_changelist')
+        from django.http import JsonResponse
+        return JsonResponse({'success': False, 'message': 'Unauthorized'})
     
-    registration = get_object_or_404(EventRegistration, id=registration_id, approval_status='approved')
+    try:
+        registration = EventRegistration.objects.get(id=registration_id)
+        if registration.approval_status != 'approved':
+            from django.http import JsonResponse
+            return JsonResponse({'success': False, 'message': 'Registration not approved'})
+    except EventRegistration.DoesNotExist:
+        from django.http import JsonResponse
+        return JsonResponse({'success': False, 'message': 'Registration not found'})
     
     print(f"\n=== RESEND EMAIL VIEW DEBUG ===")
     print(f"Using combined email logic with attachments")
     print(f"Registration: {registration.full_name} ({registration.email})")
     
-    # Always use combined email logic (with attachments)
-    if send_registration_approval_email(registration, request.user, skip_attachments=False):
+    # Use EXACT same call as test script
+    if send_registration_approval_email(registration):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             from django.http import JsonResponse
             return JsonResponse({'success': True, 'message': 'Combined email sent successfully'})

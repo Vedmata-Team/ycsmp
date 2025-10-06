@@ -112,36 +112,100 @@ def send_registration_approval_email(registration, sent_by_user=None, skip_attac
         if registration.approval_status == 'approved' and not skip_attachments:
             print(f"🔄 Generating attachments for {registration.email}...")
             
-            # Always generate ID card
-            id_card_data = generate_id_card_for_email(registration)
-            if id_card_data:
-                email.attach(
-                    f"id_card_{registration.registration_number or registration.id}.png",
-                    id_card_data,
-                    'image/png'
-                )
-                print(f"✅ ID card attached")
-            
-            # Generate vehicle pass only if user has vehicle
-            if (registration.vehicle_number and 
-                registration.vehicle_number.strip() and 
-                registration.vehicle_number != '-' and 
-                registration.transport_mode == 'car'):
-                vehicle_pass_data = generate_vehicle_pass_for_email(registration)
-                if vehicle_pass_data:
+            try:
+                # Always generate ID card
+                id_card_data = generate_id_card_for_email(registration)
+                if id_card_data:
                     email.attach(
-                        f"vehicle_pass_{registration.registration_number or registration.id}.png",
-                        vehicle_pass_data,
+                        f"id_card_{registration.registration_number or registration.id}.png",
+                        id_card_data,
                         'image/png'
                     )
-                    print(f"✅ Vehicle pass attached")
-            else:
-                print(f"⚠️ Vehicle pass skipped - no valid vehicle info")
+                    print(f"✅ ID card attached")
+                else:
+                    print(f"⚠️ ID card generation failed")
+            except Exception as e:
+                print(f"⚠️ ID card attachment failed: {e}")
+            
+            try:
+                # Generate vehicle pass only if user has vehicle
+                if (registration.vehicle_number and 
+                    registration.vehicle_number.strip() and 
+                    registration.vehicle_number != '-' and 
+                    registration.transport_mode == 'car'):
+                    vehicle_pass_data = generate_vehicle_pass_for_email(registration)
+                    if vehicle_pass_data:
+                        email.attach(
+                            f"vehicle_pass_{registration.registration_number or registration.id}.png",
+                            vehicle_pass_data,
+                            'image/png'
+                        )
+                        print(f"✅ Vehicle pass attached")
+                    else:
+                        print(f"⚠️ Vehicle pass generation failed")
+                else:
+                    print(f"⚠️ Vehicle pass skipped - no valid vehicle info")
+            except Exception as e:
+                print(f"⚠️ Vehicle pass attachment failed: {e}")
+            
+            print(f"✅ Proceeding with email (with or without attachments)")
         
-        # Send single email with all content and attachments
-        email.send(fail_silently=False)
-        print(f"✅ Combined email sent to {registration.email}")
-        success = True
+        # Send single email with all content and attachments (with fallback)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                from django.core.mail import get_connection
+                connection = get_connection()
+                connection.timeout = 15
+                email.connection = connection
+                
+                email.send(fail_silently=False)
+                print(f"✅ Combined email sent to {registration.email}")
+                success = True
+                break
+            except Exception as retry_error:
+                print(f"⚠️ Email attempt {attempt + 1} failed: {retry_error}")
+                if attempt < max_retries - 1:
+                    import time
+                    time.sleep(3)
+                    continue
+                else:
+                    # Try Gmail SMTP as fallback
+                    try:
+                        print(f"🔄 Trying Gmail SMTP fallback...")
+                        from django.core.mail.backends.smtp import EmailBackend
+                        gmail_backend = EmailBackend(
+                            host='smtp.gmail.com',
+                            port=587,
+                            username='youthcell@awgp.org',
+                            password='PpgPvm@24',
+                            use_tls=True,
+                            timeout=10
+                        )
+                        email.connection = gmail_backend
+                        email.send(fail_silently=False)
+                        print(f"✅ Combined email sent via Gmail fallback to {registration.email}")
+                        success = True
+                        break
+                    except Exception as fallback_error:
+                        print(f"❌ Gmail fallback also failed: {fallback_error}")
+                        # Last resort: send without attachments
+                        try:
+                            print(f"🔄 Last resort: sending without attachments...")
+                            simple_email = EmailMessage(
+                                subject=subject,
+                                body=html_message,
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                to=[registration.email],
+                            )
+                            simple_email.content_subtype = 'html'
+                            simple_email.send(fail_silently=False)
+                            print(f"✅ Email sent without attachments to {registration.email}")
+                            success = True
+                            break
+                        except Exception as final_error:
+                            print(f"❌ Final attempt failed: {final_error}")
+                            raise retry_error
         
     except Exception as e:
         error_message = str(e)
