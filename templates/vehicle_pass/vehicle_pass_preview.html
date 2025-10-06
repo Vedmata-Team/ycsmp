@@ -404,8 +404,10 @@
 
 {% block extra_js %}
 <script>
-    // Pass user DOB to JavaScript for verification
+    // Set DOB immediately
     window.USER_DOB = '{{ registration.date_of_birth|date:"Y-m-d" }}';
+    console.log('🎯 Template - USER_DOB set to:', window.USER_DOB);
+    console.log('🎯 Template - registration.date_of_birth:', '{{ registration.date_of_birth }}');
 </script>
 <script src="{% static 'js/vehicle_pass_download.js' %}"></script>
 {% endblock %}
@@ -499,17 +501,35 @@
     </div>
     
     <!-- Download Section -->
+    {% if is_primary_user %}
     <div class="download-section">
-        <a href="{{ download_url }}" class="download-btn download-protected" data-download-url="{{ download_url }}">
+        <a href="{{ download_url }}" class="download-btn download-protected" data-download-url="{{ download_url }}" data-user-dob="{{ registration.date_of_birth|date:'Y-m-d' }}">
             <i class="bi bi-download"></i> Download Vehicle Pass
         </a>
         <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
             <i class="bi bi-file-earmark-image"></i> PNG Format <i class="bi bi-dot"></i> <i class="bi bi-printer"></i> Print Ready
         </p>
     </div>
+    {% else %}
+    <div class="download-section">
+        <div class="alert alert-info" style="max-width: 500px; margin: 0 auto;">
+            <i class="bi bi-info-circle"></i>
+            <strong>Vehicle Pass Information</strong><br>
+            This vehicle pass can only be downloaded by the primary user: <strong>{{ primary_user.full_name }}</strong> ({{ primary_user.phone }})
+        </div>
+    </div>
+    {% endif %}
     
 
 </div>
 
-<script src="{% static 'js/vehicle_pass_download.js' %}"></script>
+<!-- DOB data attribute for fallback -->
+<div id="dob-data" data-user-dob="{{ registration.date_of_birth|date:'Y-m-d' }}" style="display:none;"></div>
+
+<script>
+// Set DOB immediately
+window.USER_DOB = '{{ registration.date_of_birth|date:"Y-m-d" }}';
+console.log('🎯 IMMEDIATE - USER_DOB set to:', window.USER_DOB);
+</script>
+
 {% endblock %}

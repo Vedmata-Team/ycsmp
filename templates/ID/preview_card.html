@@ -212,10 +212,13 @@
         </div>
     </div>
     
+    <!-- DOB data attribute for fallback -->
+    <div id="dob-data" data-user-dob="{{ registration.date_of_birth|date:'Y-m-d' }}" style="display:none;"></div>
+    
     <script>
-        // Pass user DOB to JavaScript for verification
+        // Set DOB immediately
         window.USER_DOB = '{{ registration.date_of_birth|date:"Y-m-d" }}';
-        console.log('ID Preview page USER_DOB set to:', window.USER_DOB);
+        console.log('🎯 ID Card Preview - USER_DOB set to:', window.USER_DOB);
     </script>
     <script src="/static/js/vehicle_pass_download.js"></script>
 </body>

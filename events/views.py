@@ -359,6 +359,15 @@ def check_status(request):
             registrations = EventRegistration.objects.filter(phone=phone).order_by('-registration_date')
             if not registrations:
                 messages.error(request, 'इस मोबाइल नंबर से कोई पंजीकरण नहीं मिला।')
+            else:
+                # Add primary vehicle user check for each registration
+                from vehicle_pass.views import get_primary_vehicle_user
+                for registration in registrations:
+                    if registration.vehicle_number:
+                        primary_user = get_primary_vehicle_user(registration.vehicle_number)
+                        registration.is_primary_vehicle_user = not primary_user or primary_user.id == registration.id
+                    else:
+                        registration.is_primary_vehicle_user = True
     
     context = {
         'registrations': registrations,

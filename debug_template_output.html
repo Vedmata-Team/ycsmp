@@ -1,0 +1,907 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>वाहन पास प्रीव्यू - Dr Rajesh Amrute</title>
+    
+        <!-- Enhanced SEO Meta Tags -->
+    <meta name="description" content="Join All World Gayatri Pariwar's Prantiya Yuva Chintan Shivir Bhopal 2025 at Gayatri Shaktipeeth - प्रान्तीय युवा प्रेरणा शिविर by AWGP युवा प्रकोष्ठ. Youth motivation, spiritual awakening & leadership training in Madhya Pradesh. Registration open.">
+    <meta name="keywords" content="प्रान्तीय युवा चिंतन शिविर भोपाल 2025, Prantiya Yuva Chintan Shivir Bhopal 2025, AWGP Yuva Chintan Shivir, गायत्री परिवार युवा शिविर भोपाल, Gayatri Pariwar youth camp Bhopal, DIYA youth camp Bhopal, Divine India Youth Association, दिव्य भारत युवा संघ, All World Gayatri Pariwar youth programs, अखिल विश्व गायत्री परिवार युवा कार्यक्रम, Yuva Chintan Shivir 2025, प्रांतीय युवा चिंतन शिविर, Provincial Yuva Chintan Shivir, Gayatri Shaktipeeth Bhopal youth, गायत्री शक्ति पीठ भोपाल युवा, Bhopal youth camp, भोपाल युवा शिविर, Bhopal spiritual event, भोपाल आध्यात्मिक कार्यक्रम, Madhya Pradesh youth program, मध्य प्रदेश युवा कार्यक्रम, youth motivation camp, युवा प्रेरणा शिविर, youth spiritual retreat, युवा आध्यात्मिक शिविर, youth awakening workshop, युवा जागृति कार्यशाला, sanskar shivir, संस्कार शिविर, personality development program, व्यक्तित्व विकास कार्यक्रम, AWGP youth event, AWGP युवा कार्यक्रम, Pandit Shriram Sharma youth camp, पं. श्रीराम शर्मा युवा शिविर, youth camp near Bhopal, भोपाल के पास युवा शिविर, युवा चिंतन शिविर भोपाल 2025 पंजीकरण, Yuva Chintan Shivir Bhopal registration, युवा चिंतन शिविर भोपाल में शामिल कैसे हों, How to join Yuva Chintan Shivir Bhopal, Gayatri Pariwar youth camp Bhopal registration, AWGP youth leadership camp Madhya Pradesh, Bhopal youth empowerment workshop DIYA">
+    <meta name="author" content="प्रान्तीय युवा चिंतन शिविर भोपाल 2025 - AWGP Yuva Prakoshth">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Hindi">
+    <meta name="geo.region" content="IN-MP">
+    <meta name="geo.placename" content="Bhopal, Madhya Pradesh">
+    <meta name="geo.position" content="23.2599;77.4126">
+    <meta name="ICBM" content="23.2599, 77.4126">
+    
+    
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Bootstrap 5 JS (place before </body>) -->
+    
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/dropdown-fix.css">
+
+    
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .preview-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .preview-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #dc3545;
+    }
+    
+    .preview-title {
+        color: #dc3545;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-family: 'Kalam', cursive;
+    }
+    
+    .preview-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+    
+    .vehicle-pass-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .vehicle-pass-preview {
+        width: 10cm;
+        height: 5cm;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        transform: scale(1.2);
+        transform-origin: center;
+    }
+    
+    .vehicle-pass {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px solid #dee2e6;
+    }
+    
+    .background-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+    }
+    
+    .header-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 0.9cm;
+        background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 14px;
+        z-index: 1;
+    }
+    
+    .content-area {
+        position: absolute;
+        top: 0.9cm;
+        left: 0;
+        right: 0;
+        bottom: 1cm;
+        width: 10cm;
+        height: calc(5cm - 1.9cm);
+        z-index: 2;
+    }
+    
+    .pass-title-line {
+        position: absolute;
+        top: 0;
+        left: 0.3cm;
+        right: 0;
+        height: 0.8cm;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .pass-text {
+        font-family: 'Kalam', cursive;
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffe600;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .vehicle-number {
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #ffe600;
+        letter-spacing: 1px;
+        position: absolute;
+        right: 0.8cm;
+        z-index: 10;
+    }
+    
+    .info-section {
+        position: absolute;
+        top: 1.2cm;
+        left: 0;
+        right: 0;
+        height: 1.5cm;
+        display: flex;
+    }
+    
+    .qr-section {
+        position: absolute;
+        left: 0.4cm;
+        top: -7%;
+        width: 1.9cm;
+        height: 140%;
+        background: white;
+        border-radius: 8px;
+        padding: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border: 1px solid #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+    }
+    
+    .qr-code {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+    
+    .scan-text {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+        line-height: 1.1;
+    }
+    
+    .text-details {
+        position: absolute;
+        left: 2.5cm;
+        top: 0;
+        right: 3cm;
+        height: auto;
+        min-height: 1.8cm;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-left: 2px solid #dc3545;
+    }
+    
+    .info-line {
+        font-size: 0.7rem !important;
+        color: #2c3e50;
+        margin-bottom: 2px;
+        line-height: 1.1;
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-label {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-right: 6px;
+        min-width: 60px;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .info-value {
+        color: #1a1a1a;
+        font-weight: 700;
+    }
+    
+    .validity {
+        font-size: 9px;
+        font-weight: 700;
+        color: #dc3545;
+        background: rgba(220, 53, 69, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-top: 0;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .user-type {
+        position: absolute;
+        top: 22%;
+        left: 2.5cm;
+        right: 2.6cm;
+        text-align: center;
+        font-family: 'Kalam', cursive;
+        font-size: 14px;
+        font-weight: 700;
+        color: #8B0000;
+        z-index: 3;
+    }
+    
+    .download-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .download-btn {
+        background: #dc3545;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-family: 'Kalam', cursive;
+    }
+    
+    .download-btn:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .info-label {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-value {
+        color: #34495e;
+        font-size: 0.7rem !important;
+    }
+    
+    .mobile-only {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .vehicle-pass-preview {
+            width: 90vw;
+            height: 45vw;
+            max-width: none;
+            transform: none;
+            left: 0;
+        }
+        
+        .preview-container {
+            margin: 0.5rem;
+            padding: 0.5rem;
+        }
+        
+        .vehicle-pass-container {
+            padding: 0.5rem;
+            margin: 0;
+        }
+        
+        .pass-text {
+            font-size: 13.5px;
+            margin-top: -5%;
+        }
+        
+        .vehicle-number {
+            font-size: 12px;
+            margin-top: -5%;
+            right: 2.2cm;
+        }
+        
+        .user-type {
+            font-size: 12.5px;
+            top: 20%;
+            right: 4cm;
+        }
+        
+        .qr-section {
+            top: -43%;
+        }
+        
+        .text-details {
+            left: 2.4cm;
+            height: 100%;
+            right: auto;
+            min-height: 0;
+            margin-top: -1%;
+            width: 35%;
+        }
+        
+        .info-value {
+            font-size: 0.6rem !important;
+            margin-top: -6%;
+        }
+        
+        .validity {
+            font-size: 8.75px;
+            padding: 1.5px 5px;
+            margin-top: -5%;
+        }
+        
+        .info-line {
+            font-size: 0.525rem !important;
+        }
+        
+        .info-label {
+            font-size: 0.525rem;
+            min-width: 45px;
+        }
+        
+        .scan-text {
+            font-size: 0.525rem;
+        }
+        
+        .header-placeholder {
+            font-size: 10.5px;
+        }
+        
+        .desktop-inline,
+        .desktop-bullet {
+            display: none;
+        }
+        
+        .mobile-only {
+            display: block;
+        }
+        
+        .user-details-summary .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-details-summary .detail-row span {
+            flex: 1;
+            text-align: center;
+        }
+    }
+</style>
+
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/logo.png">
+    
+    
+    <!-- Default Open Graph Meta Tags (will be overridden by specific pages) -->
+    
+    <meta property="og:title" content="प्रान्तीय युवा चिंतन शिविर भोपाल 2025">
+    <meta property="og:description" content="युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:site_name" content="प्रान्तीय युवा चिंतन शिविर भोपाल 2025">
+    <meta property="og:image" content=":///static/images/logo.png">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="प्रान्तीय युवा चिंतन शिविर भोपाल 2025">
+    <meta name="twitter:description" content="युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम">
+    <meta name="twitter:image" content=":///static/images/logo.png">
+    
+    
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "प्रान्तीय युवा चिंतन शिविर भोपाल 2025",
+        "alternateName": "Prantiya Yuva Chintan Shivir Bhopal 2025",
+        "description": "AWGP द्वारा आयोजित युवाओं के आत्म-विकास, नेतृत्व प्रशिक्षण और आध्यात्मिक प्रेरणा का विशेष शिविर",
+        "startDate": "2025-10-26",
+        "endDate": "2025-10-28",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": {
+            "@type": "Place",
+            "name": "सरस्वती विद्या मंदिर शारदा विहार भोपाल",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "शारदा विहार",
+                "addressLocality": "भोपाल",
+                "addressRegion": "मध्य प्रदेश",
+                "addressCountry": "IN"
+            },
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 23.183373,
+                "longitude": 77.36068
+            }
+        },
+        "organizer": {
+            "@type": "Organization",
+            "name": "All World Gayatri Pariwar (AWGP)",
+            "alternateName": ["AWGP Yuva Prakoshth", "Divine India Youth Association", "DIYA", "अखिल विश्व गायत्री परिवार", "दिव्य भारत युवा संघ"],
+            "url": "://",
+            "telephone": "+919258360962",
+            "email": "youthcell@awgp.org",
+            "founder": {
+                "@type": "Person",
+                "name": "Pandit Shriram Sharma Acharya",
+                "alternateName": "पंदित श्रीराम शर्मा आचार्य"
+            }
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock",
+            "url": ":///register/"
+        },
+        "image": ":///static/images/logo.png",
+        "url": "://",
+        "keywords": "युवा चिंतन शिविर, AWGP, Yuva Prakoshth, भोपाल, आत्म विकास, नेतृत्व प्रशिक्षण"
+    }
+    </script>
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "All World Gayatri Pariwar - Yuva Chintan Shivir Bhopal",
+        "alternateName": ["AWGP Yuva Chintan Shivir", "DIYA Youth Camp Bhopal", "YCSMP", "गायत्री परिवार युवा शिविर भोपाल", "Provincial Yuva Chintan Shivir"],
+        "url": "://",
+        "logo": ":///static/images/logo.png",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+919258360962",
+            "contactType": "customer service",
+            "email": "youthcell@awgp.org",
+            "availableLanguage": ["Hindi", "English"]
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "भोपाल",
+            "addressRegion": "मध्य प्रदेश",
+            "addressCountry": "IN"
+        },
+        "sameAs": [
+            "https://wa.me/919258360962"
+        ]
+    }
+    </script>
+    
+</head>
+<body>
+    <div class="wrapper d-flex flex-column min-vh-100">
+        
+        <!-- Enhanced Navigation Header -->
+        <header class="main-header shadow-sm" data-aos="fade-down">
+            <nav class="navbar navbar-expand-lg ">
+                <div class="container">
+                    <!-- Brand Logo -->
+                    <a class="navbar-brand d-flex align-items-center" href="/">
+                        <img src="/static/images/logo.png" alt="Logo" width="60" height="60" class="me-2">
+                        <div>
+                            <div class="brand-title">प्रान्तीय युवा चिंतन शिविर भोपाल</div>
+                            <small class="brand-subtitle">Youth Thinking Camp Bhopal</small>
+                        </div>
+                    </a>
+                    
+                    <!-- Mobile Toggle Button -->
+                    <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="toggler-icon"></span>
+                        <span class="toggler-icon"></span>
+                        <span class="toggler-icon"></span>
+                    </button>
+
+                    <!-- Navigation Menu -->
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="/">
+                                    <i class="bi bi-house-door-fill me-1"></i>मुख्य पृष्ठ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="/events/">
+                                    <i class="bi bi-calendar-event me-1"></i>कार्यक्रम
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="/check-status/">
+                                    <i class="bi bi-search me-1"></i>स्थिति जांचें
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link modern-nav-link" href="/contact/">
+                                    <i class="bi bi-telephone me-1"></i>संपर्क
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link btn btn-register-nav dropdown-toggle ms-2" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-plus-fill me-1"></i>पंजीकरण करें
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="/register/">
+                                            <i class="bi bi-person-plus me-2"></i>
+                                            प्रतिभागी पंजीकरण
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/volunteer-register/">
+                                            <i class="bi bi-hand-thumbs-up me-2"></i>
+                                            समयदानी कार्यकर्ता पंजीकरण
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/organization-register/">
+                                            <i class="bi bi-building me-2"></i>
+                                            संगठन प्रतिनिधि पंजीकरण
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Warning Strip -->
+        
+
+        <!-- Progress Bar -->
+        <div class="reading-progress-bar" id="reading-progress"></div>
+
+        <!-- Flash Messages -->
+        
+
+        <!-- Main Content -->
+        <main class="main-content flex-grow-1">
+            
+<div class="preview-container">
+    <div class="preview-header">
+        <h1 class="preview-title"><i class="bi bi-eye"></i> Vehicle Pass Preview</h1>
+        <p class="preview-subtitle"><i class="bi bi-car-front"></i> वाहन पास प्रीव्यू</p>
+    </div>
+    
+    <!-- User Details Summary -->
+    <div class="user-details-summary" style="text-align: center; margin: 1rem 0; padding: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; font-size: 0.9rem; font-weight: 600;">
+        <span class="desktop-inline" style="color: #dc3545;"><i class="bi bi-person"></i> Dr Rajesh Amrute</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #28a745;"><i class="bi bi-phone"></i> 9752903051</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #007bff;"><i class="bi bi-car-front"></i> Mp04cv7765</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #fd7e14;"><i class="bi bi-tag"></i> प्रतिभागी</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #6f42c1;"><i class="bi bi-calendar-check"></i> Valid till 29 Oct 2025</span> <span class="desktop-bullet">•</span> 
+        <span class="desktop-inline" style="color: #20c997;"><i class="bi bi-check-circle"></i> अप्रूव</span>
+        
+        <div class="detail-row mobile-only">
+            <span style="color: #dc3545;"><i class="bi bi-person"></i> Dr Rajesh Amrute</span>
+            <span style="color: #28a745;"><i class="bi bi-phone"></i> 9752903051</span>
+        </div>
+        <div class="detail-row mobile-only">
+            <span style="color: #007bff;"><i class="bi bi-car-front"></i> Mp04cv7765</span>
+            <span style="color: #fd7e14;"><i class="bi bi-tag"></i> प्रतिभागी</span>
+        </div>
+        <div class="detail-row mobile-only">
+            <span style="color: #6f42c1;"><i class="bi bi-calendar-check"></i> Valid till 29 Oct 2025</span>
+            <span style="color: #20c997;"><i class="bi bi-check-circle"></i> अप्रूव</span>
+        </div>
+    </div>
+    
+    <!-- Vehicle Pass Preview -->
+    <div class="vehicle-pass-container">
+        <div class="vehicle-pass-preview">
+            <div class="vehicle-pass">
+                <!-- Background Image -->
+                
+                <img src="data:image/png;base64,test" alt="Vehicle Pass Background" class="background-image">
+                
+                
+                <div class="content-area">
+                    <!-- Pass Title Line -->
+                    <div class="pass-title-line">
+                        <span class="pass-text"><i class="bi bi-car-front"></i> वाहन पास</span>
+                        <span class="vehicle-number">Mp04cv7765</span>
+                    </div>
+                    
+                    <!-- User Type -->
+                    <div class="user-type">
+                        
+                            प्रतिभागी
+                        
+                    </div>
+                    
+                    <!-- Information Section -->
+                    <div class="info-section">
+                        <!-- QR Code Area -->
+                        <a href="test" target="_blank" class="qr-section" style="text-decoration: none; cursor: pointer;">
+                            <img src="data:image/png;base64,test" alt="QR Code" class="qr-code">
+                            <div class="scan-text"><i class="bi bi-qr-code-scan"></i> Scan</div>
+                        </a>
+                        
+                        <!-- Text Details -->
+                        <div class="text-details">
+                            <div class="info-line">
+                                <span class="info-label"><i class="bi bi-person"></i> Name:</span>
+                                <span class="info-value">Dr Rajesh Amrute</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="info-label"><i class="bi bi-phone"></i> Mobile:</span>
+                                <span class="info-value">9752903051</span>
+                            </div>
+                            <div class="validity"><i class="bi bi-clock"></i> Valid Till: 29-10-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Download Section -->
+    <div class="download-section">
+        <a href="test" class="download-btn download-protected" data-download-url="test">
+            <i class="bi bi-download"></i> Download Vehicle Pass
+        </a>
+        <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+            <i class="bi bi-file-earmark-image"></i> PNG Format <i class="bi bi-dot"></i> <i class="bi bi-printer"></i> Print Ready
+        </p>
+    </div>
+    
+
+</div>
+
+<script>
+// Direct DOB setting - bypass template blocks
+window.USER_DOB = '1989-06-25';
+console.log('🎯 Direct Template - USER_DOB set to:', window.USER_DOB);
+console.log('🎯 Direct Template - registration.date_of_birth:', 'June 25, 1989');
+</script>
+
+
+        </main>
+
+        <!-- Enhanced Footer -->
+        <footer class="modern-footer mt-auto" data-aos="fade-up">
+            <div class="footer-wave">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M0,0V6c0,21.6,291,111.46,741,110.26C1295.83,115.52,1200,6,1200,6V0Z" class="footer-wave-path"></path>
+                </svg>
+            </div>
+            
+            <div class="footer-content">
+                <div class="container py-5">
+                    <!-- Main Footer Content -->
+                    <div class="row mb-4">
+                        <div class="col-lg-4 mb-4">
+                            <div class="footer-brand">
+                                <img src="/static/images/logo.png" alt="Logo" width="50" height="50" class="mb-3">
+                                <h4 class="footer-title">प्रान्तीय युवा चिंतन शिविर भोपाल 2025</h4>
+                                <p class="footer-description">युवाओं के व्यक्तित्व विकास, आध्यात्मिक उन्नति और चरित्र निर्माण के लिए आयोजित विशेष शिविर कार्यक्रम।</p>
+                                
+                                <!-- Contact Links - Redirect to Contact Page -->
+                                <div class="contact-links">
+                                    <a href="/contact/" class="btn btn-success btn-sm me-2 mb-2" title="WhatsApp">
+                                        <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                                    </a>
+                                    <a href="/contact/" class="btn btn-primary btn-sm mb-2" title="Call">
+                                        <i class="bi bi-telephone-fill me-1"></i>Call
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <h5 class="footer-heading">पंजीकरण करें</h5>
+                            <div class="registration-buttons">
+                                <a href="/register/" class="btn btn-outline-light btn-sm mb-2 w-100">
+                                    <i class="bi bi-person-plus me-2"></i>प्रतिभागी पंजीकरण
+                                </a>
+                                <a href="/volunteer-register/" class="btn btn-outline-light btn-sm mb-2 w-100">
+                                    <i class="bi bi-hand-thumbs-up me-2"></i>समयदानी कार्यकर्ता
+                                </a>
+                                <a href="/organization-register/" class="btn btn-outline-light btn-sm mb-2 w-100">
+                                    <i class="bi bi-building me-2"></i>संगठन प्रतिनिधि
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-2 col-md-6 mb-4">
+                            <h5 class="footer-heading">Quick Links</h5>
+                            <a href="/check-status/" class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="bi bi-search me-2"></i>स्थिति जांचें
+                            </a>
+                            <a href="/contact/" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-telephone me-2"></i>संपर्क
+                            </a>
+                        </div>
+                        
+                        <div class="col-lg-3 mb-4">
+                            <h5 class="footer-heading">Contact Info</h5>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    <span>प्रान्तीय युवा चिंतन शिविर भोपाल 2025, मध्य प्रदेश</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    <a href="/contact/">संपर्क विवरण देखें</a>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope-fill"></i>
+                                    <a href="mailto:youthcell@awgp.org">youthcell@awgp.org</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer Bottom -->
+                    <div class="footer-bottom">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <p class="copyright">
+                                    &copy; 2025 प्रान्तीय युवा चिंतन शिविर भोपाल 2025 (Prantiya Youth Thinking Camp Bhopal 2025). All rights reserved.
+                                </p>
+
+
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        
+        <!-- SEO Keywords for Search Engine Indexing -->
+        
+
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" title="वापस ऊपर जाएं">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/animations.js"></script>
+    
+    <!-- Security Script -->
+    <script>
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.key === 's')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Disable drag and drop
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable text selection
+        document.onselectstart = function() {
+            return false;
+        };
+    </script>
+    
+    <!-- AOS Initialization -->
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 60,
+            easing: 'ease-out-cubic'
+        });
+        
+        function closeWarning(button) {
+            const warningStrip = button.parentElement.parentElement.parentElement;
+            const header = document.querySelector('.main-header');
+            const mainContent = document.querySelector('.main-content');
+            
+            warningStrip.style.display = 'none';
+            
+            // Force CSS override with !important
+            header.style.cssText = 'top: 0px !important; transition: top 0.3s ease !important;';
+            
+            if (window.innerWidth <= 575) {
+                mainContent.style.cssText = 'padding-top: 80px !important; transition: padding-top 0.3s ease !important;';
+            } else {
+                mainContent.style.cssText = 'padding-top: 100px !important; transition: padding-top 0.3s ease !important;';
+            }
+        }
+    </script>
+
+
+    
+<script>
+    // Set DOB immediately
+    window.USER_DOB = '1989-06-25';
+    console.log('🎯 Template - USER_DOB set to:', window.USER_DOB);
+    console.log('🎯 Template - registration.date_of_birth:', 'June 25, 1989');
+</script>
+<script src="/static/js/vehicle_pass_download.js"></script>
+
+</body>
+</html>

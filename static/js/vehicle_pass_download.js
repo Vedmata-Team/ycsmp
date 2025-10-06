@@ -2,18 +2,56 @@
 if (typeof VehiclePassDownloader === 'undefined') {
 class VehiclePassDownloader {
     constructor() {
+        console.log('🔧 VehiclePassDownloader constructor called');
+        console.log('🔧 window.USER_DOB at construction:', window.USER_DOB);
+        console.log('🔧 window.BACKUP_DOB:', window.BACKUP_DOB);
+        console.log('🔧 window.USER_DOB_FORCED:', window.USER_DOB_FORCED);
+        
         this.isDownloading = false;
         this.isVerified = false;
-        this.userDOB = window.USER_DOB;
-        this.init();
+        
+        // Try multiple sources for DOB
+        this.userDOB = window.USER_DOB || window.BACKUP_DOB || window.USER_DOB_FORCED;
+        
+        // If still undefined, try to get from DOM
+        if (!this.userDOB || this.userDOB === 'undefined') {
+            const dobElement = document.querySelector('#dob-data');
+            if (dobElement) {
+                this.userDOB = dobElement.dataset.userDob;
+                console.log('🔧 Got DOB from DOM:', this.userDOB);
+            } else {
+                // Try to get from any dob-data element
+                const anyDobElement = document.querySelector('[data-user-dob]');
+                if (anyDobElement) {
+                    this.userDOB = anyDobElement.dataset.userDob;
+                    console.log('🔧 Got DOB from any element:', this.userDOB);
+                }
+            }
+        }
+        
+        console.log('🔧 this.userDOB set to:', this.userDOB);
+        
+        // Delay initialization to ensure DOM is ready
+        setTimeout(() => {
+            console.log('🔧 Calling init() after timeout');
+            this.init();
+        }, 100);
     }
 
     init() {
+        console.log('🚀 VehiclePassDownloader init() called');
+        console.log('🚀 this.userDOB in init:', this.userDOB);
+        console.log('🚀 window.USER_DOB in init:', window.USER_DOB);
+        console.log('🚀 document.readyState:', document.readyState);
+        
         if (document.readyState === 'loading') {
+            console.log('🚀 DOM still loading, adding event listener');
             document.addEventListener('DOMContentLoaded', () => {
+                console.log('🚀 DOM loaded, attaching handlers');
                 this.attachDownloadHandlers();
             });
         } else {
+            console.log('🚀 DOM ready, attaching handlers immediately');
             this.attachDownloadHandlers();
         }
     }
@@ -75,8 +113,14 @@ class VehiclePassDownloader {
     }
 
     validateDOB(inputDOB) {
+        console.log('🔍 validateDOB called with:', inputDOB);
+        console.log('🔍 this.userDOB:', this.userDOB);
+        console.log('🔍 window.USER_DOB:', window.USER_DOB);
+        
         if (!this.userDOB) {
-            console.error('USER_DOB not set properly - validation failed');
+            console.error('❌ USER_DOB not set properly - validation failed');
+            console.error('❌ this.userDOB is:', this.userDOB);
+            console.error('❌ window.USER_DOB is:', window.USER_DOB);
             return false;
         }
         
@@ -339,6 +383,20 @@ class VehiclePassDownloader {
     }
 
     showDOBVerification(link) {
+        // Get DOB from the clicked link
+        const linkDOB = link.dataset.userDob;
+        if (linkDOB) {
+            this.userDOB = linkDOB;
+            console.log('🔧 Got DOB from clicked link:', this.userDOB);
+        } else if (link.dataset.regId) {
+            // Try to get DOB from registration-specific element
+            const regDobElement = document.querySelector(`#dob-data-${link.dataset.regId}`);
+            if (regDobElement) {
+                this.userDOB = regDobElement.dataset.userDob;
+                console.log('🔧 Got DOB from reg element:', this.userDOB);
+            }
+        }
+        
         const modal = document.createElement('div');
         modal.innerHTML = `
             <div style="
@@ -526,8 +584,29 @@ class VehiclePassDownloader {
     }
 }
 
-// Initialize the downloader
-if (typeof window.vehiclePassDownloader === 'undefined') {
-    window.vehiclePassDownloader = new VehiclePassDownloader();
-}
+// Initialize the downloader after DOM is ready
+console.log('🎆 Script loaded, window.USER_DOB:', window.USER_DOB);
+console.log('🎆 typeof window.USER_DOB:', typeof window.USER_DOB);
+console.log('🎆 document.readyState:', document.readyState);
+console.log('🎆 All window properties:', Object.keys(window).filter(k => k.includes('USER')));
+
+// Wait a bit for USER_DOB to be set
+setTimeout(function() {
+    console.log('🎆 After timeout, window.USER_DOB:', window.USER_DOB);
+    
+    if (document.readyState === 'loading') {
+        console.log('🎆 DOM loading, adding event listener');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎆 DOM loaded, creating VehiclePassDownloader');
+            if (typeof window.vehiclePassDownloader === 'undefined') {
+                window.vehiclePassDownloader = new VehiclePassDownloader();
+            }
+        });
+    } else {
+        console.log('🎆 DOM ready, creating VehiclePassDownloader immediately');
+        if (typeof window.vehiclePassDownloader === 'undefined') {
+            window.vehiclePassDownloader = new VehiclePassDownloader();
+        }
+    }
+}, 200);
 }

@@ -1,7 +1,8 @@
 <!-- Admin Vehicle Pass Download Script -->
 <script>
     // Pass user DOB to JavaScript for verification (admin context)
-    window.USER_DOB = '{{ user.date_of_birth|date:"Y-m-d"|default:"1995-12-04" }}'; // Admin DOB or default
+    window.USER_DOB = '{{ user.date_of_birth|date:"Y-m-d" }}'; // Admin DOB
+    console.log('Admin Vehicle Pass - USER_DOB set to:', window.USER_DOB);
 </script>
 <script src="{% static 'js/vehicle_pass_download.js' %}"></script>
 <script>

@@ -299,14 +299,9 @@ def vehicle_pass_preview(request, registration_id, vehicle_number):
             content_type='text/plain'
         )
     
-    # Check priority for vehicle conflicts
+    # Check priority for vehicle conflicts - allow preview but track primary user
     primary_user = get_primary_vehicle_user(vehicle_number)
-    if primary_user and primary_user.id != registration.id:
-        return HttpResponse(
-            f"Vehicle pass preview only available for primary user: {primary_user.full_name}.",
-            status=403,
-            content_type='text/plain'
-        )
+    is_primary_user = not primary_user or primary_user.id == registration.id
     
     # Generate QR code for vehicle verification
     vehicle_verify_url = f"https://ycsmp.in/vehicle-pass/verify/{registration.id}/{vehicle_number}/"
@@ -361,6 +356,8 @@ def vehicle_pass_preview(request, registration_id, vehicle_number):
         'validity_date': '29 अक्टूबर 2025',
         'download_url': f'/vehicle-pass/generate/{registration.id}/{vehicle_number}/',
         'qr_url': vehicle_verify_url,
+        'is_primary_user': is_primary_user,
+        'primary_user': primary_user,
     }
     
     return render(request, 'vehicle_pass/vehicle_pass_preview.html', context)

@@ -50,10 +50,18 @@ def registration_profile(request, profile_id):
         campaign_dict = dict(registration.CAMPAIGN_CHOICES)
         campaign_names = [campaign_dict.get(code, code) for code in registration.selected_campaigns]
     
+    # Check if user is primary vehicle user
+    is_primary_vehicle_user = True
+    if registration.vehicle_number:
+        from vehicle_pass.views import get_primary_vehicle_user
+        primary_user = get_primary_vehicle_user(registration.vehicle_number)
+        is_primary_vehicle_user = not primary_user or primary_user.id == registration.id
+    
     context = {
         'registration': registration,
         'vibhag_names': vibhag_names,
         'campaign_names': campaign_names,
+        'is_primary_vehicle_user': is_primary_vehicle_user,
     }
     
     return render(request, 'events/registration_profile.html', context)
