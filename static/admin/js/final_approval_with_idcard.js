@@ -58,39 +58,9 @@
         const transportMode = $('select[name="transport_mode"], #id_transport_mode').val() || 
                              $('.field-transport_mode .readonly').text().trim();
         
-        // Step 1: Generate ID Card
-        updateProgress('📄 Generating ID card...');
-        $.get(`/id/card/${registrationId}/`)
-            .done(function() {
-                updateProgress('✅ ID card generated successfully');
-                
-                // Step 2: Check vehicle pass requirement
-                if (vehicleNumber && 
-                    vehicleNumber.trim() !== '' && 
-                    vehicleNumber.trim() !== '-' && 
-                    transportMode === 'car') {
-                    
-                    updateProgress('🚗 Generating vehicle pass...');
-                    const encodedVehicle = encodeURIComponent(vehicleNumber);
-                    
-                    $.get(`/vehicle-pass/generate/${registrationId}/${encodedVehicle}/`)
-                        .done(function() {
-                            updateProgress('✅ Vehicle pass generated successfully');
-                            processApprovalStep(registrationId, formData);
-                        })
-                        .fail(function() {
-                            updateProgress('⚠️ Vehicle pass generation failed, continuing...');
-                            processApprovalStep(registrationId, formData);
-                        });
-                } else {
-                    updateProgress('⚠️ Vehicle pass skipped (no valid vehicle info)');
-                    processApprovalStep(registrationId, formData);
-                }
-            })
-            .fail(function() {
-                updateProgress('❌ ID card generation failed');
-                setTimeout(hideProgress, 3000);
-            });
+        // Skip document generation - will be done in email step
+        updateProgress('⚡ Skipping document generation - will generate in email...');
+        processApprovalStep(registrationId, formData);
     }
     
     function processApprovalStep(registrationId, formData) {
