@@ -30,3 +30,5 @@ sudo systemctl status nginx --no-pager -l
 
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Website: https://ycsmp.in"
+
+#python send_pending_emails.py (For approved user who are pending)
