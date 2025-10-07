@@ -130,8 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const paginationLinks = document.querySelectorAll('.paginator a');
         paginationLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                e.preventDefault();
                 const href = this.getAttribute('href');
+                
+                // Skip if href is null, empty, or just a fragment
+                if (!href || href === '#' || href.startsWith('#')) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                e.preventDefault();
                 const newUrl = addFiltersToUrl(href, getSavedFilters());
                 window.location.href = newUrl;
             });
@@ -141,8 +148,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortingLinks = document.querySelectorAll('#result_list th a');
         sortingLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                e.preventDefault();
                 const href = this.getAttribute('href');
+                
+                // Skip if href is null, empty, or just a fragment
+                if (!href || href === '#' || href.startsWith('#')) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                e.preventDefault();
                 const newUrl = addFiltersToUrl(href, getSavedFilters());
                 window.location.href = newUrl;
             });
@@ -193,16 +207,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function addFiltersToUrl(url, filters) {
-        const urlObj = new URL(url, window.location.origin);
-        
-        // Add saved filters to the URL
-        for (const key in filters) {
-            if (!urlObj.searchParams.has(key)) {
-                urlObj.searchParams.set(key, filters[key]);
+        try {
+            // Handle relative URLs and fragments
+            if (!url || url === '#' || url.startsWith('#')) {
+                return window.location.href;
             }
+            
+            const urlObj = new URL(url, window.location.origin);
+            
+            // Add saved filters to the URL
+            for (const key in filters) {
+                if (!urlObj.searchParams.has(key)) {
+                    urlObj.searchParams.set(key, filters[key]);
+                }
+            }
+            
+            return urlObj.toString();
+        } catch (e) {
+            console.warn('Error constructing URL:', e, 'Original URL:', url);
+            return window.location.href;
         }
-        
-        return urlObj.toString();
     }
     
     // Handle edit page redirects
