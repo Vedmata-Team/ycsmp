@@ -186,7 +186,7 @@ def send_approval_email_ultra_fast(registration):
         elapsed = time.time() - start_time
         logger.info(f"Total email process completed in {elapsed:.2f}s - Success: {success}")
         
-        # Log to database
+        # Log to database and update email_sent flag
         try:
             from .models import EmailLog
             EmailLog.objects.create(
@@ -196,8 +196,15 @@ def send_approval_email_ultra_fast(registration):
                 success=success,
                 error_message='' if success else 'Fast email system failure'
             )
+            
+            # Update email_sent flag if email was successful
+            if success:
+                from .models import EventRegistration
+                EventRegistration.objects.filter(pk=registration.pk).update(email_sent=True)
+                logger.info(f"Email_sent flag updated for registration {registration.pk}")
+                
         except Exception as log_error:
-            logger.error(f"Failed to log email: {log_error}")
+            logger.error(f"Failed to log email or update flag: {log_error}")
         
         return success
         
@@ -239,6 +246,15 @@ def send_simple_email_fast(registration):
         
         elapsed = time.time() - start_time
         logger.info(f"Simple email completed in {elapsed:.2f}s - Success: {success}")
+        
+        # Update email_sent flag if successful
+        if success:
+            try:
+                from .models import EventRegistration
+                EventRegistration.objects.filter(pk=registration.pk).update(email_sent=True)
+                logger.info(f"Simple email flag updated for registration {registration.pk}")
+            except Exception as flag_error:
+                logger.error(f"Failed to update email_sent flag: {flag_error}")
         
         return success
         

@@ -548,15 +548,19 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         updated += 1
                         
                         # IMPORTANT: Send email AFTER registration number is generated
-                        try:
-                            if registration.registration_number and send_registration_approval_email(registration, request.user):
-                                registration.email_sent = True
-                                registration.save(update_fields=['email_sent'])
-                                email_sent += 1
-                            elif not registration.registration_number:
-                                print(f"⚠️ Skipping email for {registration.email} - no registration number")
-                        except Exception as e:
-                            print(f"Email failed for {registration.email}: {e}")
+                        if registration.registration_number:
+                            try:
+                                if send_registration_approval_email(registration, request.user):
+                                    # Update email_sent flag in separate transaction to ensure it's saved
+                                    EventRegistration.objects.filter(pk=registration.pk).update(email_sent=True)
+                                    email_sent += 1
+                                    print(f"✅ Email sent and flag updated for {registration.email}")
+                                else:
+                                    print(f"❌ Email failed for {registration.email}")
+                            except Exception as e:
+                                print(f"❌ Email error for {registration.email}: {e}")
+                        else:
+                            print(f"⚠️ Skipping email for {registration.email} - no registration number")
                         
                         # Small delay between emails
                         time.sleep(0.3)
@@ -604,15 +608,19 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         updated += 1
                         
                         # IMPORTANT: Send email AFTER registration number is generated
-                        try:
-                            if registration.registration_number and send_registration_approval_email(registration, request.user):
-                                registration.email_sent = True
-                                registration.save(update_fields=['email_sent'])
-                                email_sent += 1
-                            elif not registration.registration_number:
-                                print(f"⚠️ Skipping email for {registration.email} - no registration number")
-                        except Exception as e:
-                            print(f"Email failed for {registration.email}: {e}")
+                        if registration.registration_number:
+                            try:
+                                if send_registration_approval_email(registration, request.user):
+                                    # Update email_sent flag in separate transaction to ensure it's saved
+                                    EventRegistration.objects.filter(pk=registration.pk).update(email_sent=True)
+                                    email_sent += 1
+                                    print(f"✅ Email sent and flag updated for {registration.email}")
+                                else:
+                                    print(f"❌ Email failed for {registration.email}")
+                            except Exception as e:
+                                print(f"❌ Email error for {registration.email}: {e}")
+                        else:
+                            print(f"⚠️ Skipping email for {registration.email} - no registration number")
                         
                         # Calculate progress
                         progress = int(((i + 1) / total) * 100)
