@@ -23,6 +23,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from events.sitemap_views import sitemap_view
 from vehicle_pass.views import vehicle_verify
+from events.streaming_views import stream_bulk_email
 
 def robots_txt(request):
     content = render_to_string('robots.txt')
@@ -36,6 +37,7 @@ urlpatterns = [
     path('id/', include('ID.urls')),
     path('vehicle-pass/', include('vehicle_pass.urls')),
     path('vehicle-verify/<int:registration_id>/<str:vehicle_number>/', vehicle_verify, name='vehicle_verify_direct'),
+    path('stream-bulk-email/', stream_bulk_email, name='stream_bulk_email'),
     path('', include('events.urls')),
 ]
 
