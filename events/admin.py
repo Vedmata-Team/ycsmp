@@ -65,7 +65,7 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
     class Media:
-        js = ('admin/js/bulk_approval_progress.js', 'admin/js/final_approval_with_idcard.js', 'admin/js/bulk_email_sender.js')
+        js = ('admin/js/bulk_approval_progress.js', 'admin/js/final_approval_with_idcard.js', 'admin/js/bulk_email_sender.js', 'admin/js/filter_persistence.js')
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
     list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
@@ -981,7 +981,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         return None
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        """Add approval buttons to change view context"""
+        """Add approval buttons to change view context and preserve filters"""
         extra_context = extra_context or {}
         
         if object_id:
@@ -989,12 +989,43 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             if obj:
                 extra_context['approval_buttons'] = self.get_approval_buttons(request, obj)
         
+        # Store filters in session for preservation
+        if request.GET:
+            filter_params = {}
+            for key, value in request.GET.items():
+                if key not in ['edit', '_popup', '_to_field']:
+                    filter_params[key] = value
+            if filter_params:
+                request.session['preserved_filters'] = filter_params
+        
         return super().change_view(request, object_id, form_url, extra_context)
+    
+    def get_preserved_filters(self, request):
+        """Get preserved filters from session or referer"""
+        preserved_filters = request.session.get('preserved_filters', {})
+        
+        if hasattr(request, 'META') and 'HTTP_REFERER' in request.META:
+            from urllib.parse import urlparse, parse_qs
+            referer = request.META['HTTP_REFERER']
+            parsed = urlparse(referer)
+            if 'eventregistration' in parsed.path:
+                query_params = parse_qs(parsed.query)
+                for key, values in query_params.items():
+                    if key not in ['edit', '_popup', '_to_field'] and values:
+                        preserved_filters[key] = values[0]
+        
+        if preserved_filters:
+            from urllib.parse import urlencode
+            return urlencode(preserved_filters)
+        return ''
     
     def response_change(self, request, obj):
         from django.http import HttpResponseRedirect
         from django.utils import timezone
         from django.contrib import messages
+        from django.urls import reverse
+        
+        preserved_filters = self.get_preserved_filters(request)
         
         # Handle custom approval buttons
         if '_approve_district' in request.POST:
@@ -1004,7 +1035,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj.district_approved_at = timezone.now()
                 obj.save()
                 messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been district approved.')
-            return HttpResponseRedirect(request.path)
+            redirect_url = request.path
+            if preserved_filters:
+                redirect_url += '?' + preserved_filters
+            return HttpResponseRedirect(redirect_url)
         
         elif '_approve_upzone' in request.POST:
             if obj.approval_status == 'district_approved':
@@ -1013,7 +1047,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj.upzone_approved_at = timezone.now()
                 obj.save()
                 messages.success(request, f'Registration {obj.registration_number or obj.full_name} has been upzone approved.')
-            return HttpResponseRedirect(request.path)
+            redirect_url = request.path
+            if preserved_filters:
+                redirect_url += '?' + preserved_filters
+            return HttpResponseRedirect(redirect_url)
         
         elif '_approve_final' in request.POST:
             if obj.approval_status == 'upzone_approved':
@@ -1023,16 +1060,36 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj._skip_auto_email = True  # Skip auto email
                 obj.save()  # This will generate registration number and send email
                 messages.success(request, f'Registration {obj.registration_number} has been finally approved and email sent.')
-            return HttpResponseRedirect(request.path)
+            redirect_url = request.path
+            if preserved_filters:
+                redirect_url += '?' + preserved_filters
+            return HttpResponseRedirect(redirect_url)
         
         elif '_reject' in request.POST:
             if obj.approval_status != 'approved':
                 obj.approval_status = 'rejected'
                 obj.save()
                 messages.warning(request, f'Registration {obj.registration_number or obj.full_name} has been rejected.')
-            return HttpResponseRedirect(request.path)
+            redirect_url = request.path
+            if preserved_filters:
+                redirect_url += '?' + preserved_filters
+            return HttpResponseRedirect(redirect_url)
         
-        return super().response_change(request, obj)
+        # Handle regular save operations
+        response = super().response_change(request, obj)
+        
+        # If redirecting to changelist, preserve filters
+        if isinstance(response, HttpResponseRedirect):
+            redirect_url = response.url
+            changelist_url = reverse('admin:events_eventregistration_changelist')
+            
+            if redirect_url == changelist_url or redirect_url.startswith(changelist_url):
+                if preserved_filters and '?' not in redirect_url:
+                    response.url = redirect_url + '?' + preserved_filters
+                elif preserved_filters and '?' in redirect_url:
+                    response.url = redirect_url + '&' + preserved_filters
+        
+        return response
     
     def save_model(self, request, obj, form, change):
         from django.utils import timezone
@@ -1115,6 +1172,15 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     export_pdf.short_description = "Export to PDF"
     
     def changelist_view(self, request, extra_context=None):
+        # Store current filters in session
+        if request.GET:
+            filter_params = {}
+            for key, value in request.GET.items():
+                if key not in ['_popup', '_to_field']:
+                    filter_params[key] = value
+            if filter_params:
+                request.session['preserved_filters'] = filter_params
+        
         if '_facets' not in request.GET:
             from django.http import HttpResponseRedirect
             from django.urls import reverse

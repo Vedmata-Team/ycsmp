@@ -8,6 +8,21 @@
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold text-dark">संपर्क सूची</h1>
         <p class="lead text-muted">किसी भी सहायता के लिए संपर्क करें</p>
+        
+        <!-- Special Notice for Asweekrati Panjeeyan -->
+        <div class="alert border-0 shadow-sm mb-4 rejection-notice">
+            <div class="zoom-text">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>अस्वीकृत पंजीकरण के लिए कृपया कुलमी जी से संपर्क करें</strong>
+                <br>
+                <small>For rejected registration, kindly contact Kulmi Ji</small>
+                <br>
+                <a href="tel:+917987543913" class="btn btn-danger btn-sm mt-2">
+                    <i class="fas fa-phone me-1"></i> 7987 543913
+                </a>
+            </div>
+        </div>
+        
         <hr class="w-25 mx-auto" style="height: 3px; background: linear-gradient(90deg, #007bff, #28a745);">
     </div>
 
@@ -367,6 +382,22 @@
     border-color: #007bff !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,123,255,0.1);
+}
+
+.rejection-notice {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2) !important;
+    border: 2px solid #d32f2f !important;
+    color: #b71c1c !important;
+}
+
+.zoom-text {
+    animation: zoomInOut 2s ease-in-out infinite;
+    font-weight: bold;
+}
+
+@keyframes zoomInOut {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 @media (max-width: 768px) {
