@@ -1139,6 +1139,12 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             # Save the model
             super().save_model(request, obj, form, change)
             
+            # Generate registration number if approved and not already generated
+            if obj.approval_status == 'approved' and not obj.registration_number:
+                obj.registration_number = obj.generate_registration_number()
+                obj.is_confirmed = True
+                obj.save(update_fields=['registration_number', 'is_confirmed'])
+            
             messages.success(request, f'Registration {obj.registration_number or obj.full_name} saved successfully.')
             
         except Exception as e:

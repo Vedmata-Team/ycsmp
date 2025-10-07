@@ -605,8 +605,7 @@ class EventRegistration(models.Model):
     
     def generate_registration_number(self):
         """Generate registration number: YCS/YCSV-StateCode-CityPrefix-SerialNumber"""
-        from django.db import transaction
-        import time
+        import datetime
         import random
         
         state_code = self.state_code or 'XX'
@@ -622,49 +621,31 @@ class EventRegistration(models.Model):
         
         prefix = f"{base_prefix}-{state_code}-{city_prefix}-"
         
-        # Try multiple times to generate unique number
-        for attempt in range(10):
+        # Get existing registrations with same prefix
+        existing_numbers = EventRegistration.objects.filter(
+            registration_number__startswith=prefix,
+            registration_number__isnull=False
+        ).exclude(pk=self.pk or 0).values_list('registration_number', flat=True)
+        
+        max_serial = 0
+        for reg_number in existing_numbers:
             try:
-                with transaction.atomic():
-                    # Use select_for_update to prevent race conditions
-                    existing_regs = EventRegistration.objects.select_for_update().filter(
-                        city=self.city,
-                        registration_type=self.registration_type,
-                        registration_number__isnull=False
-                    ).exclude(pk=self.pk or 0)
-                    
-                    max_serial = 0
-                    
-                    for reg in existing_regs:
-                        if reg.registration_number and reg.registration_number.startswith(prefix):
-                            try:
-                                serial_part = reg.registration_number.split('-')[-1]
-                                serial_num = int(serial_part)
-                                max_serial = max(max_serial, serial_num)
-                            except (ValueError, IndexError):
-                                continue
-                    
-                    new_serial = max_serial + 1
-                    new_reg_number = f"{prefix}{new_serial:04d}"
-                    
-                    # Double check if this number already exists
-                    if EventRegistration.objects.filter(registration_number=new_reg_number).exists():
-                        # Add small delay and retry
-                        time.sleep(random.uniform(0.1, 0.5))
-                        continue
-                    
-                    return new_reg_number
-                    
-            except Exception as e:
-                print(f"Registration number generation attempt {attempt + 1} failed: {e}")
-                if attempt < 9:  # Not the last attempt
-                    time.sleep(random.uniform(0.1, 0.5))
-                    continue
-                else:
-                    # Last attempt failed, use timestamp-based fallback
-                    import datetime
-                    timestamp = int(datetime.datetime.now().timestamp() * 1000) % 10000
-                    return f"{prefix}{timestamp:04d}"
+                serial_part = reg_number.split('-')[-1]
+                serial_num = int(serial_part)
+                max_serial = max(max_serial, serial_num)
+            except (ValueError, IndexError):
+                continue
+        
+        # Generate new serial number
+        new_serial = max_serial + 1
+        new_reg_number = f"{prefix}{new_serial:04d}"
+        
+        # Check if this number already exists (safety check)
+        while EventRegistration.objects.filter(registration_number=new_reg_number).exists():
+            new_serial += 1
+            new_reg_number = f"{prefix}{new_serial:04d}"
+        
+        return new_reg_number
 
 class EventImage(models.Model):
     event = models.ForeignKey(Event, related_name='images', on_delete=models.CASCADE)
