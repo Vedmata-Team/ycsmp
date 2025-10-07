@@ -1,7 +1,15 @@
-// Optimized final approval workflow - generates documents simultaneously and sends email with attachments
-(function($) {
+// Clean Approval Workflow - Handles approval with email sending
+(function() {
     'use strict';
-
+    
+    // Check if jQuery is available
+    if (typeof django === 'undefined' || typeof django.jQuery === 'undefined') {
+        console.warn('Django jQuery not available, approval workflow disabled');
+        return;
+    }
+    
+    const $ = django.jQuery;
+    
     function showProgress(message) {
         const modal = $(`
             <div id="approval-modal" style="
@@ -43,31 +51,14 @@
         $('#approval-modal').remove();
     }
 
-    function getVehicleNumber() {
-        const field = $('input[name="vehicle_number"], #id_vehicle_number');
-        if (field.length) return field.val();
-        const text = $('.field-vehicle_number .readonly');
-        if (text.length) return text.text().trim();
-        return null;
-    }
-
     function processApproval(registrationId, formData) {
         showProgress('🚀 Starting approval process...');
         
-        const vehicleNumber = getVehicleNumber();
-        const transportMode = $('select[name="transport_mode"], #id_transport_mode').val() || 
-                             $('.field-transport_mode .readonly').text().trim();
-        
-        // Skip document generation - will be done in email step
-        updateProgress('⚡ Skipping document generation - will generate in email...');
-        processApprovalStep(registrationId, formData);
-    }
-    
-    function processApprovalStep(registrationId, formData) {
-        // Step 3: Process approval
+        // Process approval step
         updateProgress('📝 Processing approval status...');
         
-        let approvalData = formData + '&_skip_auto_email=1';
+        // Ensure approval status is set to approved
+        let approvalData = formData;
         if (!approvalData.includes('approval_status=approved')) {
             approvalData = approvalData.replace(/approval_status=[^&]*/, 'approval_status=approved');
             if (!approvalData.includes('approval_status=')) {
@@ -75,40 +66,54 @@
             }
         }
         
+        // Submit the form data
         $.post(window.location.href, approvalData)
             .done(function() {
                 updateProgress('✅ Approval status updated successfully');
                 
-                // Step 4: Send ultra-fast email
-                updateProgress('⚡ Sending ultra-fast email...');
+                // Send email
+                updateProgress('📧 Sending approval email...');
                 
                 $.get(`/resend-email/${registrationId}/`)
                     .done(function() {
-                        updateProgress('✅ Ultra-fast email sent! Redirecting...');
+                        updateProgress('✅ Email sent successfully! Redirecting...');
                         
                         setTimeout(function() {
                             hideProgress();
-                            alert('🎉 Process completed successfully!\n\n✅ ID card generated\n✅ Vehicle pass handled\n✅ Approval processed\n⚡ Ultra-fast email sent');
+                            alert('🎉 Process completed successfully!\\n\\n✅ Registration approved\\n📧 Email sent');
                             
+                            // Redirect based on button clicked
                             const url = window.location.href;
                             if (url.includes('_continue=1')) {
                                 window.location.reload();
                             } else if (url.includes('_addanother=1')) {
                                 window.location.href = window.location.pathname.replace(/\/\d+\/change\//, '/add/');
                             } else {
-                                // Go back to changelist - filters will be auto-restored
-                                window.location.href = window.location.pathname.replace(/\/\d+\/change\//, '/');
+                                // Go back to changelist with preserved filters
+                                const changelist = window.location.pathname.replace(/\/\d+\/change\//, '/');
+                                const params = new URLSearchParams(window.location.search);
+                                params.delete('_continue');
+                                params.delete('_addanother');
+                                const queryString = params.toString();
+                                window.location.href = changelist + (queryString ? '?' + queryString : '');
                             }
                         }, 1000);
                     })
                     .fail(function() {
-                        updateProgress('❌ Ultra-fast email failed');
-                        setTimeout(hideProgress, 3000);
+                        updateProgress('⚠️ Email sending failed, but approval saved');
+                        setTimeout(function() {
+                            hideProgress();
+                            alert('Registration approved but email failed to send.\\nYou can resend the email manually.');
+                            window.location.reload();
+                        }, 2000);
                     });
             })
             .fail(function() {
                 updateProgress('❌ Approval processing failed');
-                setTimeout(hideProgress, 3000);
+                setTimeout(function() {
+                    hideProgress();
+                    alert('Failed to process approval. Please try again.');
+                }, 2000);
             });
     }
 
@@ -117,15 +122,22 @@
         return field.length && field.val() === 'approved';
     }
 
+    function getRegistrationId() {
+        const match = window.location.pathname.match(/\/(\d+)\/change\//);
+        return match ? match[1] : null;
+    }
+
     $(document).ready(function() {
+        console.log('Approval workflow loaded');
+        
         // Handle final approval button
         $('input[name="_approve_final"]').click(function(e) {
             e.preventDefault();
             const form = $(this).closest('form');
             const formData = form.serialize() + '&_approve_final=1';
-            const registrationId = window.location.pathname.match(/\/(\d+)\/change\//)[1];
+            const registrationId = getRegistrationId();
             
-            if (confirm('Process final approval with ID card, vehicle pass and email?')) {
+            if (registrationId && confirm('Process final approval and send email?')) {
                 processApproval(registrationId, formData);
             }
         });
@@ -137,13 +149,13 @@
                 const form = $(this).closest('form');
                 const buttonName = $(this).attr('name');
                 const formData = form.serialize() + '&' + buttonName + '=1';
-                const registrationId = window.location.pathname.match(/\/(\d+)\/change\//)[1];
+                const registrationId = getRegistrationId();
                 
-                if (confirm('Process approval with ID card, vehicle pass and email?')) {
+                if (registrationId && confirm('Process approval and send email?')) {
                     processApproval(registrationId, formData);
                 }
             }
         });
     });
 
-})(django.jQuery);
+})();

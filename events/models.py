@@ -689,6 +689,7 @@ class EmailLog(models.Model):
         ('approval', 'Approval Email'),
         ('rejection', 'Rejection Email'),
         ('resend', 'Resend Email'),
+        ('apology', 'Apology Email'),
     ]
     
     registration = models.ForeignKey(EventRegistration, on_delete=models.CASCADE, related_name='email_logs')

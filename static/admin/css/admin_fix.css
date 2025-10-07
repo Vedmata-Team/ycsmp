@@ -1,0 +1,59 @@
+/* Admin Navigation Fix CSS */
+
+/* Ensure all admin links work properly */
+.admin a,
+.breadcrumbs a,
+.paginator a,
+.model-link,
+.addlink,
+.changelink {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix form elements */
+form {
+    pointer-events: auto !important;
+}
+
+input[type="submit"],
+button[type="submit"],
+.submit-row input,
+.submit-row button {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Ensure navigation works */
+.breadcrumbs {
+    pointer-events: auto !important;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+/* Fix pagination */
+.paginator {
+    pointer-events: auto !important;
+}
+
+.paginator a:hover {
+    background-color: #f0f0f0;
+}
+
+/* Ensure admin buttons work */
+.button,
+.default,
+.deletelink,
+.addlink,
+.changelink {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix any overlay issues */
+.admin-navigation-fix {
+    z-index: 1000;
+    position: relative;
+}

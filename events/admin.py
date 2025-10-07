@@ -65,7 +65,10 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):
     class Media:
-        js = ('admin/js/bulk_approval_progress.js', 'admin/js/final_approval_with_idcard.js', 'admin/js/bulk_email_sender.js', 'admin/js/filter_persistence.js')
+        js = ('admin/js/admin_navigation_fix.js', 'admin/js/final_approval_with_idcard.js')
+        css = {
+            'all': ('admin/css/admin_fix.css',)
+        }
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
     list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
@@ -1084,10 +1087,13 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             changelist_url = reverse('admin:events_eventregistration_changelist')
             
             if redirect_url == changelist_url or redirect_url.startswith(changelist_url):
-                if preserved_filters and '?' not in redirect_url:
-                    response.url = redirect_url + '?' + preserved_filters
-                elif preserved_filters and '?' in redirect_url:
-                    response.url = redirect_url + '&' + preserved_filters
+                from urllib.parse import urlencode
+                preserved = request.session.get('admin_filters_eventregistration', {})
+                preserved['_facets'] = 'True'
+                
+                if preserved:
+                    new_url = changelist_url + '?' + urlencode(preserved)
+                    response = HttpResponseRedirect(new_url)
         
         return response
     
@@ -1095,69 +1101,50 @@ class EventRegistrationAdmin(admin.ModelAdmin):
         from django.utils import timezone
         from django.contrib import messages
         
-        # Check if is_confirmed status changed to True
-        send_confirmation_email = False
-        if change and obj.pk:
-            old_obj = EventRegistration.objects.get(pk=obj.pk)
-            if not old_obj.is_confirmed and obj.is_confirmed and not old_obj.email_sent:
-                send_confirmation_email = True
-        elif not change and obj.is_confirmed:
-            send_confirmation_email = True
-        
-        # Auto-assign approvers when status changes
-        if obj.approval_status == 'district_approved' and not obj.district_approver:
-            obj.district_approver = request.user
-            if not obj.district_approved_at:
-                obj.district_approved_at = timezone.now()
-        
-        if obj.approval_status == 'upzone_approved' and not obj.upzone_approver:
-            obj.upzone_approver = request.user
-            if not obj.upzone_approved_at:
-                obj.upzone_approved_at = timezone.now()
-        
-        # Auto-assign final_approver when status changes to approved
-        if obj.approval_status == 'approved' and not obj.final_approver:
-            obj.final_approver = request.user
-            if not obj.final_approved_at:
-                obj.final_approved_at = timezone.now()
-        
-        # Check if JavaScript requested to skip auto email or if email already sent
-        if request.POST.get('_skip_auto_email') or obj.email_sent:
-            obj._skip_auto_email = True
-        
-        # Auto-assign rejected_by when status changes to rejected
-        if obj.approval_status == 'rejected' and not getattr(obj, 'rejected_by', None):
-            obj.rejected_by = request.user
-            if not getattr(obj, 'rejected_at', None):
-                obj.rejected_at = timezone.now()
-        
-        # For non-superusers, ensure they can only set themselves as approver
-        if not request.user.is_superuser:
-            if obj.approval_status == 'district_approved':
+        try:
+            # Auto-assign approvers when status changes
+            if obj.approval_status == 'district_approved' and not obj.district_approver:
                 obj.district_approver = request.user
-            elif obj.approval_status == 'upzone_approved':
+                if not obj.district_approved_at:
+                    obj.district_approved_at = timezone.now()
+            
+            if obj.approval_status == 'upzone_approved' and not obj.upzone_approver:
                 obj.upzone_approver = request.user
-            elif obj.approval_status == 'approved':
+                if not obj.upzone_approved_at:
+                    obj.upzone_approved_at = timezone.now()
+            
+            # Auto-assign final_approver when status changes to approved
+            if obj.approval_status == 'approved' and not obj.final_approver:
                 obj.final_approver = request.user
-            elif obj.approval_status == 'rejected':
+                if not obj.final_approved_at:
+                    obj.final_approved_at = timezone.now()
+            
+            # Auto-assign rejected_by when status changes to rejected
+            if obj.approval_status == 'rejected' and not getattr(obj, 'rejected_by', None):
                 obj.rejected_by = request.user
-        
-        super().save_model(request, obj, form, change)
-        
-        # Send email when is_confirmed is set to True (only if not already sent)
-        if send_confirmation_email and not obj.email_sent:
-            from .email_utils import send_registration_approval_email
-            try:
-                if send_registration_approval_email(obj):
-                    obj.email_sent = True
-                    EventRegistration.objects.filter(pk=obj.pk).update(email_sent=True)
-                    messages.success(request, f'Registration confirmed and email sent to {obj.email}')
-                else:
-                    messages.warning(request, f'Registration confirmed but failed to send email to {obj.email}')
-            except Exception as e:
-                messages.error(request, f'Registration confirmed but email error: {str(e)}')
-        elif obj.email_sent:
-            messages.info(request, f'Email already sent to {obj.email}')
+                if not getattr(obj, 'rejected_at', None):
+                    obj.rejected_at = timezone.now()
+            
+            # For non-superusers, ensure they can only set themselves as approver
+            if not request.user.is_superuser:
+                if obj.approval_status == 'district_approved':
+                    obj.district_approver = request.user
+                elif obj.approval_status == 'upzone_approved':
+                    obj.upzone_approver = request.user
+                elif obj.approval_status == 'approved':
+                    obj.final_approver = request.user
+                elif obj.approval_status == 'rejected':
+                    obj.rejected_by = request.user
+            
+            # Save the model
+            super().save_model(request, obj, form, change)
+            
+            messages.success(request, f'Registration {obj.registration_number or obj.full_name} saved successfully.')
+            
+        except Exception as e:
+            messages.error(request, f'Error saving registration: {str(e)}')
+            # Still try to save with basic Django save
+            super().save_model(request, obj, form, change)
     
     def export_csv(self, request, queryset):
         return ExportManager.export_to_csv(queryset, 'registrations_export', REGISTRATION_FIELDS)
@@ -1179,13 +1166,23 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 if key not in ['_popup', '_to_field']:
                     filter_params[key] = value
             if filter_params:
-                request.session['preserved_filters'] = filter_params
+                request.session['admin_filters_eventregistration'] = filter_params
         
+        # Auto-add facets and restore filters
         if '_facets' not in request.GET:
             from django.http import HttpResponseRedirect
             from django.urls import reverse
+            from urllib.parse import urlencode
+            
             url = reverse('admin:events_eventregistration_changelist')
-            return HttpResponseRedirect(f'{url}?_facets=True')
+            params = {'_facets': 'True'}
+            
+            # Add preserved filters
+            preserved = request.session.get('admin_filters_eventregistration', {})
+            params.update(preserved)
+            
+            return HttpResponseRedirect(f'{url}?{urlencode(params)}')
+        
         return super().changelist_view(request, extra_context)
 
 @admin.register(EventImage)

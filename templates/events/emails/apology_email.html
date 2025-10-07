@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
+        .content { padding: 20px 0; }
+        .highlight { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>प्रान्तीय युवा चिंतन शिविर भोपाल 2025</h2>
+            <h3>पंजीकरण स्थिति अपडेट</h3>
+        </div>
+        
+        <div class="content">
+            <p>प्रिय {{ registration.full_name }},</p>
+            
+            <p>नमस्कार!</p>
+            
+            <p>हमें खुशी है कि आपने <strong>प्रान्तीय युवा चिंतन शिविर भोपाल 2025</strong> के लिए पंजीकरण कराया है।</p>
+            
+            <div class="highlight">
+                <p><strong>महत्वपूर्ण सूचना:</strong> पहले आपका पंजीकरण कुछ <strong>तकनीकी समस्याओं</strong> के कारण अस्वीकृत दिखाया गया था। हमें इसके लिए खेद है।</p>
+            </div>
+            
+            <p><strong>अच्छी खबर:</strong> अब आपका पंजीकरण स्थिति <strong>प्रतीक्षारत</strong> है और हमारी टीम इसकी समीक्षा कर रही है।</p>
+            
+            <p><strong>आपकी पंजीकरण जानकारी:</strong></p>
+            <ul>
+                <li><strong>नाम:</strong> {{ registration.full_name }}</li>
+                <li><strong>मोबाइल:</strong> {{ registration.phone }}</li>
+                <li><strong>राज्य:</strong> {{ registration.state }}</li>
+                <li><strong>जिला:</strong> {{ registration.city }}</li>
+                <li><strong>वर्तमान स्थिति:</strong> प्रतीक्षारत</li>
+            </ul>
+            
+            <p>हम जल्द ही आपको अंतिम स्थिति की जानकारी देंगे।</p>
+            
+            <p>असुविधा के लिए खेद और धन्यवाद!</p>
+            
+            <p><strong>युवा चिंतन शिविर टीम</strong><br>
+            प्रान्तीय युवा चिंतन शिविर भोपाल 2025</p>
+        </div>
+        
+        <div class="footer">
+            <p>यह एक स्वचालित ईमेल है। कृपया इसका उत्तर न दें।</p>
+            <p>अधिक जानकारी के लिए: <a href="https://ycsmp.in">ycsmp.in</a></p>
+        </div>
+    </div>
+</body>
+</html>
+    

@@ -1,59 +1,29 @@
-// Admin Filter Persistence System
-// Maintains filter state across page reloads and actions
+// Admin Filter Persistence System - Fixed Version
+// Maintains filter state without interfering with normal navigation
 
 document.addEventListener('DOMContentLoaded', function() {
     const STORAGE_KEY = 'admin_filters_' + window.location.pathname;
     
+    // Only initialize on changelist pages
+    if (!window.location.pathname.includes('/changelist/') && !window.location.pathname.endsWith('/')) {
+        return;
+    }
+    
     // Initialize filter persistence
     initFilterPersistence();
     
-    // Handle edit page redirects
-    handleEditPageRedirects();
-    
     function initFilterPersistence() {
-        // Restore filters on page load
-        restoreFilters();
-        
-        // Save filters when they change
+        // Save filters when they change (but don't auto-restore)
         attachFilterListeners();
         
         // Handle form submissions to preserve filters
         handleFormSubmissions();
         
-        // Handle pagination and sorting links
-        handleNavigationLinks();
+        // Only handle specific navigation links, not all links
+        handleSpecificNavigationLinks();
     }
     
-    function restoreFilters() {
-        const savedFilters = getSavedFilters();
-        if (!savedFilters || Object.keys(savedFilters).length === 0) {
-            return;
-        }
-        
-        // Check if current URL already has filters
-        const currentParams = new URLSearchParams(window.location.search);
-        let hasFilters = false;
-        
-        // Check if any filter parameters exist in current URL
-        for (const key in savedFilters) {
-            if (currentParams.has(key)) {
-                hasFilters = true;
-                break;
-            }
-        }
-        
-        // Only restore if no filters are currently applied
-        if (!hasFilters) {
-            const newUrl = buildUrlWithFilters(savedFilters);
-            if (newUrl !== window.location.href) {
-                window.location.href = newUrl;
-                return;
-            }
-        }
-        
-        // Update saved filters with current state
-        saveCurrentFilters();
-    }
+    // Removed auto-restore functionality to prevent unwanted redirects
     
     function attachFilterListeners() {
         // Listen to filter sidebar links
@@ -125,41 +95,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function handleNavigationLinks() {
-        // Handle pagination links
+    function handleSpecificNavigationLinks() {
+        // Only handle pagination and sorting - don't interfere with other navigation
         const paginationLinks = document.querySelectorAll('.paginator a');
+        const sortingLinks = document.querySelectorAll('#result_list th a');
+        
+        // Handle pagination links only if they're within the same admin section
         paginationLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                
-                // Skip if href is null, empty, or just a fragment
-                if (!href || href === '#' || href.startsWith('#')) {
+            const href = link.getAttribute('href');
+            if (href && href.includes('eventregistration') && !href.includes('/change/') && !href.includes('/add/')) {
+                link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    return;
-                }
-                
-                e.preventDefault();
-                const newUrl = addFiltersToUrl(href, getSavedFilters());
-                window.location.href = newUrl;
-            });
+                    const newUrl = addFiltersToUrl(href, getSavedFilters());
+                    window.location.href = newUrl;
+                });
+            }
         });
         
-        // Handle column sorting links
-        const sortingLinks = document.querySelectorAll('#result_list th a');
+        // Handle column sorting links only within the same admin section
         sortingLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                
-                // Skip if href is null, empty, or just a fragment
-                if (!href || href === '#' || href.startsWith('#')) {
+            const href = link.getAttribute('href');
+            if (href && href.includes('eventregistration') && !href.includes('/change/') && !href.includes('/add/')) {
+                link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    return;
-                }
-                
-                e.preventDefault();
-                const newUrl = addFiltersToUrl(href, getSavedFilters());
-                window.location.href = newUrl;
-            });
+                    const newUrl = addFiltersToUrl(href, getSavedFilters());
+                    window.location.href = newUrl;
+                });
+            }
         });
     }
     
@@ -229,23 +191,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Handle edit page redirects
+    // Simplified edit page handling - only preserve filters in forms, don't redirect
     function handleEditPageRedirects() {
-        // Check if we're on an edit page and need to redirect back with filters
         if (window.location.pathname.includes('/change/')) {
             const savedFilters = getSavedFilters();
             if (Object.keys(savedFilters).length > 0) {
-                // Add hidden inputs to preserve filters on save
+                // Only add hidden inputs to preserve filters, don't manipulate navigation
                 const forms = document.querySelectorAll('form[method="post"]');
                 forms.forEach(form => {
-                    for (const key in savedFilters) {
-                        const existingInput = form.querySelector(`input[name="${key}"]`);
-                        if (!existingInput) {
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = key;
-                            input.value = savedFilters[key];
-                            form.appendChild(input);
+                    // Only add filter preservation to admin forms, not all forms
+                    if (form.action.includes('admin') || form.action === '') {
+                        for (const key in savedFilters) {
+                            const existingInput = form.querySelector(`input[name="${key}"]`);
+                            if (!existingInput) {
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = key;
+                                input.value = savedFilters[key];
+                                form.appendChild(input);
+                            }
                         }
                     }
                 });
