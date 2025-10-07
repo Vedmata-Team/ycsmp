@@ -5,7 +5,7 @@ from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Event, EventRegistration, EventImage, ApprovalUser, ResponsibilityOption, VibhagOption, UpZone, Country, State, City
-from .admin_filters import UpZoneFilter
+from .admin_filters import UpZoneFilter, RegistrationNumberFilter
 from .models_location import StateDistrict
 from .models_warning import SiteWarning
 
@@ -70,7 +70,7 @@ class EventRegistrationAdmin(admin.ModelAdmin):
             'all': ('admin/css/admin_fix.css',)
         }
     list_display = ('registration_number_with_buttons', 'full_name', 'registration_type', 'email', 'phone', 'village_taluka', 'city', 'state', 'country', 'arrival_date', 'approval_status_with_user', 'email_sent', 'registration_date_ist', 'is_confirmed')
-    list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date')
+    list_filter = ('approval_status', 'event', 'registration_type', 'state', 'city', UpZoneFilter, 'responsibility', 'gender', 'email_sent', 'is_confirmed', 'registration_date', 'transport_mode', 'previous_shivir', 'arrival_date', RegistrationNumberFilter)
     actions = ['approve_district', 'approve_upzone', 'approve_final', 'reject_registration', 'send_email_to_approved', 'export_csv', 'export_excel', 'export_pdf']
     search_fields = ('full_name', 'email', 'phone', 'registration_number', 'education', 'occupation')
     readonly_fields = ('registration_number', 'registration_date', 'approval_history_display')
@@ -547,12 +547,14 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         registration.save()
                         updated += 1
                         
-                        # Send combined email with attachments
+                        # IMPORTANT: Send email AFTER registration number is generated
                         try:
-                            if send_registration_approval_email(registration, request.user):
+                            if registration.registration_number and send_registration_approval_email(registration, request.user):
                                 registration.email_sent = True
                                 registration.save(update_fields=['email_sent'])
                                 email_sent += 1
+                            elif not registration.registration_number:
+                                print(f"⚠️ Skipping email for {registration.email} - no registration number")
                         except Exception as e:
                             print(f"Email failed for {registration.email}: {e}")
                         
@@ -601,12 +603,14 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                         registration.save()
                         updated += 1
                         
-                        # Send combined email with attachments
+                        # IMPORTANT: Send email AFTER registration number is generated
                         try:
-                            if send_registration_approval_email(registration, request.user):
+                            if registration.registration_number and send_registration_approval_email(registration, request.user):
                                 registration.email_sent = True
                                 registration.save(update_fields=['email_sent'])
                                 email_sent += 1
+                            elif not registration.registration_number:
+                                print(f"⚠️ Skipping email for {registration.email} - no registration number")
                         except Exception as e:
                             print(f"Email failed for {registration.email}: {e}")
                         
@@ -857,6 +861,8 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     
 
     
+
+    
     def get_responsibility_name(self, obj):
         if obj.registration_type == 'organization_representative' and obj.responsibility:
             return obj.responsibility.name
@@ -1060,9 +1066,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 obj.approval_status = 'approved'
                 obj.final_approver = request.user
                 obj.final_approved_at = timezone.now()
-                obj._skip_auto_email = True  # Skip auto email
-                obj.save()  # This will generate registration number and send email
-                messages.success(request, f'Registration {obj.registration_number} has been finally approved and email sent.')
+                obj._skip_auto_email = True  # Skip auto email - JS will handle it
+                obj.save()
+                messages.success(request, f'Registration {obj.registration_number} has been finally approved.')
             redirect_url = request.path
             if preserved_filters:
                 redirect_url += '?' + preserved_filters
@@ -1136,6 +1142,9 @@ class EventRegistrationAdmin(admin.ModelAdmin):
                 elif obj.approval_status == 'rejected':
                     obj.rejected_by = request.user
             
+            # Skip auto email to prevent duplicates
+            obj._skip_auto_email = True
+            
             # Save the model
             super().save_model(request, obj, form, change)
             
@@ -1163,6 +1172,10 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     def export_pdf(self, request, queryset):
         return ExportManager.export_to_pdf(queryset, 'registrations_export', REGISTRATION_FIELDS, 'Registrations Report')
     export_pdf.short_description = "Export to PDF"
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs
     
     def changelist_view(self, request, extra_context=None):
         # Store current filters in session
