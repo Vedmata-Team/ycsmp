@@ -1,0 +1,80 @@
+username,full_name,email,is_active,last_login,date_joined,state_code,is_super_approver,is_state_approver,is_district_approver,is_upzone_approver,districts,upzone,district_approvals_total,district_participant,district_volunteer,district_organization,upzone_approvals_total,upzone_participant,upzone_volunteer,upzone_organization,final_approvals_total,final_participant,final_volunteer,final_organization,total_approvals,total_rejections,rejected_participant,rejected_volunteer,rejected_organization,total_activity_count,active_hours,approval_rate,rejection_rate,activity_per_hour
+prabhakant_sah_samanvayak_mp,PRABHAKANT TIWARI,prabhakant_sah_samanvayak_mp@ycsmp.in,True,2025-10-08 03:40:10.767302+00:00,2025-10-01 19:42:53.643306+00:00,MP,False,False,False,True,,MP Central Zone,5,1,3,1,301,13,138,150,1,0,0,1,307,142,2,5,135,449,13.75,68.37,31.63,32.65
+MPZONE,Jagdish Kulmi,,True,2025-10-08 14:26:36.570808+00:00,2025-09-23 07:32:17+00:00,MP,False,True,False,False,,,0,0,0,0,2,0,0,2,272,13,110,149,274,17,11,2,4,291,0.45,94.16,5.84,646.67
+abhishek_mp,ABHISHEK PARMAR,,True,2025-10-08 11:58:43.471366+00:00,2025-10-05 08:33:30+00:00,MP,True,True,True,True,,,0,0,0,0,0,0,0,0,155,152,2,1,155,0,0,0,0,155,5.4,100.0,0.0,28.7
+amar_mp,AMAR DHAKAD,,True,2025-10-08 18:34:17.474503+00:00,2025-10-05 08:33:26+00:00,MP,True,True,True,True,,,0,0,0,0,0,0,0,0,146,146,0,0,146,0,0,0,0,146,4.86,100.0,0.0,30.04
+pankesh_mp,PANKESH GHODKI,,True,2025-10-07 14:07:17.065132+00:00,2025-10-05 08:33:28+00:00,MP,True,True,True,True,,,0,0,0,0,0,0,0,0,140,139,1,0,140,0,0,0,0,140,3.55,100.0,0.0,39.44
+Anmol_mp,Anmol Pathak,anmolpathak10@gmail.com,True,2025-10-08 13:25:38.270264+00:00,2025-09-25 07:10:39+00:00,MP,True,True,True,True,,जबलपुर उपजोन,0,0,0,0,0,0,0,0,71,71,0,0,71,2,2,0,0,73,2.02,97.26,2.74,36.14
+govind_mp,GOVIND VISHWAKARMA,,True,2025-10-07 15:05:44.268521+00:00,2025-10-05 08:33:29+00:00,MP,True,True,True,True,,,0,0,0,0,2,2,0,0,56,53,2,1,58,0,0,0,0,58,1.35,100.0,0.0,42.96
+Ambekar_mp,Ambekar,,True,2025-10-07 16:41:05.572151+00:00,2025-09-26 12:27:57+00:00,MP,True,False,False,False,Bhopal,MP Central Zone,2,1,1,0,1,0,1,0,46,43,2,1,49,0,0,0,0,49,2.75,100.0,0.0,17.82
+vivek_chaudhary,No Name,,True,2025-10-08 04:18:21.067380+00:00,2025-10-01 08:32:52+00:00,MP,True,False,False,False,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+jabalpur_upzone,No Name,,True,2025-09-18 21:49:23.488391+00:00,2025-09-18 20:41:50+00:00,MP,False,False,False,True,,जबलपुर उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0,0,0.0
+amarkantak_upzone,No Name,,True,,2025-09-18 20:41:48.112861+00:00,MP,False,False,False,True,,अमरकंटक उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+parjhudi_upzone,No Name,,True,,2025-09-18 20:41:49.010918+00:00,MP,False,False,False,True,,परखुड़ी उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+chhindwara_upzone,No Name,,True,,2025-09-18 20:41:49.911479+00:00,MP,False,False,False,True,,छिंदवाड़ा उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+tikamgarh_upzone,No Name,,True,,2025-09-18 20:41:51.709989+00:00,MP,False,False,False,True,,टीकमगढ़ उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+guna_upzone,No Name,,True,,2025-09-18 20:41:52.611255+00:00,MP,False,False,False,True,,गुना उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+gwalior_upzone,No Name,,True,,2025-09-18 20:41:53.508775+00:00,MP,False,False,False,True,,ग्वालियर उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+omkareshwar_upzone,No Name,,True,,2025-09-18 20:41:54.408472+00:00,MP,False,False,False,True,,ओमकारेश्वर उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+indore_upzone,No Name,,True,,2025-09-18 20:41:55.308986+00:00,MP,False,False,False,True,,इंदौर उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+ujjain_upzone,No Name,,True,,2025-09-18 20:41:56.208844+00:00,MP,False,False,False,True,,उज्जैन उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+alirajpur_mp_approver,Alirajpur District Approver,alirajpur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:25.898535+00:00,MP,False,False,True,False,Alirajpur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+agar_mp_approver,Agar District Approver,agar_mp_approver@ycsmp.in,True,2025-10-02 11:04:07.157454+00:00,2025-10-01 10:01:25.200034+00:00,MP,False,False,True,False,Agar,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+anuppur_mp_approver,Anuppur District Approver,anuppur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:26.602086+00:00,MP,False,False,True,False,Anuppur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+ashoknagar_mp_approver,Ashoknagar District Approver,ashoknagar_mp_approver@ycsmp.in,True,,2025-10-01 10:01:27.299824+00:00,MP,False,False,True,False,Ashoknagar,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+balaghat_mp_approver,Balaghat District Approver,balaghat_mp_approver@ycsmp.in,True,,2025-10-01 10:01:27.997462+00:00,MP,False,False,True,False,Balaghat,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+bhopal_upzone,No Name,,True,2025-10-05 08:50:09.566255+00:00,2025-09-18 20:41:57+00:00,MP,False,False,False,True,,भोपाल उपजोन,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+betul_mp_approver,Betul District Approver,betul_mp_approver@ycsmp.in,True,,2025-10-01 10:01:29.417906+00:00,MP,False,False,True,False,Betul,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+bhind_mp_approver,Bhind District Approver,bhind_mp_approver@ycsmp.in,True,,2025-10-01 10:01:30.098795+00:00,MP,False,False,True,False,Bhind,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+bhopal_mp_approver,Bhopal District Approver,bhopal_mp_approver@ycsmp.in,True,,2025-10-01 10:01:30.797366+00:00,MP,False,False,True,False,Bhopal,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+burhanpur_mp_approver,Burhanpur District Approver,burhanpur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:31.499278+00:00,MP,False,False,True,False,Burhanpur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+chhatarpur_mp_approver,Chhatarpur District Approver,chhatarpur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:32.197744+00:00,MP,False,False,True,False,Chhatarpur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+chhindwara_mp_approver,Chhindwara District Approver,chhindwara_mp_approver@ycsmp.in,True,,2025-10-01 10:01:32.898322+00:00,MP,False,False,True,False,Chhindwara,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+damoh_mp_approver,Damoh District Approver,damoh_mp_approver@ycsmp.in,True,,2025-10-01 10:01:33.597763+00:00,MP,False,False,True,False,Damoh,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+datia_mp_approver,Datia District Approver,datia_mp_approver@ycsmp.in,True,,2025-10-01 10:01:34.298426+00:00,MP,False,False,True,False,Datia,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+dewas_mp_approver,Dewas District Approver,dewas_mp_approver@ycsmp.in,True,,2025-10-01 10:01:35.000064+00:00,MP,False,False,True,False,Dewas,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+dhar_mp_approver,Dhar District Approver,dhar_mp_approver@ycsmp.in,True,,2025-10-01 10:01:35.699026+00:00,MP,False,False,True,False,Dhar,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+dindori_mp_approver,Dindori District Approver,dindori_mp_approver@ycsmp.in,True,,2025-10-01 10:01:36.397730+00:00,MP,False,False,True,False,Dindori,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+guna_mp_approver,Guna District Approver,guna_mp_approver@ycsmp.in,True,,2025-10-01 10:01:37.099023+00:00,MP,False,False,True,False,Guna,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+gwalior_mp_approver,Gwalior District Approver,gwalior_mp_approver@ycsmp.in,True,,2025-10-01 10:01:37.797722+00:00,MP,False,False,True,False,Gwalior,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+harda_mp_approver,Harda District Approver,harda_mp_approver@ycsmp.in,True,,2025-10-01 10:01:38.498064+00:00,MP,False,False,True,False,Harda,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+indore_mp_approver,Indore District Approver,indore_mp_approver@ycsmp.in,True,,2025-10-01 10:01:39.198375+00:00,MP,False,False,True,False,Indore,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+jabalpur_mp_approver,Jabalpur District Approver,jabalpur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:39.903778+00:00,MP,False,False,True,False,Jabalpur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+jhabua_mp_approver,Jhabua District Approver,jhabua_mp_approver@ycsmp.in,True,,2025-10-01 10:01:40.597366+00:00,MP,False,False,True,False,Jhabua,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+barwani_mp_approver,Barwani District Approver,barwani_mp_approver@ycsmp.in,True,2025-10-01 21:08:08.178292+00:00,2025-10-01 10:01:28.697429+00:00,MP,False,False,True,False,Barwani,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+khandwa_mp_approver,Khandwa District Approver,khandwa_mp_approver@ycsmp.in,True,,2025-10-01 10:01:42.097645+00:00,MP,False,False,True,False,Khandwa,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+khargone_mp_approver,Khargone District Approver,khargone_mp_approver@ycsmp.in,True,,2025-10-01 10:01:42.798853+00:00,MP,False,False,True,False,Khargone,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+maihar_mp_approver,Maihar District Approver,maihar_mp_approver@ycsmp.in,True,,2025-10-01 10:01:43.497535+00:00,MP,False,False,True,False,Maihar,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mandla_mp_approver,Mandla District Approver,mandla_mp_approver@ycsmp.in,True,,2025-10-01 10:01:44.198720+00:00,MP,False,False,True,False,Mandla,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mandsaur_mp_approver,Mandsaur District Approver,mandsaur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:44.898586+00:00,MP,False,False,True,False,Mandsaur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mauganj_mp_approver,Mauganj District Approver,mauganj_mp_approver@ycsmp.in,True,,2025-10-01 10:01:45.597951+00:00,MP,False,False,True,False,Mauganj,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+morena_mp_approver,Morena District Approver,morena_mp_approver@ycsmp.in,True,,2025-10-01 10:01:46.298303+00:00,MP,False,False,True,False,Morena,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+narmadapuram_mp_approver,Narmadapuram District Approver,narmadapuram_mp_approver@ycsmp.in,True,,2025-10-01 10:01:46.997490+00:00,MP,False,False,True,False,Narmadapuram,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+narsimhapur_mp_approver,Narsimhapur District Approver,narsimhapur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:47.697297+00:00,MP,False,False,True,False,Narsimhapur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+narsinghpur_mp_approver,Narsinghpur District Approver,narsinghpur_mp_approver@ycsmp.in,True,,2025-10-01 10:01:48.397686+00:00,MP,False,False,True,False,Narsinghpur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+neemuch_mp_approver,Neemuch District Approver,neemuch_mp_approver@ycsmp.in,True,,2025-10-01 10:01:49.097202+00:00,MP,False,False,True,False,Neemuch,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+niwadi_mp_approver,Niwadi District Approver,niwadi_mp_approver@ycsmp.in,True,,2025-10-01 10:01:50.703457+00:00,MP,False,False,True,False,Niwadi,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+pandhurna_mp_approver,Pandhurna District Approver,pandhurna_mp_approver@ycsmp.in,True,,2025-10-01 10:01:53.028137+00:00,MP,False,False,True,False,Pandhurna,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+panna_mp_approver,Panna District Approver,panna_mp_approver@ycsmp.in,True,,2025-10-01 10:01:54.497112+00:00,MP,False,False,True,False,Panna,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+raisen_mp_approver,Raisen District Approver,raisen_mp_approver@ycsmp.in,True,,2025-10-01 10:01:56.698666+00:00,MP,False,False,True,False,Raisen,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+rajgarh_mp_approver,Rajgarh District Approver,rajgarh_mp_approver@ycsmp.in,True,,2025-10-01 10:01:57.898428+00:00,MP,False,False,True,False,Rajgarh,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+ratlam_mp_approver,Ratlam District Approver,ratlam_mp_approver@ycsmp.in,True,,2025-10-01 10:01:58.598778+00:00,MP,False,False,True,False,Ratlam,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+rewa_mp_approver,Rewa District Approver,rewa_mp_approver@ycsmp.in,True,,2025-10-01 10:01:59.297429+00:00,MP,False,False,True,False,Rewa,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+sagar_mp_approver,Sagar District Approver,sagar_mp_approver@ycsmp.in,True,,2025-10-01 10:01:59.997283+00:00,MP,False,False,True,False,Sagar,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+satna_mp_approver,Satna District Approver,satna_mp_approver@ycsmp.in,True,,2025-10-01 10:02:00.697476+00:00,MP,False,False,True,False,Satna,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+sehore_mp_approver,Sehore District Approver,sehore_mp_approver@ycsmp.in,True,,2025-10-01 10:02:01.396420+00:00,MP,False,False,True,False,Sehore,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+seoni_mp_approver,Seoni District Approver,seoni_mp_approver@ycsmp.in,True,,2025-10-01 10:02:02.096553+00:00,MP,False,False,True,False,Seoni,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+shahdol_mp_approver,Shahdol District Approver,shahdol_mp_approver@ycsmp.in,True,,2025-10-01 10:02:02.897224+00:00,MP,False,False,True,False,Shahdol,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+shajapur_mp_approver,Shajapur District Approver,shajapur_mp_approver@ycsmp.in,True,,2025-10-01 10:02:03.597923+00:00,MP,False,False,True,False,Shajapur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+sheopur_mp_approver,Sheopur District Approver,sheopur_mp_approver@ycsmp.in,True,,2025-10-01 10:02:04.297140+00:00,MP,False,False,True,False,Sheopur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+shivpuri_mp_approver,Shivpuri District Approver,shivpuri_mp_approver@ycsmp.in,True,,2025-10-01 10:02:04.998367+00:00,MP,False,False,True,False,Shivpuri,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+sidhi_mp_approver,Sidhi District Approver,sidhi_mp_approver@ycsmp.in,True,,2025-10-01 10:02:05.697615+00:00,MP,False,False,True,False,Sidhi,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+singrauli_mp_approver,Singrauli District Approver,singrauli_mp_approver@ycsmp.in,True,,2025-10-01 10:02:06.397944+00:00,MP,False,False,True,False,Singrauli,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+tikamgarh_mp_approver,Tikamgarh District Approver,tikamgarh_mp_approver@ycsmp.in,True,,2025-10-01 10:02:07.096212+00:00,MP,False,False,True,False,Tikamgarh,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+ujjain_mp_approver,Ujjain District Approver,ujjain_mp_approver@ycsmp.in,True,,2025-10-01 10:02:07.798042+00:00,MP,False,False,True,False,Ujjain,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+umaria_mp_approver,Umaria District Approver,umaria_mp_approver@ycsmp.in,True,,2025-10-01 10:02:08.497504+00:00,MP,False,False,True,False,Umaria,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+vidisha_mp_approver,Vidisha District Approver,vidisha_mp_approver@ycsmp.in,True,,2025-10-01 10:02:09.196630+00:00,MP,False,False,True,False,Vidisha,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+katni_mp_approver,Katni District Approver,katni_mp_approver@ycsmp.in,True,,2025-10-01 10:01:41.398736+00:00,MP,False,False,True,False,Katni,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+Ashish,Ashish Singh,ashish.awgp@gmail.com,True,2025-09-24 17:32:03+00:00,2025-07-15 07:21:08+00:00,MP,True,False,True,False,Jabalpur,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+rajesh_samanvayak_mp,RAJESH PATEL,rajesh_samanvayak_mp@ycsmp.in,True,2025-10-08 12:26:13.671633+00:00,2025-10-01 19:42:52.845424+00:00,MP,False,False,False,True,,MP Central Zone,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+rc_gayakwad_sah_samanvayak_mp,RC GAYAKWAD,rc_gayakwad_sah_samanvayak_mp@ycsmp.in,True,2025-10-07 11:39:09.169831+00:00,2025-10-01 19:42:54.342810+00:00,MP,False,False,False,True,,MP Central Zone,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0,0,0,0

@@ -33,3 +33,4 @@ echo "🌐 Website: https://ycsmp.in"
 
 #python send_pending_emails.py (For approved user who are pending)
 #python detect_and_send_rejection_emails.py
+#python approval_user_activity_report.py
