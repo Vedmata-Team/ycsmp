@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from events.models import EventRegistration
-import pandas as pd
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 import os
 from datetime import datetime
 
@@ -57,94 +58,143 @@ class Command(BaseCommand):
             self.stdout.write(f'Approved users: {approved_users.count()}')
             self.stdout.write(f'Non-approved users: {non_approved_users.count()}')
 
-            # Prepare data for Excel
-            def prepare_registration_data(registrations):
-                data = []
-                for reg in registrations:
-                    row = {
-                        'Registration Number': reg.registration_number or 'Not Generated',
-                        'Full Name': reg.full_name,
-                        'Phone': reg.phone,
-                        'Email': reg.email,
-                        'Date of Birth': reg.date_of_birth.strftime('%d/%m/%Y') if reg.date_of_birth else '',
-                        'Gender': reg.get_gender_display(),
-                        'Registration Type': reg.get_registration_type_display(),
-                        'Event': reg.event.title,
-                        'State': reg.state,
-                        'District/City': reg.city,
-                        'Village/Taluka': reg.village_taluka,
-                        'Country': reg.country,
-                        'Education': reg.get_education_display(),
-                        'Occupation': reg.occupation or '',
-                        'Transport Mode': reg.get_transport_mode_display(),
-                        'Vehicle Number': reg.vehicle_number or '',
-                        'Arrival Date': reg.get_arrival_date_display(),
-                        'Previous Shivir': 'Yes' if reg.previous_shivir else 'No',
-                        'Gayatri Diksha': 'Yes' if reg.gayatri_diksha else ('No' if reg.gayatri_diksha is False else 'Not Specified'),
-                        'Special Skills': reg.special_skills_other or '',
-                        'Selected Campaigns': reg.get_campaign_names(),
-                        'Selected Vibhags': reg.get_vibhag_names(),
-                        'Responsibility': reg.responsibility.name if reg.responsibility else '',
-                        'Volunteer Start Date': reg.volunteer_start_date.strftime('%d/%m/%Y') if reg.volunteer_start_date else '',
-                        'Volunteer End Date': reg.volunteer_end_date.strftime('%d/%m/%Y') if reg.volunteer_end_date else '',
-                        'Interested in Volunteering': 'Yes' if reg.interested_in_volunteering else 'No',
-                        'Volunteering Details': reg.volunteering_details or '',
-                        'Approval Status': reg.get_approval_status_display(),
-                        'District Approver': reg.district_approver.get_full_name() if reg.district_approver else '',
-                        'District Approved At': reg.district_approved_at.strftime('%d/%m/%Y %H:%M') if reg.district_approved_at else '',
-                        'UpZone Approver': reg.upzone_approver.get_full_name() if reg.upzone_approver else '',
-                        'UpZone Approved At': reg.upzone_approved_at.strftime('%d/%m/%Y %H:%M') if reg.upzone_approved_at else '',
-                        'Final Approver': reg.final_approver.get_full_name() if reg.final_approver else '',
-                        'Final Approved At': reg.final_approved_at.strftime('%d/%m/%Y %H:%M') if reg.final_approved_at else '',
-                        'Rejected By': reg.rejected_by.get_full_name() if reg.rejected_by else '',
-                        'Rejected At': reg.rejected_at.strftime('%d/%m/%Y %H:%M') if reg.rejected_at else '',
-                        'Rejection Reason': reg.rejection_reason or '',
-                        'Registration Date': reg.registration_date.strftime('%d/%m/%Y %H:%M'),
-                        'Payment Status': 'Paid' if reg.payment_status else 'Pending',
-                        'Email Sent': 'Yes' if reg.email_sent else 'No',
-                        'Is Confirmed': 'Yes' if reg.is_confirmed else 'No',
-                        'Aadhar Upload Type': reg.aadhar_upload_type or '',
-                        'Aadhar Full URL': reg.aadhar_full or '',
-                        'Aadhar Front URL': reg.aadhar_front or '',
-                        'Aadhar Back URL': reg.aadhar_back or '',
-                        'Passport Photo URL': reg.passport_photo or '',
-                    }
-                    data.append(row)
-                return data
-
-            # Create Excel writer
-            with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
-                # Approved users sheet
-                if approved_users.exists():
-                    approved_data = prepare_registration_data(approved_users)
-                    approved_df = pd.DataFrame(approved_data)
-                    approved_df.to_excel(writer, sheet_name='Approved Users', index=False)
-                    self.stdout.write(f'✓ Approved users sheet created with {len(approved_data)} records')
-
-                # Non-approved users sheet
-                if non_approved_users.exists():
-                    non_approved_data = prepare_registration_data(non_approved_users)
-                    non_approved_df = pd.DataFrame(non_approved_data)
-                    non_approved_df.to_excel(writer, sheet_name='Non-Approved Users', index=False)
-                    self.stdout.write(f'✓ Non-approved users sheet created with {len(non_approved_data)} records')
-
-                # Summary sheet
-                summary_data = [
-                    ['Total Registrations', all_registrations.count()],
-                    ['Approved Users', approved_users.count()],
-                    ['Pending Users', all_registrations.filter(approval_status='pending').count()],
-                    ['District Approved Users', all_registrations.filter(approval_status='district_approved').count()],
-                    ['UpZone Approved Users', all_registrations.filter(approval_status='upzone_approved').count()],
-                    ['Rejected Users', all_registrations.filter(approval_status='rejected').count()],
-                    ['Participants', all_registrations.filter(registration_type='participant').count()],
-                    ['Volunteers', all_registrations.filter(registration_type='volunteer').count()],
-                    ['Organization Representatives', all_registrations.filter(registration_type='organization_representative').count()],
-                    ['Export Date', timezone.now().strftime('%d/%m/%Y %H:%M:%S')],
+            # Create Excel workbook
+            wb = Workbook()
+            
+            # Define headers
+            headers = [
+                'Registration Number', 'Full Name', 'Phone', 'Email', 'Date of Birth', 'Gender',
+                'Registration Type', 'Event', 'State', 'District/City', 'Village/Taluka', 'Country',
+                'Education', 'Occupation', 'Transport Mode', 'Vehicle Number', 'Arrival Date',
+                'Previous Shivir', 'Gayatri Diksha', 'Special Skills', 'Selected Campaigns',
+                'Selected Vibhags', 'Responsibility', 'Volunteer Start Date', 'Volunteer End Date',
+                'Interested in Volunteering', 'Volunteering Details', 'Approval Status',
+                'District Approver', 'District Approved At', 'UpZone Approver', 'UpZone Approved At',
+                'Final Approver', 'Final Approved At', 'Rejected By', 'Rejected At', 'Rejection Reason',
+                'Registration Date', 'Payment Status', 'Email Sent', 'Is Confirmed',
+                'Aadhar Upload Type', 'Aadhar Full URL', 'Aadhar Front URL', 'Aadhar Back URL', 'Passport Photo URL'
+            ]
+            
+            def get_registration_row(reg):
+                return [
+                    reg.registration_number or 'Not Generated',
+                    reg.full_name,
+                    reg.phone,
+                    reg.email,
+                    reg.date_of_birth.strftime('%d/%m/%Y') if reg.date_of_birth else '',
+                    reg.get_gender_display(),
+                    reg.get_registration_type_display(),
+                    reg.event.title,
+                    reg.state,
+                    reg.city,
+                    reg.village_taluka,
+                    reg.country,
+                    reg.get_education_display(),
+                    reg.occupation or '',
+                    reg.get_transport_mode_display(),
+                    reg.vehicle_number or '',
+                    reg.get_arrival_date_display(),
+                    'Yes' if reg.previous_shivir else 'No',
+                    'Yes' if reg.gayatri_diksha else ('No' if reg.gayatri_diksha is False else 'Not Specified'),
+                    reg.special_skills_other or '',
+                    reg.get_campaign_names(),
+                    reg.get_vibhag_names(),
+                    reg.responsibility.name if reg.responsibility else '',
+                    reg.volunteer_start_date.strftime('%d/%m/%Y') if reg.volunteer_start_date else '',
+                    reg.volunteer_end_date.strftime('%d/%m/%Y') if reg.volunteer_end_date else '',
+                    'Yes' if reg.interested_in_volunteering else 'No',
+                    reg.volunteering_details or '',
+                    reg.get_approval_status_display(),
+                    reg.district_approver.get_full_name() if reg.district_approver else '',
+                    reg.district_approved_at.strftime('%d/%m/%Y %H:%M') if reg.district_approved_at else '',
+                    reg.upzone_approver.get_full_name() if reg.upzone_approver else '',
+                    reg.upzone_approved_at.strftime('%d/%m/%Y %H:%M') if reg.upzone_approved_at else '',
+                    reg.final_approver.get_full_name() if reg.final_approver else '',
+                    reg.final_approved_at.strftime('%d/%m/%Y %H:%M') if reg.final_approved_at else '',
+                    reg.rejected_by.get_full_name() if reg.rejected_by else '',
+                    reg.rejected_at.strftime('%d/%m/%Y %H:%M') if reg.rejected_at else '',
+                    reg.rejection_reason or '',
+                    reg.registration_date.strftime('%d/%m/%Y %H:%M'),
+                    'Paid' if reg.payment_status else 'Pending',
+                    'Yes' if reg.email_sent else 'No',
+                    'Yes' if reg.is_confirmed else 'No',
+                    reg.aadhar_upload_type or '',
+                    reg.aadhar_full or '',
+                    reg.aadhar_front or '',
+                    reg.aadhar_back or '',
+                    reg.passport_photo or '',
                 ]
+            
+            # Create approved users sheet
+            if approved_users.exists():
+                ws_approved = wb.active
+                ws_approved.title = "Approved Users"
                 
-                summary_df = pd.DataFrame(summary_data, columns=['Metric', 'Count'])
-                summary_df.to_excel(writer, sheet_name='Summary', index=False)
-                self.stdout.write('✓ Summary sheet created')
+                # Add headers with styling
+                header_font = Font(bold=True)
+                header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+                
+                for col, header in enumerate(headers, 1):
+                    cell = ws_approved.cell(row=1, column=col, value=header)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                
+                # Add data
+                for row_num, reg in enumerate(approved_users, 2):
+                    row_data = get_registration_row(reg)
+                    for col, value in enumerate(row_data, 1):
+                        ws_approved.cell(row=row_num, column=col, value=value)
+                
+                self.stdout.write(f'✓ Approved users sheet created with {approved_users.count()} records')
+            
+            # Create non-approved users sheet
+            if non_approved_users.exists():
+                ws_non_approved = wb.create_sheet("Non-Approved Users")
+                
+                # Add headers with styling
+                header_font = Font(bold=True)
+                header_fill = PatternFill(start_color="D9534F", end_color="D9534F", fill_type="solid")
+                
+                for col, header in enumerate(headers, 1):
+                    cell = ws_non_approved.cell(row=1, column=col, value=header)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                
+                # Add data
+                for row_num, reg in enumerate(non_approved_users, 2):
+                    row_data = get_registration_row(reg)
+                    for col, value in enumerate(row_data, 1):
+                        ws_non_approved.cell(row=row_num, column=col, value=value)
+                
+                self.stdout.write(f'✓ Non-approved users sheet created with {non_approved_users.count()} records')
+            
+            # Create summary sheet
+            ws_summary = wb.create_sheet("Summary")
+            summary_data = [
+                ['Metric', 'Count'],
+                ['Total Registrations', all_registrations.count()],
+                ['Approved Users', approved_users.count()],
+                ['Pending Users', all_registrations.filter(approval_status='pending').count()],
+                ['District Approved Users', all_registrations.filter(approval_status='district_approved').count()],
+                ['UpZone Approved Users', all_registrations.filter(approval_status='upzone_approved').count()],
+                ['Rejected Users', all_registrations.filter(approval_status='rejected').count()],
+                ['Participants', all_registrations.filter(registration_type='participant').count()],
+                ['Volunteers', all_registrations.filter(registration_type='volunteer').count()],
+                ['Organization Representatives', all_registrations.filter(registration_type='organization_representative').count()],
+                ['Export Date', timezone.now().strftime('%d/%m/%Y %H:%M:%S')],
+            ]
+            
+            for row_num, (metric, count) in enumerate(summary_data, 1):
+                ws_summary.cell(row=row_num, column=1, value=metric)
+                ws_summary.cell(row=row_num, column=2, value=count)
+                if row_num == 1:  # Header row
+                    ws_summary.cell(row=row_num, column=1).font = Font(bold=True)
+                    ws_summary.cell(row=row_num, column=2).font = Font(bold=True)
+            
+            self.stdout.write('✓ Summary sheet created')
+            
+            # Save the workbook
+            wb.save(filepath)
 
             self.stdout.write(
                 self.style.SUCCESS(f'✅ Export completed successfully!')
