@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}धन्यवाद - युवा चिंतन शिविर 2025{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container { max-width: 600px; margin: 50px auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; padding: 50px; }
+    .success-icon { font-size: 80px; margin-bottom: 30px; }
+    .success-title { color: #28a745; font-size: 32px; font-weight: 700; margin-bottom: 20px; }
+    .success-message { font-size: 18px; color: #6c757d; margin-bottom: 30px; }
+    .btn-home { background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%); border: none; padding: 15px 40px; border-radius: 50px; color: white; font-weight: 700; text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="success-container">
+            <div class="success-icon">🎉</div>
+            <h1 class="success-title">धन्यवाद {{ user_name }} जी!</h1>
+            <p class="success-message">
+                आपकी प्रतिक्रिया सफलतापूर्वक प्राप्त हो गई है।<br>
+                {{ user_name }} जी, आपके सुझाव हमारे लिए अत्यंत मूल्यवान हैं।<br><br>
+                <strong>🙏 आपका सहयोग अमूल्य है!</strong><br>
+                <em>आशा है कि शिविर का अनुभव प्रेरणादायक रहा!</em>
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="https://whatsapp.com/channel/0029Vb6nlTe9hXFC8R0pN00P" target="_blank" class="btn" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;">
+                    <i class="bi bi-whatsapp" style="font-size: 1.2rem;"></i>
+                    WhatsApp चैनल जॉइन करें
+                </a>
+                <a href="/" class="btn btn-home">मुख्य पृष्ठ पर जाएं</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // Clear localStorage after successful submission
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('feedback_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    </script>
+{% endblock %}

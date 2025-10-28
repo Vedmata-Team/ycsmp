@@ -183,10 +183,13 @@ class Command(BaseCommand):
             
             for reg in registrations:
                 try:
+                    # Clean vehicle number for filename
+                    clean_vehicle = reg.vehicle_number.replace(' ', '_').replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+                    
                     if upzone_name:
-                        filename = f"{district}_{upzone_name}_{reg.id}_{reg.registration_number or 'NO_REG'}_{reg.vehicle_number.replace(' ', '_')}.jpg"
+                        filename = f"{district}_{upzone_name}_{reg.id}_{reg.registration_number or 'NO_REG'}_{clean_vehicle}.jpg"
                     else:
-                        filename = f"{district}_{reg.id}_{reg.registration_number or 'NO_REG'}_{reg.vehicle_number.replace(' ', '_')}.jpg"
+                        filename = f"{district}_{reg.id}_{reg.registration_number or 'NO_REG'}_{clean_vehicle}.jpg"
                     
                     filepath = os.path.join(type_path, filename)
                     
@@ -204,10 +207,13 @@ class Command(BaseCommand):
                     
         except Exception as e:
             for reg in registrations:
+                # Clean vehicle number for filename
+                clean_vehicle = reg.vehicle_number.replace(' ', '_').replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+                
                 if upzone_name:
-                    filename = f"{district}_{upzone_name}_{reg.id}_{reg.registration_number or 'NO_REG'}_{reg.vehicle_number.replace(' ', '_')}.jpg"
+                    filename = f"{district}_{upzone_name}_{reg.id}_{reg.registration_number or 'NO_REG'}_{clean_vehicle}.jpg"
                 else:
-                    filename = f"{district}_{reg.id}_{reg.registration_number or 'NO_REG'}_{reg.vehicle_number.replace(' ', '_')}.jpg"
+                    filename = f"{district}_{reg.id}_{reg.registration_number or 'NO_REG'}_{clean_vehicle}.jpg"
                 filepath = os.path.join(type_path, filename)
                 
                 if os.path.exists(filepath):
@@ -245,7 +251,7 @@ class Command(BaseCommand):
             qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
             
             # Load background image
-            static_dir = settings.STATIC_ROOT or settings.STATICFILES_DIRS[0]
+            static_dir = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else settings.STATIC_ROOT
             bg_path = os.path.join(static_dir, 'Vehicle_Pass', bg_file)
             
             try:
@@ -273,8 +279,8 @@ class Command(BaseCommand):
                 # Use wkhtmltoimage with Windows paths
                 wkhtml_paths = [
                     'wkhtmltoimage',
-                    'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe',
-                    'C:\\wkhtmltopdf\\bin\\wkhtmltoimage.exe',
+                    r'C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe',
+                    r'C:\wkhtmltopdf\bin\wkhtmltoimage.exe',
                     '/usr/bin/wkhtmltoimage',
                     '/usr/local/bin/wkhtmltoimage'
                 ]

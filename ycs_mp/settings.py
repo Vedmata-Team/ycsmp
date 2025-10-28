@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'events',
     'ID',
     'vehicle_pass',
+    'feedback',
     'crispy_bootstrap5',
 ]
 

@@ -504,6 +504,37 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="event.stopPropagation();"></button>
 </div>
 
+<!-- Feedback Button -->
+<div class="feedback-banner" style="background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%); padding: 8px 0; text-align: center;">
+    <div class="container">
+        <a href="/feedback/" class="feedback-btn" style="display: inline-block; background: white; color: #ff6b00; padding: 8px 30px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); animation: feedbackPulse 2s infinite;">
+            <i class="bi bi-chat-heart-fill me-2"></i>शिविर का अनुभव कैसा रहा? प्रतिक्रिया दें ✨
+        </a>
+    </div>
+</div>
+
+<style>
+@keyframes feedbackPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.feedback-btn:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3) !important;
+    color: #ff6b00 !important;
+    text-decoration: none !important;
+}
+
+@media (max-width: 768px) {
+    .feedback-btn {
+        padding: 6px 20px !important;
+        font-size: 12px !important;
+        border-radius: 20px !important;
+    }
+}
+</style>
+
 <!-- Hero Section -->
 <section class="hero-section" data-aos="fade-down">
     <div class="container">

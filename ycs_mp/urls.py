@@ -38,6 +38,8 @@ urlpatterns = [
     path('vehicle-pass/', include('vehicle_pass.urls')),
     path('vehicle-verify/<int:registration_id>/<str:vehicle_number>/', vehicle_verify, name='vehicle_verify_direct'),
     path('stream-bulk-email/', stream_bulk_email, name='stream_bulk_email'),
+    path('feedback/', include('feedback.urls')),
+    path('api/', include('events.urls')),  # Include events API endpoints
     path('', include('events.urls')),
 ]
 

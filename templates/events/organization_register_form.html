@@ -29,6 +29,26 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="event.stopPropagation();"></button>
 </div>
 
+<!-- Feedback Button -->
+<div class="container-fluid p-0">
+    <div class="text-center py-2" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <a href="{% url 'feedback:form' %}" class="btn feedback-btn" style="background: linear-gradient(135deg, #fd8535 0%, #ffb300 100%); color: white; border: none; padding: 8px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; animation: feedbackPulse 2s infinite; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <i class="bi bi-chat-heart-fill"></i>
+            <span>फीडबैक दें</span>
+        </a>
+    </div>
+</div>
+
+<style>
+@keyframes feedbackPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+@media (max-width: 768px) {
+    .feedback-btn { font-size: 12px !important; padding: 6px 16px !important; }
+}
+</style>
+
 <section class="registration-form-section">
     <div class="container">
         <div class="row justify-content-center">
