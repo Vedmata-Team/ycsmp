@@ -766,6 +766,86 @@
     }
 }
 
+/* Dropdown Z-Index Fixes - Ultra High Values */
+.dropdown {
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+.dropdown-menu {
+    z-index: 100000 !important;
+    position: absolute !important;
+}
+
+.dropdown-toggle {
+    z-index: 99998 !important;
+}
+
+.dropdown.show {
+    z-index: 100001 !important;
+}
+
+.dropdown.show .dropdown-menu {
+    z-index: 100002 !important;
+}
+
+/* Registration sidebar dropdown specific */
+.registration-sidebar .dropdown {
+    z-index: 100001 !important;
+}
+
+.registration-sidebar .dropdown-menu {
+    z-index: 100002 !important;
+}
+
+.registration-sidebar .dropdown.show {
+    z-index: 100003 !important;
+}
+
+.registration-sidebar .dropdown.show .dropdown-menu {
+    z-index: 100004 !important;
+}
+
+.registration-actions .dropdown {
+    z-index: 100003 !important;
+}
+
+.registration-actions .dropdown-menu {
+    z-index: 100004 !important;
+}
+
+.registration-actions .dropdown.show {
+    z-index: 100005 !important;
+}
+
+.registration-actions .dropdown.show .dropdown-menu {
+    z-index: 100006 !important;
+}
+
+/* Section z-index management - Lower values */
+.event-detail-section {
+    position: relative;
+    z-index: 1 !important;
+}
+
+.event-detail-card {
+    position: relative;
+    z-index: 2 !important;
+    overflow: visible !important;
+}
+
+.registration-sidebar {
+    position: relative;
+    z-index: 2 !important;
+    overflow: visible !important;
+}
+
+.registration-actions {
+    position: relative;
+    z-index: 3 !important;
+    overflow: visible !important;
+}
+
 /* Print Styles */
 @media print {
     .reading-progress-bar,

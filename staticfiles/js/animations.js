@@ -9,7 +9,7 @@ const STAGGER_DELAY = 100;
 const EASING = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
 /**
- * Initialize all animations when DOM is ready
+ * Initializes all animations when DOM is ready
  */
 document.addEventListener('DOMContentLoaded', function() {
     initializeScrollAnimations();

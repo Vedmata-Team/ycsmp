@@ -70,7 +70,7 @@
     --transition-slow: 0.5s ease-in-out;
     
     /* Z-index Scale */
-    --z-dropdown: 1000;
+    --z-dropdown: 1030;
     --z-sticky: 1020;
     --z-fixed: 1030;
     --z-modal-backdrop: 1040;
@@ -162,7 +162,7 @@ a:hover {
     border-bottom: 1px solid rgba(253, 133, 53, 0.1);
     box-shadow: var(--shadow-md);
     position: fixed;
-    top: 0;
+    top: 40px;
     left: 0;
     width: 100%;
     z-index: var(--z-sticky);
@@ -557,6 +557,61 @@ a:hover {
     color: var(--text-light);
 }
 
+/* Footer Registration Buttons */
+.registration-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.registration-buttons .btn {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.registration-buttons .btn:hover {
+    transform: translateX(5px);
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Footer Contact Links */
+.contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.contact-links .btn {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+    text-decoration: none;
+}
+
+.contact-links .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+}
+
+.contact-links .btn-success:hover {
+    background-color: #1e7e34 !important;
+    border-color: #1c7430 !important;
+}
+
+.contact-links .btn-primary:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
 /* Footer Bottom */
 .footer-bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -699,12 +754,58 @@ a:hover {
         margin-bottom: var(--spacing-lg);
     }
     
+    .warning-strip-responsive {
+        padding: 4px 0 !important;
+        font-size: 12px !important;
+    }
+    
+    .main-header {
+        top: 28px !important;
+    }
+    
+    .main-content {
+        padding-top: 120px !important;
+    }
+    
     .footer-wave svg {
         height: 30px; /* Smaller wave on mobile */
     }
     .footer-content {
         padding-top: 30px;
     }
+    
+    /* Mobile footer adjustments */
+    .contact-links {
+        flex-direction: column;
+    }
+    
+    .contact-links .btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .registration-buttons .btn {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+}
+
+/* Dropdown Menu Fix */
+.dropdown-menu {
+    z-index: 9999 !important;
+    position: absolute !important;
+}
+
+.navbar .dropdown-menu {
+    z-index: 9999 !important;
+}
+
+.nav-item .dropdown-menu {
+    z-index: 9999 !important;
+}
+
+.dropdown {
+    z-index: 9999 !important;
 }
 
 /* Utility Classes */
@@ -741,7 +842,7 @@ a:hover {
 
 /* Main content spacing for fixed header */
 .main-content {
-    padding-top: 100px;
+    padding-top: 140px;
 }
 
 /* Animation Classes */
@@ -781,5 +882,20 @@ a:hover {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
